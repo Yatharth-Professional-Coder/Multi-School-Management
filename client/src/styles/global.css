@@ -77,6 +77,25 @@ button {
   border-radius: var(--radius);
   font-weight: 600;
   transition: all 0.3s ease;
+  color: hsl(var(--text));
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: hsl(var(--white));
+}
+
+.btn-danger {
+  background: rgba(255, 77, 77, 0.2);
+  color: #ff4d4d;
+  border: 1px solid rgba(255, 77, 77, 0.3);
 }
 
 .btn-primary {
