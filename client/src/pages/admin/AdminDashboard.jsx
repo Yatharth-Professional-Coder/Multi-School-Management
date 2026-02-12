@@ -1,16 +1,17 @@
 import { useState, useEffect, useContext } from 'react';
 import api from '../../utils/api';
 import AuthContext from '../../context/AuthContext';
-import { FaUserTie, FaUserGraduate, FaUserPlus, FaChalkboardTeacher, FaLayerGroup } from 'react-icons/fa';
+import { FaUserTie, FaUserGraduate, FaUserPlus, FaChalkboardTeacher, FaLayerGroup, FaClipboardList } from 'react-icons/fa';
 
 const AdminDashboard = () => {
     const { user, logout } = useContext(AuthContext);
     const [users, setUsers] = useState([]);
     const [classes, setClasses] = useState([]);
     const [pendingRectifications, setPendingRectifications] = useState([]);
+    const [attendanceRecords, setAttendanceRecords] = useState([]);
     const [activeTab, setActiveTab] = useState('Overview');
     const [showForm, setShowForm] = useState(false);
-    const [newItemType, setNewItemType] = useState('Teacher'); // 'Teacher', 'Student', 'Class', 'Announcement'
+    const [newItemType, setNewItemType] = useState('Teacher'); // 'Teacher', 'SubAdmin', 'Class', 'Announcement'
 
     // Form States
     const [userData, setUserData] = useState({ name: '', email: '', password: '', role: 'Teacher' });
@@ -36,9 +37,24 @@ const AdminDashboard = () => {
         }
     };
 
+    const fetchAttendance = async () => {
+        try {
+            const { data } = await api.get('/api/attendance', config);
+            setAttendanceRecords(data);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
     useEffect(() => {
         fetchData();
     }, []);
+
+    useEffect(() => {
+        if (activeTab === 'Attendance') {
+            fetchAttendance();
+        }
+    }, [activeTab]);
 
     const handleUserSubmit = async (e) => {
         e.preventDefault();
@@ -123,11 +139,11 @@ const AdminDashboard = () => {
                 </div>
                 <div className="glass-panel" style={{ padding: '20px', display: 'flex', alignItems: 'center' }}>
                     <div style={{ padding: '15px', background: 'rgba(100, 255, 150, 0.2)', borderRadius: '12px', marginRight: '15px' }}>
-                        <FaUserGraduate size={24} color="#64ff96" />
+                        <FaUserTie size={24} color="#64ff96" />
                     </div>
                     <div>
-                        <h3>{stats.students}</h3>
-                        <p style={{ fontSize: '0.9rem', color: 'hsl(var(--text-dim))' }}>Students</p>
+                        <h3>{stats.subAdmins}</h3>
+                        <p style={{ fontSize: '0.9rem', color: 'hsl(var(--text-dim))' }}>Sub Admins</p>
                     </div>
                 </div>
                 <div className="glass-panel" style={{ padding: '20px', display: 'flex', alignItems: 'center' }}>
@@ -141,7 +157,7 @@ const AdminDashboard = () => {
                 </div>
                 <div className="glass-panel" style={{ padding: '20px', display: 'flex', alignItems: 'center', cursor: 'pointer', border: activeTab === 'Rectifications' ? '1px solid hsl(var(--primary))' : '' }} onClick={() => setActiveTab('Rectifications')}>
                     <div style={{ padding: '15px', background: 'rgba(255, 100, 100, 0.2)', borderRadius: '12px', marginRight: '15px' }}>
-                        <FaUserTie size={24} color="#ff6464" />
+                        <FaClipboardList size={24} color="#ff6464" />
                     </div>
                     <div>
                         <h3>{stats.rectificationRequests}</h3>
@@ -151,12 +167,14 @@ const AdminDashboard = () => {
             </div>
 
             {/* Actions */}
-            <div style={{ marginBottom: '30px', display: 'flex', gap: '10px' }}>
+            <div style={{ marginBottom: '30px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                 <button className={`btn ${activeTab === 'Teachers' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('Teachers')}>Teachers</button>
+                <button className={`btn ${activeTab === 'SubAdmins' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('SubAdmins')}>Sub Admins</button>
                 <button className={`btn ${activeTab === 'Students' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('Students')}>Students</button>
                 <button className={`btn ${activeTab === 'Parents' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('Parents')}>Parents</button>
                 <button className={`btn ${activeTab === 'Classes' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('Classes')}>Classes</button>
                 <button className={`btn ${activeTab === 'Announcements' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('Announcements')}>Announcements</button>
+                <button className={`btn ${activeTab === 'Attendance' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('Attendance')}>Attendance</button>
                 <button className={`btn ${activeTab === 'Rectifications' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('Rectifications')}>Rectifications</button>
             </div>
 
@@ -164,12 +182,12 @@ const AdminDashboard = () => {
             <div className="glass-panel" style={{ padding: '30px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
                     <h2>{activeTab} Management</h2>
-                    {activeTab !== 'Rectifications' && (
+                    {activeTab !== 'Rectifications' && activeTab !== 'Overview' && activeTab !== 'Attendance' && activeTab !== 'Students' && (
                         <button className="btn btn-primary" onClick={() => {
                             setShowForm(true);
-                            setNewItemType(activeTab === 'Classes' ? 'Class' : activeTab === 'Announcements' ? 'Announcement' : activeTab === 'Parents' ? 'Parent' : activeTab === 'Teachers' ? 'Teacher' : 'Student');
+                            setNewItemType(activeTab === 'Classes' ? 'Class' : activeTab === 'Announcements' ? 'Announcement' : activeTab === 'Parents' ? 'Parent' : activeTab === 'SubAdmins' ? 'SubAdmin' : 'Teacher');
                         }}>
-                            <FaUserPlus style={{ marginRight: '8px' }} /> Add {activeTab === 'Classes' ? 'Class' : activeTab === 'Announcements' ? 'Announcement' : activeTab === 'Parents' ? 'Parent' : activeTab === 'Teachers' ? 'Teacher' : 'Student'}
+                            <FaUserPlus style={{ marginRight: '8px' }} /> Add {activeTab === 'Classes' ? 'Class' : activeTab === 'Announcements' ? 'Announcement' : activeTab === 'Parents' ? 'Parent' : activeTab === 'SubAdmins' ? 'Sub Admin' : 'Teacher'}
                         </button>
                     )}
                 </div>
@@ -268,7 +286,7 @@ const AdminDashboard = () => {
                                 <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
                                     <th style={{ textAlign: 'left', padding: '15px' }}>Student</th>
                                     <th style={{ textAlign: 'left', padding: '15px' }}>Date</th>
-                                    <th style={{ textAlign: 'left', padding: '15px' }}>Current Status</th>
+                                    <th style={{ textAlign: 'left', padding: '15px' }}>Status</th>
                                     <th style={{ textAlign: 'left', padding: '15px' }}>Reason</th>
                                     <th style={{ textAlign: 'left', padding: '15px' }}>Action</th>
                                 </tr>
@@ -289,6 +307,40 @@ const AdminDashboard = () => {
                                 {pendingRectifications.length === 0 && (
                                     <tr>
                                         <td colSpan="5" style={{ padding: '20px', textAlign: 'center', color: 'hsl(var(--text-dim))' }}>No pending requests</td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                ) : activeTab === 'Attendance' ? (
+                    <div style={{ overflowX: 'auto' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                            <thead>
+                                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                                    <th style={{ textAlign: 'left', padding: '15px' }}>Student</th>
+                                    <th style={{ textAlign: 'left', padding: '15px' }}>Date</th>
+                                    <th style={{ textAlign: 'left', padding: '15px' }}>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {attendanceRecords.map(record => (
+                                    <tr key={record._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                        <td style={{ padding: '15px' }}>{record.userId?.name}</td>
+                                        <td style={{ padding: '15px' }}>{new Date(record.date).toLocaleDateString()}</td>
+                                        <td style={{ padding: '15px' }}>
+                                            <span style={{
+                                                padding: '4px 10px', borderRadius: '15px', fontSize: '0.8rem',
+                                                background: record.status === 'Present' ? 'rgba(50, 200, 255, 0.2)' : 'rgba(255, 100, 100, 0.2)',
+                                                color: record.status === 'Present' ? '#32c8ff' : '#ff6464'
+                                            }}>
+                                                {record.status}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                ))}
+                                {attendanceRecords.length === 0 && (
+                                    <tr>
+                                        <td colSpan="3" style={{ padding: '20px', textAlign: 'center', color: 'hsl(var(--text-dim))' }}>No attendance records found</td>
                                     </tr>
                                 )}
                             </tbody>
@@ -318,15 +370,19 @@ const AdminDashboard = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {users.filter(u => (activeTab === 'Overview' ? true : activeTab.includes(u.role))).map(user => (
+                            {users.filter(u => {
+                                if (activeTab === 'Overview') return true;
+                                if (activeTab === 'SubAdmins') return u.role === 'SubAdmin';
+                                return activeTab.includes(u.role);
+                            }).map(user => (
                                 <tr key={user._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                                     <td style={{ padding: '15px' }}>{user.name}</td>
                                     <td style={{ padding: '15px' }}>{user.email}</td>
                                     <td style={{ padding: '15px' }}>
                                         <span style={{
                                             padding: '4px 10px', borderRadius: '15px', fontSize: '0.8rem',
-                                            background: user.role === 'Teacher' ? 'rgba(50, 200, 255, 0.2)' : 'rgba(100, 255, 150, 0.2)',
-                                            color: user.role === 'Teacher' ? '#32c8ff' : '#64ff96'
+                                            background: user.role === 'Teacher' ? 'rgba(50, 200, 255, 0.2)' : user.role === 'SubAdmin' ? 'rgba(255, 200, 50, 0.2)' : 'rgba(100, 255, 150, 0.2)',
+                                            color: user.role === 'Teacher' ? '#32c8ff' : user.role === 'SubAdmin' ? '#ffc832' : '#64ff96'
                                         }}>
                                             {user.role}
                                         </span>

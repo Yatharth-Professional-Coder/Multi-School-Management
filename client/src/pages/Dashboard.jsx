@@ -2,10 +2,9 @@ import { useContext } from 'react';
 import AuthContext from '../context/AuthContext';
 import SuperAdminDashboard from './superadmin/SuperAdminDashboard';
 import AdminDashboard from './admin/AdminDashboard';
+import SubAdminDashboard from './subadmin/SubAdminDashboard';
 import TeacherDashboard from './teacher/TeacherDashboard';
-
 import StudentDashboard from './student/StudentDashboard';
-
 import ParentDashboard from './parent/ParentDashboard';
 
 const Dashboard = () => {
@@ -17,6 +16,10 @@ const Dashboard = () => {
 
     if (user?.role === 'Admin') {
         return <AdminDashboard />;
+    }
+
+    if (user?.role === 'SubAdmin') {
+        return <SubAdminDashboard />;
     }
 
     if (user?.role === 'Teacher') {

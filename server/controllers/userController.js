@@ -20,10 +20,18 @@ const addUser = async (req, res) => {
             return res.status(400).json({ message: 'User already exists' });
         }
 
-        // Validate allowed roles for Admin to create
-        const allowedRoles = ['Teacher', 'Student', 'SubAdmin', 'Parent'];
+        // Validate allowed roles based on requester
+        let allowedRoles = [];
+        if (req.user.role === 'Admin') {
+            allowedRoles = ['Teacher', 'SubAdmin', 'Parent']; // Admin cannot create Student
+        } else if (req.user.role === 'SubAdmin') {
+            allowedRoles = ['Student']; // SubAdmin can only create Student
+        } else if (req.user.role === 'SuperAdmin') {
+            allowedRoles = ['Admin', 'Teacher', 'Student', 'SubAdmin', 'Parent'];
+        }
+
         if (!allowedRoles.includes(role)) {
-            return res.status(400).json({ message: 'Invalid role for Admin to create' });
+            return res.status(403).json({ message: `Role '${req.user.role}' is not authorized to create '${role}' accounts` });
         }
 
         const user = await User.create({
