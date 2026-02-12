@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 import api from '../../utils/api';
 import AuthContext from '../../context/AuthContext';
-import { FaUserTie, FaUserGraduate, FaUserPlus, FaChalkboardTeacher, FaLayerGroup, FaClipboardList, FaBullhorn } from 'react-icons/fa';
+import { FaUserTie, FaUserGraduate, FaUserPlus, FaChalkboardTeacher, FaLayerGroup, FaClipboardList, FaBullhorn, FaTrash, FaArrowLeft, FaEye } from 'react-icons/fa';
 
 const AdminDashboard = () => {
     const { user, logout } = useContext(AuthContext);
@@ -19,6 +19,8 @@ const AdminDashboard = () => {
     const [announcements, setAnnouncements] = useState([]);
     const [announcementData, setAnnouncementData] = useState({ title: '', content: '', targetAudience: 'All' });
     const [editId, setEditId] = useState(null);
+    const [selectedClass, setSelectedClass] = useState(null);
+    const [classAttendance, setClassAttendance] = useState([]);
 
     // Create Teacher Mode inside Class Modal
     const [isCreatingTeacher, setIsCreatingTeacher] = useState(false);
@@ -73,6 +75,15 @@ const AdminDashboard = () => {
         }
     };
 
+    const fetchClassAttendance = async (classId) => {
+        try {
+            const { data } = await api.get(`/api/attendance/class/${classId}`, config);
+            setClassAttendance(data);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
     useEffect(() => {
         fetchClasses();
         fetchSubAdmins();
@@ -80,7 +91,7 @@ const AdminDashboard = () => {
     }, []);
 
     useEffect(() => {
-        if (activeTab === 'Attendance') {
+        if (activeTab === 'Teacher Attendance') {
             fetchAttendance();
         }
         if (activeTab === 'Announcements') {
@@ -142,6 +153,18 @@ const AdminDashboard = () => {
         }
     };
 
+    const handleDeleteClass = async (id) => {
+        if (window.confirm('Are you sure you want to delete this class?')) {
+            try {
+                await api.delete(`/api/classes/${id}`, config);
+                setClasses(classes.filter(c => c._id !== id));
+                alert('Class deleted successfully');
+            } catch (error) {
+                alert(error.response?.data?.message || 'Error deleting class');
+            }
+        }
+    };
+
     const closeForm = () => {
         setShowForm(false);
         setEditId(null);
@@ -161,6 +184,11 @@ const AdminDashboard = () => {
         });
         setNewItemType('Class');
         setShowForm(true);
+    };
+
+    const handleViewAttendance = (cls) => {
+        setSelectedClass(cls);
+        fetchClassAttendance(cls._id);
     };
 
     return (
@@ -205,12 +233,13 @@ const AdminDashboard = () => {
             </div>
 
             {/* Actions */}
+            {/* Actions */}
             <div style={{ marginBottom: '30px', display: 'flex', gap: '10px' }}>
-                {['Classes', 'SubAdmins', 'Attendance', 'Announcements'].map(tab => (
+                {['Classes', 'SubAdmins', 'Teacher Attendance', 'Announcements'].map(tab => (
                     <button
                         key={tab}
                         className={`btn ${activeTab === tab ? 'btn-primary' : ''}`}
-                        onClick={() => setActiveTab(tab)}
+                        onClick={() => { setActiveTab(tab); setSelectedClass(null); }}
                     >
                         {tab === 'SubAdmins' ? 'Sub Admins' : tab}
                     </button>
@@ -219,16 +248,21 @@ const AdminDashboard = () => {
 
             {/* Content Area */}
             <div className="glass-panel" style={{ padding: '30px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', alignItems: 'center' }}>
                     <h2 style={{ color: 'hsl(var(--white))' }}>
-                        {activeTab === 'SubAdmins' ? 'Sub Admin' : activeTab} Management
+                        {selectedClass ? `Attendance: ${selectedClass.className}` : activeTab === 'SubAdmins' ? 'Sub Admin Management' : activeTab === 'Teacher Attendance' ? 'Teacher Attendance' : `${activeTab} Management`}
                     </h2>
-                    {activeTab !== 'Attendance' && (
+                    {activeTab !== 'Teacher Attendance' && !selectedClass && (
                         <button className="btn btn-primary" onClick={() => {
                             setShowForm(true);
                             setNewItemType(activeTab === 'Classes' ? 'Class' : activeTab === 'SubAdmins' ? 'SubAdmin' : 'Announcement');
                         }}>
                             <FaUserPlus style={{ marginRight: '8px' }} /> Add {activeTab === 'Classes' ? 'Class' : activeTab === 'SubAdmins' ? 'Sub Admin' : 'Announcement'}
+                        </button>
+                    )}
+                    {selectedClass && (
+                        <button className="btn btn-secondary" onClick={() => setSelectedClass(null)}>
+                            <FaArrowLeft style={{ marginRight: '5px' }} /> Back
                         </button>
                     )}
                 </div>
@@ -345,7 +379,7 @@ const AdminDashboard = () => {
                 )}
 
                 {/* Tables */}
-                {activeTab === 'Classes' && (
+                {activeTab === 'Classes' && !selectedClass && (
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
                             <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
@@ -361,8 +395,11 @@ const AdminDashboard = () => {
                                     <td style={{ padding: '15px' }}>{cls.className}</td>
                                     <td style={{ padding: '15px' }}>{cls.teacherId?.name || <span style={{ opacity: 0.5 }}>Not Assigned</span>}</td>
                                     <td style={{ padding: '15px' }}>{cls.subAdminId?.name || <span style={{ opacity: 0.5 }}>Not Assigned</span>}</td>
-                                    <td style={{ padding: '15px' }}>
+                                    <td style={{ padding: '15px' }}>{cls.subAdminId?.name || <span style={{ opacity: 0.5 }}>Not Assigned</span>}</td>
+                                    <td style={{ padding: '15px', display: 'flex', gap: '10px' }}>
                                         <button onClick={() => handleEditClass(cls)} style={{ color: 'hsl(var(--accent))', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}>Edit</button>
+                                        <button onClick={() => handleDeleteClass(cls._id)} style={{ color: '#ff6b6b', background: 'none', border: 'none', cursor: 'pointer' }}><FaTrash /></button>
+                                        <button onClick={() => handleViewAttendance(cls)} style={{ color: '#4CAF50', background: 'none', border: 'none', cursor: 'pointer' }}><FaEye /> View Attendance</button>
                                     </td>
                                 </tr>
                             ))}
@@ -395,7 +432,7 @@ const AdminDashboard = () => {
                     </table>
                 )}
 
-                {activeTab === 'Attendance' && (
+                {activeTab === 'Teacher Attendance' && (
                     <div style={{ overflowX: 'auto' }}>
                         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                             <thead>

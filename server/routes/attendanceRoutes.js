@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { markAttendance, getAttendance, requestRectification, approveRectification, getPendingRectifications } = require('../controllers/attendanceController');
+const { markAttendance, getAttendance, requestRectification, approveRectification, getPendingRectifications, getClassAttendance } = require('../controllers/attendanceController');
 const { protect, admin } = require('../middleware/authMiddleware');
 
 router.route('/')
@@ -17,6 +17,9 @@ router.route('/pending')
     .get(protect, admin, getPendingRectifications); // Admin views pending
 
 // Define parameterized route last
+router.route('/class/:classId')
+    .get(protect, getClassAttendance); // Class wise attendance
+
 router.route('/:userId')
     .get(protect, getAttendance); // View attendance
 

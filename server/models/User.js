@@ -32,6 +32,11 @@ const userSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User', // References the Student User
         default: null
+    },
+    studentClass: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Class',
+        default: null
     }
 }, { timestamps: true });
 

@@ -1,4 +1,5 @@
 const Attendance = require('../models/Attendance');
+const User = require('../models/User');
 
 // @desc    Mark attendance for multiple users
 // @route   POST /api/attendance
@@ -129,4 +130,40 @@ const getPendingRectifications = async (req, res) => {
     }
 };
 
-module.exports = { markAttendance, getAttendance, requestRectification, approveRectification, getPendingRectifications };
+// @desc    Get attendance for a specific class
+// @route   GET /api/attendance/class/:classId
+// @access  Private/Admin, Teacher
+const getClassAttendance = async (req, res) => {
+    const { classId } = req.params;
+    const { date } = req.query; // Optional date filter
+
+    try {
+        // Find all students in this class
+        const students = await User.find({ role: 'Student', studentClass: classId }).select('_id name');
+        const studentIds = students.map(s => s._id);
+
+        let query = { userId: { $in: studentIds } };
+        if (date) {
+            // Match exact date (ignoring time if stored as ISO string date part, 
+            // but usually stored as full ISODate. Here we assume exact match or range needed)
+            // For now, let's assume date is passed as YYYY-MM-DD and stored as Date at 00:00:00Z
+            // or we filter by range for that day.
+            const startDate = new Date(date);
+            startDate.setUTCHours(0, 0, 0, 0);
+            const endDate = new Date(date);
+            endDate.setUTCHours(23, 59, 59, 999);
+
+            query.date = { $gte: startDate, $lte: endDate };
+        }
+
+        const attendance = await Attendance.find(query)
+            .populate('userId', 'name')
+            .sort({ date: -1 });
+
+        res.json(attendance);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+module.exports = { markAttendance, getAttendance, requestRectification, approveRectification, getPendingRectifications, getClassAttendance };

@@ -40,12 +40,8 @@ const addUser = async (req, res) => {
             password,
             role,
             schoolId,
-            childId: req.body.childId || null
-            // classId, sectionId connection will be handled in Phase 3 mostly but we can store them if User schema has them
-            // Currently User schema in step 110 didn't have classId/sectionId explicitly, 
-            // but the plan says "Students (Linked to User) -> userId, classId..."
-            // For now, we stick to the User model. If we need extra fields, we might need a Profile model or update User.
-            // Let's stick to core User fields for now.
+            childId: req.body.childId || null,
+            studentClass: req.body.classId || null
         });
 
         res.status(201).json({

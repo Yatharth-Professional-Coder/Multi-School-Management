@@ -8,7 +8,8 @@ router.route('/')
     .get(protect, getClasses); // Teachers need to see classes to mark attendance
 
 router.route('/:id')
-    .put(protect, admin, updateClass);
+    .put(protect, admin, updateClass)
+    .delete(protect, admin, deleteClass);
 
 router.route('/sections')
     .post(protect, admin, createSection);
