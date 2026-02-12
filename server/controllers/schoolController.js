@@ -75,4 +75,22 @@ const updateSchool = async (req, res) => {
     }
 };
 
-module.exports = { createSchool, getSchools, updateSchool };
+const deleteSchool = async (req, res) => {
+    try {
+        const school = await School.findById(req.params.id);
+        if (school) {
+            // Delete all users associated with this school
+            await User.deleteMany({ schoolId: school._id });
+
+            // Delete the school
+            await school.deleteOne();
+            res.json({ message: 'School and all associated users removed' });
+        } else {
+            res.status(404).json({ message: 'School not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+module.exports = { createSchool, getSchools, updateSchool, deleteSchool };

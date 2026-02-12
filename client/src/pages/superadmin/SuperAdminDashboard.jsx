@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 import api from '../../utils/api';
 import AuthContext from '../../context/AuthContext';
-import { FaPlus, FaSchool, FaEdit, FaKey, FaArrowLeft, FaUserGraduate, FaChalkboardTeacher, FaUserTie } from 'react-icons/fa';
+import { FaPlus, FaSchool, FaEdit, FaKey, FaArrowLeft, FaUserGraduate, FaChalkboardTeacher, FaUserTie, FaTrash } from 'react-icons/fa';
 
 const SuperAdminDashboard = () => {
     const { user, logout } = useContext(AuthContext);
@@ -51,6 +51,20 @@ const SuperAdminDashboard = () => {
             alert('Error fetching school users');
         } finally {
             setLoadingUsers(false);
+        }
+    };
+
+    const handleDeleteSchool = async () => {
+        if (window.confirm('Are you sure you want to delete this school? This will delete ALL associated users (teachers, students, etc.) permanently!')) {
+            try {
+                await api.delete(`/api/schools/${selectedSchool._id}`, config);
+                alert('School deleted successfully');
+                setSelectedSchool(null);
+                fetchSchools();
+            } catch (error) {
+                console.error(error);
+                alert(error.response?.data?.message || 'Error deleting school');
+            }
         }
     };
 
@@ -125,9 +139,14 @@ const SuperAdminDashboard = () => {
                     </button>
                 )}
                 {selectedSchool && (
-                    <button className="btn btn-secondary" onClick={() => setSelectedSchool(null)}>
-                        <FaArrowLeft style={{ marginRight: '8px' }} /> Back to Schools
-                    </button>
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                        <button className="btn btn-danger" onClick={handleDeleteSchool} style={{ background: 'rgba(255, 77, 77, 0.2)', color: '#ff4d4d', border: '1px solid rgba(255, 77, 77, 0.3)' }}>
+                            <FaTrash style={{ marginRight: '8px' }} /> Delete School
+                        </button>
+                        <button className="btn btn-secondary" onClick={() => setSelectedSchool(null)}>
+                            <FaArrowLeft style={{ marginRight: '8px' }} /> Back to Schools
+                        </button>
+                    </div>
                 )}
             </div>
 
