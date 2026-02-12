@@ -153,6 +153,9 @@ const updateUser = async (req, res) => {
             } else {
                 user.role = role || user.role;
             }
+
+            user.name = name || user.name;
+            user.email = email || user.email;
             if (password) {
                 user.password = password; // Will be hashed by pre-save hook
             }

@@ -228,6 +228,7 @@ const AdminDashboard = () => {
             // Refresh counts/lists
             if (activeTab === 'SubAdmins') fetchSubAdmins();
             if (activeTab === 'Teacher Attendance') fetchTeachers();
+            fetchClasses(); // Refresh classes to update teacher names if any changed
 
             alert('User updated successfully');
         } catch (error) {

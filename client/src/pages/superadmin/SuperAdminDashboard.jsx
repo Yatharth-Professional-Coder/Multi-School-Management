@@ -124,8 +124,18 @@ const SuperAdminDashboard = () => {
                 updatePayload.password = editingUser.password;
             }
             await api.put(`/api/users/${editingUser._id}`, updatePayload, config);
+
+            // If the updated user is the current school's principal, update local selectedSchool state
+            if (editingUser._id === selectedSchool.adminId?._id) {
+                setSelectedSchool({
+                    ...selectedSchool,
+                    adminId: { ...selectedSchool.adminId, name: updatePayload.name, email: updatePayload.email }
+                });
+            }
+
             setEditingUser(null);
             fetchSchoolUsers(selectedSchool._id);
+            fetchSchools(); // Refresh main list to show updated principal name
             alert('User updated successfully');
         } catch (error) {
             alert(error.response?.data?.message || 'Error updating user');
