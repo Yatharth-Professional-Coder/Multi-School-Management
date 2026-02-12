@@ -22,6 +22,11 @@ const AdminDashboard = () => {
     const [selectedClass, setSelectedClass] = useState(null);
     const [classAttendance, setClassAttendance] = useState([]);
 
+    // Attendance State
+    const [isMarkingAttendance, setIsMarkingAttendance] = useState(false);
+    const [attendanceDate, setAttendanceDate] = useState(new Date().toISOString().split('T')[0]);
+    const [attendanceData, setAttendanceData] = useState({}); // { teacherId: 'Present' | 'Absent' }
+
     // Create Teacher Mode inside Class Modal
     const [isCreatingTeacher, setIsCreatingTeacher] = useState(false);
     const [newTeacherData, setNewTeacherData] = useState({ name: '', email: '', password: '', role: 'Teacher' });
@@ -177,6 +182,31 @@ const AdminDashboard = () => {
         }
     };
 
+    const handleAttendanceChange = (teacherId, status) => {
+        setAttendanceData(prev => ({ ...prev, [teacherId]: status }));
+    };
+
+    const submitAttendance = async () => {
+        const presentIds = Object.keys(attendanceData).filter(id => attendanceData[id] === 'Present');
+        const absentIds = Object.keys(attendanceData).filter(id => attendanceData[id] === 'Absent');
+
+        try {
+            if (presentIds.length > 0) {
+                await api.post('/api/attendance', { userIds: presentIds, date: attendanceDate, status: 'Present' }, config);
+            }
+            if (absentIds.length > 0) {
+                await api.post('/api/attendance', { userIds: absentIds, date: attendanceDate, status: 'Absent' }, config);
+            }
+            alert('Attendance marked successfully');
+            setIsMarkingAttendance(false);
+            fetchAttendance();
+            // Reset local state
+            setAttendanceData({});
+        } catch (error) {
+            alert(error.response?.data?.message || 'Error marking attendance');
+        }
+    };
+
     const closeForm = () => {
         setShowForm(false);
         setEditId(null);
@@ -270,6 +300,18 @@ const AdminDashboard = () => {
                             setNewItemType(activeTab === 'Classes' ? 'Class' : activeTab === 'SubAdmins' ? 'SubAdmin' : 'Announcement');
                         }}>
                             <FaUserPlus style={{ marginRight: '8px' }} /> Add {activeTab === 'Classes' ? 'Class' : activeTab === 'SubAdmins' ? 'Sub Admin' : 'Announcement'}
+                        </button>
+                    )}
+                    {activeTab === 'Teacher Attendance' && (
+                        <button className="btn btn-primary" onClick={() => {
+                            setIsMarkingAttendance(true);
+                            // Initialize all teachers as Present by default? Or empty?
+                            // Let's initialize empty or let user choose.
+                            const initialData = {};
+                            teachers.forEach(t => initialData[t._id] = 'Present');
+                            setAttendanceData(initialData);
+                        }}>
+                            <FaClipboardList style={{ marginRight: '8px' }} /> Mark Attendance
                         </button>
                     )}
                     {selectedClass && (
@@ -446,37 +488,98 @@ const AdminDashboard = () => {
                 )}
 
                 {activeTab === 'Teacher Attendance' && (
-                    <div style={{ overflowX: 'auto' }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                            <thead>
-                                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                                    <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Person</th>
-                                    <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Role</th>
-                                    <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Date</th>
-                                    <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {attendanceRecords.map(record => (
-                                    <tr key={record._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                        <td style={{ padding: '15px' }}>{record.userId?.name}</td>
-                                        <td style={{ padding: '15px' }}>{record.userId?.role}</td>
-                                        <td style={{ padding: '15px' }}>{new Date(record.date).toLocaleDateString()}</td>
-                                        <td style={{ padding: '15px' }}>
-                                            <span style={{
-                                                padding: '4px 10px', borderRadius: '15px', fontSize: '0.8rem',
-                                                background: record.status === 'Present' ? 'rgba(50, 200, 255, 0.2)' : 'rgba(255, 100, 100, 0.2)',
-                                                color: record.status === 'Present' ? '#32c8ff' : '#ff6464',
-                                                fontWeight: 'bold'
-                                            }}>
-                                                {record.status}
-                                            </span>
-                                        </td>
+                    <div>
+                        {isMarkingAttendance && (
+                            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '20px', borderRadius: '8px', marginBottom: '20px' }}>
+                                <h3 style={{ marginBottom: '15px' }}>Mark Teacher Attendance</h3>
+                                <div style={{ marginBottom: '15px' }}>
+                                    <label style={{ marginRight: '10px' }}>Date:</label>
+                                    <input
+                                        type="date"
+                                        className="input-field"
+                                        style={{ display: 'inline-block', width: 'auto' }}
+                                        value={attendanceDate}
+                                        onChange={(e) => setAttendanceDate(e.target.value)}
+                                        max={new Date().toISOString().split('T')[0]} // updated: added split to fix format
+                                    />
+                                </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '15px', marginBottom: '20px' }}>
+                                    {teachers.map(teacher => (
+                                        <div key={teacher._id} style={{ background: 'rgba(255,255,255,0.05)', padding: '10px', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <span>{teacher.name}</span>
+                                            <div style={{ display: 'flex', gap: '5px' }}>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleAttendanceChange(teacher._id, 'Present')}
+                                                    style={{
+                                                        padding: '5px 10px',
+                                                        borderRadius: '4px',
+                                                        border: 'none',
+                                                        cursor: 'pointer',
+                                                        background: attendanceData[teacher._id] === 'Present' ? '#32c8ff' : 'rgba(255,255,255,0.1)',
+                                                        color: attendanceData[teacher._id] === 'Present' ? '#000' : '#fff'
+                                                    }}
+                                                >
+                                                    P
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleAttendanceChange(teacher._id, 'Absent')}
+                                                    style={{
+                                                        padding: '5px 10px',
+                                                        borderRadius: '4px',
+                                                        border: 'none',
+                                                        cursor: 'pointer',
+                                                        background: attendanceData[teacher._id] === 'Absent' ? '#ff6464' : 'rgba(255,255,255,0.1)',
+                                                        color: attendanceData[teacher._id] === 'Absent' ? '#fff' : '#fff'
+                                                    }}
+                                                >
+                                                    A
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div style={{ display: 'flex', gap: '10px' }}>
+                                    <button onClick={submitAttendance} className="btn btn-primary">Save Attendance</button>
+                                    <button onClick={() => setIsMarkingAttendance(false)} className="btn btn-secondary" style={{ color: '#ff6b6b' }}>Cancel</button>
+                                </div>
+                            </div>
+                        )}
+
+                        <div style={{ overflowX: 'auto' }}>
+                            <h3 style={{ marginBottom: '15px', color: 'hsl(var(--text-dim))' }}>Attendance History</h3>
+                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                <thead>
+                                    <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                                        <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Person</th>
+                                        <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Role</th>
+                                        <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Date</th>
+                                        <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Status</th>
                                     </tr>
-                                ))}
-                                {attendanceRecords.length === 0 && <tr><td colSpan="4" style={{ padding: '20px', textAlign: 'center', color: 'hsl(var(--text-dim))' }}>No attendance records found</td></tr>}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {attendanceRecords.map(record => (
+                                        <tr key={record._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                            <td style={{ padding: '15px' }}>{record.userId?.name}</td>
+                                            <td style={{ padding: '15px' }}>{record.userId?.role}</td>
+                                            <td style={{ padding: '15px' }}>{new Date(record.date).toLocaleDateString()}</td>
+                                            <td style={{ padding: '15px' }}>
+                                                <span style={{
+                                                    padding: '4px 10px', borderRadius: '15px', fontSize: '0.8rem',
+                                                    background: record.status === 'Present' ? 'rgba(50, 200, 255, 0.2)' : 'rgba(255, 100, 100, 0.2)',
+                                                    color: record.status === 'Present' ? '#32c8ff' : '#ff6464',
+                                                    fontWeight: 'bold'
+                                                }}>
+                                                    {record.status}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    {attendanceRecords.length === 0 && <tr><td colSpan="4" style={{ padding: '20px', textAlign: 'center', color: 'hsl(var(--text-dim))' }}>No attendance records found</td></tr>}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 )}
 

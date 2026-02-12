@@ -166,4 +166,38 @@ const getClassAttendance = async (req, res) => {
     }
 };
 
-module.exports = { markAttendance, getAttendance, requestRectification, approveRectification, getPendingRectifications, getClassAttendance };
+// @desc    Get all attendance for school
+// @route   GET /api/attendance
+// @access  Private/Admin
+const getSchoolAttendance = async (req, res) => {
+    const schoolId = req.user.schoolId;
+    const { date, role } = req.query;
+
+    try {
+        let query = { schoolId };
+
+        if (date) {
+            const startDate = new Date(date);
+            startDate.setUTCHours(0, 0, 0, 0);
+            const endDate = new Date(date);
+            endDate.setUTCHours(23, 59, 59, 999);
+            query.date = { $gte: startDate, $lte: endDate };
+        }
+
+        if (role) {
+            const users = await User.find({ schoolId, role }).select('_id');
+            const userIds = users.map(u => u._id);
+            query.userId = { $in: userIds };
+        }
+
+        const attendance = await Attendance.find(query)
+            .populate('userId', 'name role email')
+            .sort({ date: -1 });
+
+        res.json(attendance);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+module.exports = { markAttendance, getAttendance, requestRectification, approveRectification, getPendingRectifications, getClassAttendance, getSchoolAttendance };

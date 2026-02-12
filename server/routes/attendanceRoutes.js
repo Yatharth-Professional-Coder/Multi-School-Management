@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const { markAttendance, getAttendance, requestRectification, approveRectification, getPendingRectifications, getClassAttendance } = require('../controllers/attendanceController');
+const { markAttendance, getAttendance, requestRectification, approveRectification, getPendingRectifications, getClassAttendance, getSchoolAttendance } = require('../controllers/attendanceController');
 const { protect, admin } = require('../middleware/authMiddleware');
 
 router.route('/')
-    .post(protect, markAttendance); // Teachers/Admins mark attendance
+    .post(protect, markAttendance) // Teachers/Admins mark attendance
+    .get(protect, admin, getSchoolAttendance);
 
 // Define specific routes first
 router.route('/rectify')
