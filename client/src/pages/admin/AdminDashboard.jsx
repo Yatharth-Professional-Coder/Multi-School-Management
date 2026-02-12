@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 import api from '../../utils/api';
 import AuthContext from '../../context/AuthContext';
-import { FaUserTie, FaUserGraduate, FaUserPlus, FaChalkboardTeacher, FaLayerGroup, FaClipboardList } from 'react-icons/fa';
+import { FaUserTie, FaUserGraduate, FaUserPlus, FaChalkboardTeacher, FaLayerGroup, FaClipboardList, FaBullhorn } from 'react-icons/fa';
 
 const AdminDashboard = () => {
     const { user, logout } = useContext(AuthContext);
@@ -16,6 +16,8 @@ const AdminDashboard = () => {
     const [newItemType, setNewItemType] = useState('Class'); // 'Class', 'SubAdmin'
     const [classData, setClassData] = useState({ className: '', teacherId: '', subAdminId: '' });
     const [subAdminData, setSubAdminData] = useState({ name: '', email: '', password: '', role: 'SubAdmin' });
+    const [announcements, setAnnouncements] = useState([]);
+    const [announcementData, setAnnouncementData] = useState({ title: '', content: '', targetAudience: 'All' });
 
     // Create Teacher Mode inside Class Modal
     const [isCreatingTeacher, setIsCreatingTeacher] = useState(false);
@@ -61,6 +63,15 @@ const AdminDashboard = () => {
         }
     };
 
+    const fetchAnnouncements = async () => {
+        try {
+            const { data } = await api.get('/api/announcements', config);
+            setAnnouncements(data);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
     useEffect(() => {
         fetchClasses();
         fetchSubAdmins();
@@ -70,6 +81,9 @@ const AdminDashboard = () => {
     useEffect(() => {
         if (activeTab === 'Attendance') {
             fetchAttendance();
+        }
+        if (activeTab === 'Announcements') {
+            fetchAnnouncements();
         }
     }, [activeTab]);
 
@@ -110,12 +124,25 @@ const AdminDashboard = () => {
         }
     };
 
+    const handleAnnouncementSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            await api.post('/api/announcements', announcementData, config);
+            closeForm();
+            fetchAnnouncements();
+            alert('Announcement posted successfully');
+        } catch (error) {
+            alert(error.response?.data?.message || 'Error posting announcement');
+        }
+    };
+
     const closeForm = () => {
         setShowForm(false);
         setClassData({ className: '', teacherId: '', subAdminId: '' });
         setSubAdminData({ name: '', email: '', password: '', role: 'SubAdmin' });
         setIsCreatingTeacher(false);
         setNewTeacherData({ name: '', email: '', password: '', role: 'Teacher' });
+        setAnnouncementData({ title: '', content: '', targetAudience: 'All' });
     };
 
     return (
@@ -161,7 +188,7 @@ const AdminDashboard = () => {
 
             {/* Actions */}
             <div style={{ marginBottom: '30px', display: 'flex', gap: '10px' }}>
-                {['Classes', 'SubAdmins', 'Attendance'].map(tab => (
+                {['Classes', 'SubAdmins', 'Attendance', 'Announcements'].map(tab => (
                     <button
                         key={tab}
                         className={`btn ${activeTab === tab ? 'btn-primary' : ''}`}
@@ -181,9 +208,9 @@ const AdminDashboard = () => {
                     {activeTab !== 'Attendance' && (
                         <button className="btn btn-primary" onClick={() => {
                             setShowForm(true);
-                            setNewItemType(activeTab === 'Classes' ? 'Class' : 'SubAdmin');
+                            setNewItemType(activeTab === 'Classes' ? 'Class' : activeTab === 'SubAdmins' ? 'SubAdmin' : 'Announcement');
                         }}>
-                            <FaUserPlus style={{ marginRight: '8px' }} /> Add {activeTab === 'Classes' ? 'Class' : 'Sub Admin'}
+                            <FaUserPlus style={{ marginRight: '8px' }} /> Add {activeTab === 'Classes' ? 'Class' : activeTab === 'SubAdmins' ? 'Sub Admin' : 'Announcement'}
                         </button>
                     )}
                 </div>
@@ -282,6 +309,20 @@ const AdminDashboard = () => {
                                 <button type="button" onClick={() => setShowForm(false)} style={{ marginLeft: '10px', color: '#ff6b6b' }}>Cancel</button>
                             </form>
                         )}
+
+                        {newItemType === 'Announcement' && (
+                            <form onSubmit={handleAnnouncementSubmit}>
+                                <input placeholder="Title" className="input-field" value={announcementData.title} onChange={(e) => setAnnouncementData({ ...announcementData, title: e.target.value })} required style={{ marginBottom: '10px' }} />
+                                <textarea placeholder="Content" className="input-field" value={announcementData.content} onChange={(e) => setAnnouncementData({ ...announcementData, content: e.target.value })} required style={{ marginBottom: '10px', minHeight: '100px' }} />
+                                <select className="input-field" value={announcementData.targetAudience} onChange={(e) => setAnnouncementData({ ...announcementData, targetAudience: e.target.value })} style={{ marginBottom: '10px' }}>
+                                    <option value="All">All</option>
+                                    <option value="Teachers">Teachers</option>
+                                    <option value="Students">Students</option>
+                                </select>
+                                <button type="submit" className="btn btn-primary">Post Announcement</button>
+                                <button type="button" onClick={closeForm} style={{ marginLeft: '10px', color: '#ff6b6b' }}>Cancel</button>
+                            </form>
+                        )}
                     </div>
                 )}
 
@@ -368,6 +409,24 @@ const AdminDashboard = () => {
                                 {attendanceRecords.length === 0 && <tr><td colSpan="4" style={{ padding: '20px', textAlign: 'center', color: 'hsl(var(--text-dim))' }}>No attendance records found</td></tr>}
                             </tbody>
                         </table>
+                    </div>
+                )}
+
+                {activeTab === 'Announcements' && (
+                    <div style={{ display: 'grid', gap: '15px' }}>
+                        {announcements.map(ann => (
+                            <div key={ann._id} style={{ background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '8px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                                    <h3 style={{ margin: 0, color: 'hsl(var(--primary))' }}>{ann.title}</h3>
+                                    <span style={{ fontSize: '0.8rem', color: 'hsl(var(--text-dim))' }}>{new Date(ann.createdAt).toLocaleDateString()}</span>
+                                </div>
+                                <p style={{ color: 'hsl(var(--text))', marginBottom: '10px' }}>{ann.content}</p>
+                                <span style={{ fontSize: '0.8rem', background: 'rgba(50, 200, 255, 0.2)', padding: '4px 10px', borderRadius: '15px', color: '#32c8ff' }}>
+                                    To: {ann.targetAudience}
+                                </span>
+                            </div>
+                        ))}
+                        {announcements.length === 0 && <p style={{ textAlign: 'center', color: 'hsl(var(--text-dim))' }}>No announcements found</p>}
                     </div>
                 )}
             </div>
