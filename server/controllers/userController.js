@@ -85,7 +85,30 @@ const getUsers = async (req, res) => {
     }
 };
 
-// ... getUserById ...
+// @desc    Get user by ID
+// @route   GET /api/users/:id
+// @access  Private
+const getUserById = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id).select('-password');
+        if (user) {
+            // Permission check: Admin, Teacher (for students), Parent (for child), Self
+            const isSelf = req.user._id.toString() === user._id.toString();
+            const isAdmin = req.user.role === 'Admin' || req.user.role === 'SuperAdmin';
+            const isParentOfChild = req.user.role === 'Parent' && req.user.childId && req.user.childId.toString() === user._id.toString();
+
+            if (isSelf || isAdmin || isParentOfChild) {
+                return res.json(user);
+            } else {
+                return res.status(403).json({ message: 'Not authorized to view this user profile' });
+            }
+        } else {
+            res.status(404).json({ message: 'User not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
 
 const updateUser = async (req, res) => {
     const { name, email, password, role } = req.body;
