@@ -113,8 +113,7 @@ const SubAdminDashboard = () => {
                                 />
                                 <input
                                     name="email"
-                                    type="email"
-                                    placeholder="Email Address"
+                                    placeholder="Email / Username"
                                     className="input-field"
                                     value={studentData.email}
                                     onChange={(e) => setStudentData({ ...studentData, email: e.target.value })}

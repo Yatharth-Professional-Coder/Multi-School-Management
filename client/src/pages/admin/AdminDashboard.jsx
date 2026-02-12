@@ -390,7 +390,7 @@ const AdminDashboard = () => {
                                             {isCreatingTeacher && (
                                                 <div style={{ marginTop: '15px', padding: '15px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px' }}>
                                                     <input placeholder="Teacher Name" className="input-field" style={{ marginBottom: '10px' }} value={newTeacherData.name} onChange={(e) => setNewTeacherData({ ...newTeacherData, name: e.target.value })} />
-                                                    <input placeholder="Email" className="input-field" style={{ marginBottom: '10px' }} value={newTeacherData.email} onChange={(e) => setNewTeacherData({ ...newTeacherData, email: e.target.value })} />
+                                                    <input placeholder="Email / Username" className="input-field" style={{ marginBottom: '10px' }} value={newTeacherData.email} onChange={(e) => setNewTeacherData({ ...newTeacherData, email: e.target.value })} />
                                                     <input placeholder="Password" type="password" className="input-field" style={{ marginBottom: '10px' }} value={newTeacherData.password} onChange={(e) => setNewTeacherData({ ...newTeacherData, password: e.target.value })} />
                                                     <button type="button" className="btn btn-primary" onClick={handleCreateTeacher}>Save & Select Teacher</button>
                                                 </div>
@@ -460,8 +460,7 @@ const AdminDashboard = () => {
                                         required
                                     />
                                     <input
-                                        type="email"
-                                        placeholder="Email Address"
+                                        placeholder="Email / Username"
                                         className="input-field"
                                         value={teacherData.email}
                                         onChange={(e) => setTeacherData({ ...teacherData, email: e.target.value })}
