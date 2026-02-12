@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 import api from '../../utils/api';
 import AuthContext from '../../context/AuthContext';
-import { FaUserGraduate, FaUserPlus, FaClipboardList } from 'react-icons/fa';
+import { FaUserGraduate, FaUserPlus } from 'react-icons/fa';
 
 const SubAdminDashboard = () => {
     const { user, logout } = useContext(AuthContext);
@@ -65,7 +65,7 @@ const SubAdminDashboard = () => {
                     <h1>Sub Admin Dashboard</h1>
                     <p style={{ color: 'hsl(var(--text-dim))' }}>Hello, {user.name}</p>
                 </div>
-                <button onClick={logout} style={{ color: 'hsl(var(--text-dim))', textDecoration: 'underline' }}>Logout</button>
+                <button onClick={logout} style={{ color: 'hsl(var(--accent))', textDecoration: 'underline' }}>Logout</button>
             </div>
 
             {/* Quick Stats */}
@@ -90,7 +90,7 @@ const SubAdminDashboard = () => {
             {/* Content Area */}
             <div className="glass-panel" style={{ padding: '30px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-                    <h2>{activeTab} Management</h2>
+                    <h2 style={{ color: 'hsl(var(--white))' }}>{activeTab} Management</h2>
                     {activeTab === 'Students' && (
                         <button className="btn btn-primary" onClick={() => setShowForm(true)}>
                             <FaUserPlus style={{ marginRight: '8px' }} /> Add Student
@@ -140,9 +140,9 @@ const SubAdminDashboard = () => {
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
                             <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                                <th style={{ textAlign: 'left', padding: '15px' }}>Name</th>
-                                <th style={{ textAlign: 'left', padding: '15px' }}>Email</th>
-                                <th style={{ textAlign: 'left', padding: '15px' }}>Action</th>
+                                <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Name</th>
+                                <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Email</th>
+                                <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -151,11 +151,11 @@ const SubAdminDashboard = () => {
                                     <td style={{ padding: '15px' }}>{student.name}</td>
                                     <td style={{ padding: '15px' }}>{student.email}</td>
                                     <td style={{ padding: '15px' }}>
-                                        <button style={{ color: 'hsl(var(--text-dim))' }}>Edit</button>
+                                        <button style={{ color: 'hsl(var(--accent))' }}>Edit</button>
                                     </td>
                                 </tr>
                             ))}
-                            {students.length === 0 && <tr><td colSpan="3" style={{ padding: '20px', textAlign: 'center' }}>No students found</td></tr>}
+                            {students.length === 0 && <tr><td colSpan="3" style={{ padding: '20px', textAlign: 'center', color: 'hsl(var(--text-dim))' }}>No students found</td></tr>}
                         </tbody>
                     </table>
                 ) : (
@@ -163,9 +163,9 @@ const SubAdminDashboard = () => {
                         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                             <thead>
                                 <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                                    <th style={{ textAlign: 'left', padding: '15px' }}>Student</th>
-                                    <th style={{ textAlign: 'left', padding: '15px' }}>Date</th>
-                                    <th style={{ textAlign: 'left', padding: '15px' }}>Status</th>
+                                    <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Student</th>
+                                    <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Date</th>
+                                    <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Status</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -177,14 +177,15 @@ const SubAdminDashboard = () => {
                                             <span style={{
                                                 padding: '4px 10px', borderRadius: '15px', fontSize: '0.8rem',
                                                 background: record.status === 'Present' ? 'rgba(50, 200, 255, 0.2)' : 'rgba(255, 100, 100, 0.2)',
-                                                color: record.status === 'Present' ? '#32c8ff' : '#ff6464'
+                                                color: record.status === 'Present' ? '#32c8ff' : '#ff6464',
+                                                fontWeight: 'bold'
                                             }}>
                                                 {record.status}
                                             </span>
                                         </td>
                                     </tr>
                                 ))}
-                                {attendanceRecords.length === 0 && <tr><td colSpan="3" style={{ padding: '20px', textAlign: 'center' }}>No attendance records found</td></tr>}
+                                {attendanceRecords.length === 0 && <tr><td colSpan="3" style={{ padding: '20px', textAlign: 'center', color: 'hsl(var(--text-dim))' }}>No attendance records found</td></tr>}
                             </tbody>
                         </table>
                     </div>

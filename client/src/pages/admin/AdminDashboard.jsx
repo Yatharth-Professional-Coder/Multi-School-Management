@@ -123,7 +123,7 @@ const AdminDashboard = () => {
                     <h1>School Dashboard</h1>
                     <p style={{ color: 'hsl(var(--text-dim))' }}>Hello, Principal {user.name}</p>
                 </div>
-                <button onClick={logout} style={{ color: 'hsl(var(--text-dim))', textDecoration: 'underline' }}>Logout</button>
+                <button onClick={logout} style={{ color: 'hsl(var(--accent))', textDecoration: 'underline' }}>Logout</button>
             </div>
 
             {/* Quick Stats */}
@@ -181,7 +181,7 @@ const AdminDashboard = () => {
             {/* Content Area */}
             <div className="glass-panel" style={{ padding: '30px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-                    <h2>{activeTab} Management</h2>
+                    <h2 style={{ color: 'hsl(var(--white))' }}>{activeTab} Management</h2>
                     {activeTab !== 'Rectifications' && activeTab !== 'Overview' && activeTab !== 'Attendance' && activeTab !== 'Students' && (
                         <button className="btn btn-primary" onClick={() => {
                             setShowForm(true);
@@ -284,11 +284,11 @@ const AdminDashboard = () => {
                         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                             <thead>
                                 <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                                    <th style={{ textAlign: 'left', padding: '15px' }}>Student</th>
-                                    <th style={{ textAlign: 'left', padding: '15px' }}>Date</th>
-                                    <th style={{ textAlign: 'left', padding: '15px' }}>Status</th>
-                                    <th style={{ textAlign: 'left', padding: '15px' }}>Reason</th>
-                                    <th style={{ textAlign: 'left', padding: '15px' }}>Action</th>
+                                    <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Student</th>
+                                    <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Date</th>
+                                    <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Status</th>
+                                    <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Reason</th>
+                                    <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -317,9 +317,9 @@ const AdminDashboard = () => {
                         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                             <thead>
                                 <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                                    <th style={{ textAlign: 'left', padding: '15px' }}>Student</th>
-                                    <th style={{ textAlign: 'left', padding: '15px' }}>Date</th>
-                                    <th style={{ textAlign: 'left', padding: '15px' }}>Status</th>
+                                    <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Student</th>
+                                    <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Date</th>
+                                    <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Status</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -331,7 +331,8 @@ const AdminDashboard = () => {
                                             <span style={{
                                                 padding: '4px 10px', borderRadius: '15px', fontSize: '0.8rem',
                                                 background: record.status === 'Present' ? 'rgba(50, 200, 255, 0.2)' : 'rgba(255, 100, 100, 0.2)',
-                                                color: record.status === 'Present' ? '#32c8ff' : '#ff6464'
+                                                color: record.status === 'Present' ? '#32c8ff' : '#ff6464',
+                                                fontWeight: 'bold'
                                             }}>
                                                 {record.status}
                                             </span>
@@ -363,10 +364,10 @@ const AdminDashboard = () => {
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
                             <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                                <th style={{ textAlign: 'left', padding: '15px' }}>Name</th>
-                                <th style={{ textAlign: 'left', padding: '15px' }}>Email</th>
-                                <th style={{ textAlign: 'left', padding: '15px' }}>Role</th>
-                                <th style={{ textAlign: 'left', padding: '15px' }}>Actions</th>
+                                <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Name</th>
+                                <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Email</th>
+                                <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Role</th>
+                                <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -382,13 +383,14 @@ const AdminDashboard = () => {
                                         <span style={{
                                             padding: '4px 10px', borderRadius: '15px', fontSize: '0.8rem',
                                             background: user.role === 'Teacher' ? 'rgba(50, 200, 255, 0.2)' : user.role === 'SubAdmin' ? 'rgba(255, 200, 50, 0.2)' : 'rgba(100, 255, 150, 0.2)',
-                                            color: user.role === 'Teacher' ? '#32c8ff' : user.role === 'SubAdmin' ? '#ffc832' : '#64ff96'
+                                            color: user.role === 'Teacher' ? '#32c8ff' : user.role === 'SubAdmin' ? '#ffc832' : '#64ff96',
+                                            fontWeight: 'bold'
                                         }}>
                                             {user.role}
                                         </span>
                                     </td>
                                     <td style={{ padding: '15px' }}>
-                                        <button style={{ color: 'hsl(var(--text-dim))' }}>Edit</button>
+                                        <button style={{ color: 'hsl(var(--accent))' }}>Edit</button>
                                     </td>
                                 </tr>
                             ))}

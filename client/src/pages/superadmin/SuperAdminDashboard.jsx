@@ -301,27 +301,33 @@ const SuperAdminDashboard = () => {
                     <div className="glass-panel" style={{ padding: '30px' }}>
                         <h2>School Users</h2>
                         {loadingUsers ? <p>Loading users...</p> : (
-                            <table className="data-table" style={{ width: '100%', marginTop: '20px' }}>
+                            <table className="data-table" style={{ width: '100%', marginTop: '20px', borderCollapse: 'collapse' }}>
                                 <thead>
-                                    <tr>
-                                        <th>Name</th>
-                                        <th>Role</th>
-                                        <th>Email</th>
+                                    <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                                        <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Name</th>
+                                        <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Role</th>
+                                        <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Email</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {schoolUsers.length > 0 ? schoolUsers.map(u => (
-                                        <tr key={u._id}>
-                                            <td>{u.name}</td>
-                                            <td>
-                                                <span className={`status-badge status-${u.role === 'Teacher' ? 'present' : 'pending'}`}>
+                                        <tr key={u._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                            <td style={{ padding: '15px' }}>{u.name}</td>
+                                            <td style={{ padding: '15px' }}>
+                                                <span className={`status-badge status-${u.role === 'Teacher' ? 'present' : 'pending'}`}
+                                                    style={{
+                                                        padding: '4px 10px', borderRadius: '15px', fontSize: '0.8rem',
+                                                        background: u.role === 'Teacher' ? 'rgba(50, 200, 255, 0.2)' : 'rgba(100, 255, 150, 0.2)',
+                                                        color: u.role === 'Teacher' ? '#32c8ff' : '#64ff96'
+                                                    }}
+                                                >
                                                     {u.role}
                                                 </span>
                                             </td>
-                                            <td>{u.email}</td>
+                                            <td style={{ padding: '15px' }}>{u.email}</td>
                                         </tr>
                                     )) : (
-                                        <tr><td colSpan="3" style={{ textAlign: 'center' }}>No users found</td></tr>
+                                        <tr><td colSpan="3" style={{ textAlign: 'center', padding: '20px', color: 'hsl(var(--text-dim))' }}>No users found</td></tr>
                                     )}
                                 </tbody>
                             </table>
@@ -330,7 +336,7 @@ const SuperAdminDashboard = () => {
                 </div>
             )}
 
-            <button onClick={logout} style={{ marginTop: '40px', color: 'hsl(var(--text-dim))', textDecoration: 'underline' }}>
+            <button onClick={logout} style={{ marginTop: '40px', color: 'hsl(var(--accent))', textDecoration: 'underline' }}>
                 Logout
             </button>
         </div>
