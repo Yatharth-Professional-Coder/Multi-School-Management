@@ -18,9 +18,9 @@ const SuperAdminDashboard = () => {
     const [isEditingPlan, setIsEditingPlan] = useState(false);
     const [newPlan, setNewPlan] = useState('');
 
-    // Reset Password State
-    const [isResettingPassword, setIsResettingPassword] = useState(false);
-    const [newPassword, setNewPassword] = useState('');
+    // Reset Password State (Deprecated in favor of editingUser)
+    // const [isResettingPassword, setIsResettingPassword] = useState(false);
+    // const [newPassword, setNewPassword] = useState('');
 
     const [formData, setFormData] = useState({
         name: '', address: '', contact: '', subscriptionPlan: 'Basic',
@@ -269,26 +269,9 @@ const SuperAdminDashboard = () => {
                                 <p><strong>{selectedSchool.adminId?.name}</strong></p>
                                 <p style={{ fontSize: '0.9rem', opacity: 0.7, marginBottom: '10px' }}>{selectedSchool.adminId?.email}</p>
 
-                                {isResettingPassword ? (
-                                    <div style={{ marginTop: '10px' }}>
-                                        <input
-                                            type="password"
-                                            className="input-field"
-                                            placeholder="New Password"
-                                            value={newPassword}
-                                            onChange={(e) => setNewPassword(e.target.value)}
-                                            style={{ marginBottom: '5px', width: '100%' }}
-                                        />
-                                        <div style={{ display: 'flex', gap: '5px', justifyContent: 'flex-end' }}>
-                                            <button className="btn btn-primary" style={{ fontSize: '0.8rem', padding: '5px 10px' }} onClick={handleResetPassword}>Save</button>
-                                            <button className="btn btn-danger" style={{ fontSize: '0.8rem', padding: '5px 10px' }} onClick={() => setIsResettingPassword(false)}>Cancel</button>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <button className="btn btn-secondary" style={{ fontSize: '0.8rem', padding: '5px 10px' }} onClick={() => setIsResettingPassword(true)}>
-                                        <FaKey style={{ marginRight: '5px' }} /> Reset Password
-                                    </button>
-                                )}
+                                <button className="btn btn-secondary" style={{ fontSize: '0.8rem', padding: '5px 10px' }} onClick={() => setEditingUser(selectedSchool.adminId)}>
+                                    <FaEdit style={{ marginRight: '5px' }} /> Edit Credentials
+                                </button>
                             </div>
                         </div>
                     </div>
