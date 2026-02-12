@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 import api from '../../utils/api';
 import AuthContext from '../../context/AuthContext';
-import { FaUserCheck, FaUserTimes, FaCalendarAlt, FaBook, FaClipboardList, FaBullhorn } from 'react-icons/fa';
+import { FaUserCheck, FaUserTimes, FaCalendarAlt, FaBook, FaClipboardList, FaBullhorn, FaUserPlus } from 'react-icons/fa';
 
 const TeacherDashboard = () => {
     const { user, logout } = useContext(AuthContext);
@@ -9,6 +9,9 @@ const TeacherDashboard = () => {
     const [attendance, setAttendance] = useState({});
     const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
     const [activeTab, setActiveTab] = useState('Attendance'); // Attendance, Homework, Results
+    const [showAddForm, setShowAddForm] = useState(false);
+    const [newStudentData, setNewStudentData] = useState({ name: '', email: '', password: '', role: 'Student' });
+    const [teacherClass, setTeacherClass] = useState(null);
 
     // Homework State
     const [homeworkList, setHomeworkList] = useState([]);
@@ -23,8 +26,19 @@ const TeacherDashboard = () => {
 
     useEffect(() => {
         fetchStudents();
+        fetchTeacherClass();
         if (activeTab === 'Homework') fetchHomework();
     }, [activeTab]);
+
+    const fetchTeacherClass = async () => {
+        try {
+            const { data } = await api.get('/api/classes', config);
+            const myClass = data.find(c => c.teacherId?._id === user._id);
+            setTeacherClass(myClass);
+        } catch (error) {
+            console.error("Error fetching teacher class", error);
+        }
+    };
 
     const fetchStudents = async () => {
         try {
@@ -79,6 +93,28 @@ const TeacherDashboard = () => {
         } catch (error) { alert('Failed to upload result'); }
     };
 
+    const handleStudentSubmit = async (e) => {
+        e.preventDefault();
+        if (!teacherClass) {
+            alert('You are not assigned to any class yet');
+            return;
+        }
+        try {
+            const studentPayload = {
+                ...newStudentData,
+                classId: teacherClass._id,
+                schoolId: user.schoolId
+            };
+            await api.post('/api/users', studentPayload, config);
+            setShowAddForm(false);
+            setNewStudentData({ name: '', email: '', password: '', role: 'Student' });
+            fetchStudents();
+            alert('Student added successfully');
+        } catch (error) {
+            alert(error.response?.data?.message || 'Error adding student');
+        }
+    };
+
     return (
         <div className="container fade-in" style={{ paddingTop: '40px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
@@ -99,9 +135,48 @@ const TeacherDashboard = () => {
                 {activeTab === 'Attendance' && (
                     <>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                            <h2>Mark Attendance</h2>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                                <h2>Mark Attendance</h2>
+                                <button className="btn btn-secondary" onClick={() => setShowAddForm(true)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <FaUserPlus /> Add Student
+                                </button>
+                            </div>
                             <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className="input-field" style={{ width: 'auto' }} />
                         </div>
+
+                        {showAddForm && (
+                            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '20px', borderRadius: '8px', marginBottom: '20px' }}>
+                                <h3 style={{ marginBottom: '15px' }}>Add New Student</h3>
+                                <form onSubmit={handleStudentSubmit}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                                        <input
+                                            placeholder="Full Name"
+                                            className="input-field"
+                                            value={newStudentData.name}
+                                            onChange={(e) => setNewStudentData({ ...newStudentData, name: e.target.value })}
+                                            required
+                                        />
+                                        <input
+                                            placeholder="Email / Username"
+                                            className="input-field"
+                                            value={newStudentData.email}
+                                            onChange={(e) => setNewStudentData({ ...newStudentData, email: e.target.value })}
+                                            required
+                                        />
+                                        <input
+                                            type="password"
+                                            placeholder="Temporary Password"
+                                            className="input-field"
+                                            value={newStudentData.password}
+                                            onChange={(e) => setNewStudentData({ ...newStudentData, password: e.target.value })}
+                                            required
+                                        />
+                                    </div>
+                                    <button type="submit" className="btn btn-primary" style={{ marginTop: '15px' }}>Create Student</button>
+                                    <button type="button" onClick={() => setShowAddForm(false)} style={{ marginLeft: '10px', color: '#ff6b6b' }}>Cancel</button>
+                                </form>
+                            </div>
+                        )}
                         <div style={{ overflowX: 'auto' }}>
                             <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px' }}>
                                 <thead>

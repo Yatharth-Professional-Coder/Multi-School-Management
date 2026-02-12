@@ -28,6 +28,8 @@ const addUser = async (req, res) => {
             allowedRoles = ['Student']; // SubAdmin can only create Student
         } else if (req.user.role === 'SuperAdmin') {
             allowedRoles = ['Admin', 'Teacher', 'Student', 'SubAdmin', 'Parent'];
+        } else if (req.user.role === 'Teacher') {
+            allowedRoles = ['Student']; // Teacher can create Student
         }
 
         if (!allowedRoles.includes(role)) {
