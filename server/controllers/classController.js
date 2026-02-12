@@ -8,8 +8,11 @@ const Section = require('../models/Section');
 // @route   POST /api/classes
 // @access  Private/Admin
 const createClass = async (req, res) => {
-    const { className, teacherId, subAdminId } = req.body;
+    let { className, teacherId, subAdminId } = req.body;
     const schoolId = req.user.schoolId;
+
+    if (teacherId === '') teacherId = null;
+    if (subAdminId === '') subAdminId = null;
 
     try {
         const classDoc = await Class.create({ className, schoolId, teacherId, subAdminId });
@@ -23,13 +26,15 @@ const createClass = async (req, res) => {
 // @route   PUT /api/classes/:id
 // @access  Private/Admin
 const updateClass = async (req, res) => {
-    const { className, teacherId, subAdminId } = req.body;
+    let { className, teacherId, subAdminId } = req.body;
     try {
         const classDoc = await Class.findById(req.params.id);
         if (classDoc) {
             classDoc.className = className || classDoc.className;
-            if (teacherId) classDoc.teacherId = teacherId;
-            if (subAdminId) classDoc.subAdminId = subAdminId;
+
+            // Allow unassigning by passing empty string or specific value
+            if (teacherId !== undefined) classDoc.teacherId = teacherId === '' ? null : teacherId;
+            if (subAdminId !== undefined) classDoc.subAdminId = subAdminId === '' ? null : subAdminId;
 
             const updatedClass = await classDoc.save();
             res.json(updatedClass);

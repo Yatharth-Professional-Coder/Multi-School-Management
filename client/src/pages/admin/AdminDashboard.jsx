@@ -18,6 +18,7 @@ const AdminDashboard = () => {
     const [subAdminData, setSubAdminData] = useState({ name: '', email: '', password: '', role: 'SubAdmin' });
     const [announcements, setAnnouncements] = useState([]);
     const [announcementData, setAnnouncementData] = useState({ title: '', content: '', targetAudience: 'All' });
+    const [editId, setEditId] = useState(null);
 
     // Create Teacher Mode inside Class Modal
     const [isCreatingTeacher, setIsCreatingTeacher] = useState(false);
@@ -90,12 +91,17 @@ const AdminDashboard = () => {
     const handleClassSubmit = async (e) => {
         e.preventDefault();
         try {
-            await api.post('/api/classes', classData, config);
-            setShowForm(false);
-            setClassData({ className: '', teacherId: '', subAdminId: '' });
+            if (editId) {
+                await api.put(`/api/classes/${editId}`, classData, config);
+                alert('Class updated successfully');
+            } else {
+                await api.post('/api/classes', classData, config);
+                alert('Class created successfully');
+            }
+            closeForm();
             fetchClasses();
         } catch (error) {
-            alert(error.response?.data?.message || 'Error creating class');
+            alert(error.response?.data?.message || 'Error saving class');
         }
     };
 
@@ -116,9 +122,9 @@ const AdminDashboard = () => {
         e.preventDefault();
         try {
             await api.post('/api/users', subAdminData, config);
-            setShowForm(false);
-            setSubAdminData({ name: '', email: '', password: '', role: 'SubAdmin' });
+            closeForm();
             fetchSubAdmins();
+            alert('Sub Admin created successfully');
         } catch (error) {
             alert(error.response?.data?.message || 'Error creating Sub Admin');
         }
@@ -138,11 +144,23 @@ const AdminDashboard = () => {
 
     const closeForm = () => {
         setShowForm(false);
+        setEditId(null);
         setClassData({ className: '', teacherId: '', subAdminId: '' });
         setSubAdminData({ name: '', email: '', password: '', role: 'SubAdmin' });
         setIsCreatingTeacher(false);
         setNewTeacherData({ name: '', email: '', password: '', role: 'Teacher' });
         setAnnouncementData({ title: '', content: '', targetAudience: 'All' });
+    };
+
+    const handleEditClass = (cls) => {
+        setEditId(cls._id);
+        setClassData({
+            className: cls.className,
+            teacherId: cls.teacherId?._id || '',
+            subAdminId: cls.subAdminId?._id || ''
+        });
+        setNewItemType('Class');
+        setShowForm(true);
     };
 
     return (
@@ -217,7 +235,7 @@ const AdminDashboard = () => {
 
                 {showForm && (
                     <div style={{ background: 'rgba(0,0,0,0.3)', padding: '20px', borderRadius: '8px', marginBottom: '20px' }}>
-                        <h3 style={{ marginBottom: '15px' }}>Add New {newItemType}</h3>
+                        <h3 style={{ marginBottom: '15px' }}>{editId ? 'Edit' : 'Add New'} {newItemType}</h3>
 
                         {newItemType === 'Class' && (
                             <form onSubmit={handleClassSubmit}>
@@ -243,7 +261,7 @@ const AdminDashboard = () => {
                                                     <option value="">Select Teacher</option>
                                                     {teachers.map(t => <option key={t._id} value={t._id}>{t.name}</option>)}
                                                 </select>
-                                                <button type="button" className="btn btn-secondary" onClick={() => setIsCreatingTeacher(!isCreatingTeacher)}>
+                                                <button type="button" className="btn btn-secondary" onClick={() => setIsCreatingTeacher(!isCreatingTeacher)} disabled={!!editId}>
                                                     {isCreatingTeacher ? 'Select Existing' : 'Create New'}
                                                 </button>
                                             </div>
@@ -272,8 +290,8 @@ const AdminDashboard = () => {
                                     </div>
                                 </div>
                                 <div style={{ marginTop: '20px' }}>
-                                    <button type="submit" className="btn btn-primary">Create Class</button>
-                                    <button type="button" onClick={() => setShowForm(false)} style={{ marginLeft: '10px', color: '#ff6b6b' }}>Cancel</button>
+                                    <button type="submit" className="btn btn-primary">{editId ? 'Update' : 'Create'} Class</button>
+                                    <button type="button" onClick={closeForm} style={{ marginLeft: '10px', color: '#ff6b6b' }}>Cancel</button>
                                 </div>
                             </form>
                         )}
@@ -344,7 +362,7 @@ const AdminDashboard = () => {
                                     <td style={{ padding: '15px' }}>{cls.teacherId?.name || <span style={{ opacity: 0.5 }}>Not Assigned</span>}</td>
                                     <td style={{ padding: '15px' }}>{cls.subAdminId?.name || <span style={{ opacity: 0.5 }}>Not Assigned</span>}</td>
                                     <td style={{ padding: '15px' }}>
-                                        <button style={{ color: 'hsl(var(--accent))' }}>Edit</button>
+                                        <button onClick={() => handleEditClass(cls)} style={{ color: 'hsl(var(--accent))', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}>Edit</button>
                                     </td>
                                 </tr>
                             ))}
