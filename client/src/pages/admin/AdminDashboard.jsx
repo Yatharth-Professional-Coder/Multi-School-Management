@@ -403,7 +403,8 @@ const AdminDashboard = () => {
                                             </span>
                                         </td>
                                     </tr>
-                                { attendanceRecords.length === 0 && <tr><td colSpan="4" style={{ padding: '20px', textAlign: 'center', color: 'hsl(var(--text-dim))' }}>No attendance records found</td></tr> }
+                                ))}
+                                {attendanceRecords.length === 0 && <tr><td colSpan="4" style={{ padding: '20px', textAlign: 'center', color: 'hsl(var(--text-dim))' }}>No attendance records found</td></tr>}
                             </tbody>
                         </table>
                     </div>
