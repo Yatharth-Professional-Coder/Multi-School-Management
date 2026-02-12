@@ -165,6 +165,18 @@ const AdminDashboard = () => {
         }
     };
 
+    const handleDeleteSubAdmin = async (id) => {
+        if (window.confirm('Are you sure you want to delete this Sub Admin? This cannot be undone.')) {
+            try {
+                await api.delete(`/api/users/${id}`, config);
+                setSubAdmins(subAdmins.filter(a => a._id !== id));
+                alert('Sub Admin deleted successfully');
+            } catch (error) {
+                alert(error.response?.data?.message || 'Error deleting Sub Admin');
+            }
+        }
+    };
+
     const closeForm = () => {
         setShowForm(false);
         setEditId(null);
@@ -422,8 +434,9 @@ const AdminDashboard = () => {
                                 <tr key={admin._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                                     <td style={{ padding: '15px' }}>{admin.name}</td>
                                     <td style={{ padding: '15px' }}>{admin.email}</td>
-                                    <td style={{ padding: '15px' }}>
-                                        <button style={{ color: 'hsl(var(--accent))' }}>Edit</button>
+                                    <td style={{ padding: '15px', display: 'flex', gap: '10px' }}>
+                                        <button style={{ color: 'hsl(var(--accent))', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}>Edit</button>
+                                        <button onClick={() => handleDeleteSubAdmin(admin._id)} style={{ color: '#ff6b6b', background: 'none', border: 'none', cursor: 'pointer' }}><FaTrash /></button>
                                     </td>
                                 </tr>
                             ))}
