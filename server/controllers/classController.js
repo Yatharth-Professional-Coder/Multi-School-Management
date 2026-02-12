@@ -4,13 +4,38 @@ const Section = require('../models/Section');
 // @desc    Create a new class
 // @route   POST /api/classes
 // @access  Private/Admin
+// @desc    Create a new class
+// @route   POST /api/classes
+// @access  Private/Admin
 const createClass = async (req, res) => {
-    const { className } = req.body;
+    const { className, teacherId, subAdminId } = req.body;
     const schoolId = req.user.schoolId;
 
     try {
-        const classDoc = await Class.create({ className, schoolId });
+        const classDoc = await Class.create({ className, schoolId, teacherId, subAdminId });
         res.status(201).json(classDoc);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Update a class
+// @route   PUT /api/classes/:id
+// @access  Private/Admin
+const updateClass = async (req, res) => {
+    const { className, teacherId, subAdminId } = req.body;
+    try {
+        const classDoc = await Class.findById(req.params.id);
+        if (classDoc) {
+            classDoc.className = className || classDoc.className;
+            if (teacherId) classDoc.teacherId = teacherId;
+            if (subAdminId) classDoc.subAdminId = subAdminId;
+
+            const updatedClass = await classDoc.save();
+            res.json(updatedClass);
+        } else {
+            res.status(404).json({ message: 'Class not found' });
+        }
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -37,7 +62,9 @@ const createSection = async (req, res) => {
 const getClasses = async (req, res) => {
     const schoolId = req.user.schoolId;
     try {
-        const classes = await Class.find({ schoolId });
+        const classes = await Class.find({ schoolId })
+            .populate('teacherId', 'name email')
+            .populate('subAdminId', 'name email');
         res.json(classes);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -57,4 +84,4 @@ const getSections = async (req, res) => {
     }
 };
 
-module.exports = { createClass, createSection, getClasses, getSections };
+module.exports = { createClass, updateClass, createSection, getClasses, getSections };

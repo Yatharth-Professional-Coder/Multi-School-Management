@@ -10,6 +10,14 @@ const classSchema = new mongoose.Schema({
         ref: 'School',
         required: true,
     },
+    teacherId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+    },
+    subAdminId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+    },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Class', classSchema);

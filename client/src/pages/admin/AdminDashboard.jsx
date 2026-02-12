@@ -5,33 +5,48 @@ import { FaUserTie, FaUserGraduate, FaUserPlus, FaChalkboardTeacher, FaLayerGrou
 
 const AdminDashboard = () => {
     const { user, logout } = useContext(AuthContext);
-    const [users, setUsers] = useState([]);
+    const [subAdmins, setSubAdmins] = useState([]);
+    const [teachers, setTeachers] = useState([]);
     const [classes, setClasses] = useState([]);
-    const [pendingRectifications, setPendingRectifications] = useState([]);
     const [attendanceRecords, setAttendanceRecords] = useState([]);
-    const [activeTab, setActiveTab] = useState('Overview');
+    const [activeTab, setActiveTab] = useState('Classes'); // Default to Classes
     const [showForm, setShowForm] = useState(false);
-    const [newItemType, setNewItemType] = useState('Teacher'); // 'Teacher', 'SubAdmin', 'Class', 'Announcement'
 
     // Form States
-    const [userData, setUserData] = useState({ name: '', email: '', password: '', role: 'Teacher' });
-    const [classData, setClassData] = useState({ className: '' });
-    const [announcementData, setAnnouncementData] = useState({ title: '', content: '', targetAudience: 'All' });
+    const [newItemType, setNewItemType] = useState('Class'); // 'Class', 'SubAdmin'
+    const [classData, setClassData] = useState({ className: '', teacherId: '', subAdminId: '' });
+    const [subAdminData, setSubAdminData] = useState({ name: '', email: '', password: '', role: 'SubAdmin' });
+
+    // Create Teacher Mode inside Class Modal
+    const [isCreatingTeacher, setIsCreatingTeacher] = useState(false);
+    const [newTeacherData, setNewTeacherData] = useState({ name: '', email: '', password: '', role: 'Teacher' });
 
     const config = {
         headers: { Authorization: `Bearer ${user.token}` },
     };
 
-    const fetchData = async () => {
+    const fetchClasses = async () => {
         try {
-            const usersRes = await api.get('/api/users', config);
-            setUsers(usersRes.data);
+            const { data } = await api.get('/api/classes', config);
+            setClasses(data);
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
-            const classesRes = await api.get('/api/classes', config);
-            setClasses(classesRes.data);
+    const fetchSubAdmins = async () => {
+        try {
+            const { data } = await api.get('/api/users?role=SubAdmin', config);
+            setSubAdmins(data);
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
-            const pendingRes = await api.get('/api/attendance/pending', config);
-            setPendingRectifications(pendingRes.data);
+    const fetchTeachers = async () => {
+        try {
+            const { data } = await api.get('/api/users?role=Teacher', config);
+            setTeachers(data);
         } catch (error) {
             console.error(error);
         }
@@ -47,7 +62,9 @@ const AdminDashboard = () => {
     };
 
     useEffect(() => {
-        fetchData();
+        fetchClasses();
+        fetchSubAdmins();
+        fetchTeachers(); // Need teachers for class assignment
     }, []);
 
     useEffect(() => {
@@ -56,27 +73,51 @@ const AdminDashboard = () => {
         }
     }, [activeTab]);
 
+    const handleClassSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            await api.post('/api/classes', classData, config);
+            setShowForm(false);
+            setClassData({ className: '', teacherId: '', subAdminId: '' });
+            fetchClasses();
+        } catch (error) {
+            alert(error.response?.data?.message || 'Error creating class');
+        }
+    };
+
+    const handleCreateTeacher = async () => {
+        try {
+            const { data } = await api.post('/api/users', newTeacherData, config);
+            setTeachers([...teachers, data]);
+            setClassData({ ...classData, teacherId: data._id }); // Auto-select new teacher
+            setIsCreatingTeacher(false);
+            setNewTeacherData({ name: '', email: '', password: '', role: 'Teacher' });
+            alert('Teacher created and selected successfully');
+        } catch (error) {
+            alert(error.response?.data?.message || 'Error creating teacher');
+        }
+    };
+
+    const handleSubAdminSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            await api.post('/api/users', subAdminData, config);
+            setShowForm(false);
+            setSubAdminData({ name: '', email: '', password: '', role: 'SubAdmin' });
+            fetchSubAdmins();
+        } catch (error) {
+            alert(error.response?.data?.message || 'Error creating Sub Admin');
+        }
+    };
+
     const handleUserSubmit = async (e) => {
         e.preventDefault();
         try {
-            await api.post('/api/users', { ...userData, role: newItemType }, config);
             closeForm();
             fetchData();
             alert(`${newItemType} added successfully`);
         } catch (error) {
             alert(error.response?.data?.message || 'Error adding user');
-        }
-    };
-
-    const handleClassSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            await api.post('/api/classes', classData, config);
-            closeForm();
-            fetchData();
-            alert('Class created successfully');
-        } catch (error) {
-            alert(error.response?.data?.message || 'Error creating class');
         }
     };
 
@@ -120,8 +161,8 @@ const AdminDashboard = () => {
         <div className="container fade-in" style={{ paddingTop: '40px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
                 <div>
-                    <h1>School Dashboard</h1>
-                    <p style={{ color: 'hsl(var(--text-dim))' }}>Hello, Principal {user.name}</p>
+                    <h1>Admin Dashboard</h1>
+                    <p style={{ color: 'hsl(var(--text-dim))' }}>Hello, {user.name}</p>
                 </div>
                 <button onClick={logout} style={{ color: 'hsl(var(--accent))', textDecoration: 'underline' }}>Logout</button>
             </div>
@@ -133,7 +174,7 @@ const AdminDashboard = () => {
                         <FaChalkboardTeacher size={24} color="#32c8ff" />
                     </div>
                     <div>
-                        <h3>{stats.teachers}</h3>
+                        <h3>{teachers.length}</h3>
                         <p style={{ fontSize: '0.9rem', color: 'hsl(var(--text-dim))' }}>Teachers</p>
                     </div>
                 </div>
@@ -142,7 +183,7 @@ const AdminDashboard = () => {
                         <FaUserTie size={24} color="#64ff96" />
                     </div>
                     <div>
-                        <h3>{stats.subAdmins}</h3>
+                        <h3>{subAdmins.length}</h3>
                         <p style={{ fontSize: '0.9rem', color: 'hsl(var(--text-dim))' }}>Sub Admins</p>
                     </div>
                 </div>
@@ -151,173 +192,196 @@ const AdminDashboard = () => {
                         <FaLayerGroup size={24} color="#ffc832" />
                     </div>
                     <div>
-                        <h3>{stats.classes}</h3>
+                        <h3>{classes.length}</h3>
                         <p style={{ fontSize: '0.9rem', color: 'hsl(var(--text-dim))' }}>Classes</p>
-                    </div>
-                </div>
-                <div className="glass-panel" style={{ padding: '20px', display: 'flex', alignItems: 'center', cursor: 'pointer', border: activeTab === 'Rectifications' ? '1px solid hsl(var(--primary))' : '' }} onClick={() => setActiveTab('Rectifications')}>
-                    <div style={{ padding: '15px', background: 'rgba(255, 100, 100, 0.2)', borderRadius: '12px', marginRight: '15px' }}>
-                        <FaClipboardList size={24} color="#ff6464" />
-                    </div>
-                    <div>
-                        <h3>{stats.rectificationRequests}</h3>
-                        <p style={{ fontSize: '0.9rem', color: 'hsl(var(--text-dim))' }}>Pending Requests</p>
                     </div>
                 </div>
             </div>
 
             {/* Actions */}
-            <div style={{ marginBottom: '30px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                <button className={`btn ${activeTab === 'Teachers' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('Teachers')}>Teachers</button>
-                <button className={`btn ${activeTab === 'SubAdmins' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('SubAdmins')}>Sub Admins</button>
-                <button className={`btn ${activeTab === 'Students' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('Students')}>Students</button>
-                <button className={`btn ${activeTab === 'Parents' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('Parents')}>Parents</button>
-                <button className={`btn ${activeTab === 'Classes' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('Classes')}>Classes</button>
-                <button className={`btn ${activeTab === 'Announcements' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('Announcements')}>Announcements</button>
-                <button className={`btn ${activeTab === 'Attendance' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('Attendance')}>Attendance</button>
-                <button className={`btn ${activeTab === 'Rectifications' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('Rectifications')}>Rectifications</button>
+            <div style={{ marginBottom: '30px', display: 'flex', gap: '10px' }}>
+                {['Classes', 'SubAdmins', 'Attendance'].map(tab => (
+                    <button
+                        key={tab}
+                        className={`btn ${activeTab === tab ? 'btn-primary' : ''}`}
+                        onClick={() => setActiveTab(tab)}
+                    >
+                        {tab === 'SubAdmins' ? 'Sub Admins' : tab}
+                    </button>
+                ))}
             </div>
 
             {/* Content Area */}
             <div className="glass-panel" style={{ padding: '30px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-                    <h2 style={{ color: 'hsl(var(--white))' }}>{activeTab} Management</h2>
-                    {activeTab !== 'Rectifications' && activeTab !== 'Overview' && activeTab !== 'Attendance' && activeTab !== 'Students' && (
+                    <h2 style={{ color: 'hsl(var(--white))' }}>
+                        {activeTab === 'SubAdmins' ? 'Sub Admin' : activeTab} Management
+                    </h2>
+                    {activeTab !== 'Attendance' && (
                         <button className="btn btn-primary" onClick={() => {
                             setShowForm(true);
-                            setNewItemType(activeTab === 'Classes' ? 'Class' : activeTab === 'Announcements' ? 'Announcement' : activeTab === 'Parents' ? 'Parent' : activeTab === 'SubAdmins' ? 'SubAdmin' : 'Teacher');
+                            setNewItemType(activeTab === 'Classes' ? 'Class' : 'SubAdmin');
                         }}>
-                            <FaUserPlus style={{ marginRight: '8px' }} /> Add {activeTab === 'Classes' ? 'Class' : activeTab === 'Announcements' ? 'Announcement' : activeTab === 'Parents' ? 'Parent' : activeTab === 'SubAdmins' ? 'Sub Admin' : 'Teacher'}
+                            <FaUserPlus style={{ marginRight: '8px' }} /> Add {activeTab === 'Classes' ? 'Class' : 'Sub Admin'}
                         </button>
                     )}
                 </div>
 
                 {showForm && (
                     <div style={{ background: 'rgba(0,0,0,0.3)', padding: '20px', borderRadius: '8px', marginBottom: '20px' }}>
-                        <h3 style={{ marginBottom: '15px' }}>Create {newItemType}</h3>
+                        <h3 style={{ marginBottom: '15px' }}>Add New {newItemType}</h3>
 
-                        {newItemType === 'Announcement' ? (
-                            <form onSubmit={handleAnnouncementSubmit}>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                                    <input placeholder="Title" className="input-field" value={announcementData.title} onChange={e => setAnnouncementData({ ...announcementData, title: e.target.value })} required />
-                                    <textarea placeholder="Content" className="input-field" style={{ minHeight: '100px' }} value={announcementData.content} onChange={e => setAnnouncementData({ ...announcementData, content: e.target.value })} required />
-                                    <select className="input-field" value={announcementData.targetAudience} onChange={e => setAnnouncementData({ ...announcementData, targetAudience: e.target.value })}>
-                                        <option value="All">All</option>
-                                        <option value="Teachers">Teachers</option>
-                                        <option value="Students">Students</option>
-                                        <option value="Parents">Parents</option>
-                                    </select>
-                                </div>
-                                <button type="submit" className="btn btn-primary" style={{ marginTop: '15px' }}>Post Announcement</button>
-                                <button type="button" onClick={closeForm} style={{ marginLeft: '10px', color: '#ff6b6b' }}>Cancel</button>
-                            </form>
-                        ) : newItemType === 'Class' ? (
+                        {newItemType === 'Class' && (
                             <form onSubmit={handleClassSubmit}>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px', maxWidth: '400px' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px' }}>
                                     <input
-                                        name="className"
-                                        placeholder="Class Name (e.g., Class 10)"
+                                        placeholder="Class Name (e.g., Class 10-A)"
                                         className="input-field"
                                         value={classData.className}
                                         onChange={(e) => setClassData({ ...classData, className: e.target.value })}
                                         required
                                     />
+
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                                        <div>
+                                            <label style={{ display: 'block', marginBottom: '8px' }}>Class Teacher</label>
+                                            <div style={{ display: 'flex', gap: '10px' }}>
+                                                <select
+                                                    className="input-field"
+                                                    value={classData.teacherId}
+                                                    onChange={(e) => setClassData({ ...classData, teacherId: e.target.value })}
+                                                    disabled={isCreatingTeacher}
+                                                >
+                                                    <option value="">Select Teacher</option>
+                                                    {teachers.map(t => <option key={t._id} value={t._id}>{t.name}</option>)}
+                                                </select>
+                                                <button type="button" className="btn btn-secondary" onClick={() => setIsCreatingTeacher(!isCreatingTeacher)}>
+                                                    {isCreatingTeacher ? 'Select Existing' : 'Create New'}
+                                                </button>
+                                            </div>
+
+                                            {isCreatingTeacher && (
+                                                <div style={{ marginTop: '15px', padding: '15px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px' }}>
+                                                    <input placeholder="Teacher Name" className="input-field" style={{ marginBottom: '10px' }} value={newTeacherData.name} onChange={(e) => setNewTeacherData({ ...newTeacherData, name: e.target.value })} />
+                                                    <input placeholder="Email" className="input-field" style={{ marginBottom: '10px' }} value={newTeacherData.email} onChange={(e) => setNewTeacherData({ ...newTeacherData, email: e.target.value })} />
+                                                    <input placeholder="Password" type="password" className="input-field" style={{ marginBottom: '10px' }} value={newTeacherData.password} onChange={(e) => setNewTeacherData({ ...newTeacherData, password: e.target.value })} />
+                                                    <button type="button" className="btn btn-primary" onClick={handleCreateTeacher}>Save & Select Teacher</button>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div>
+                                            <label style={{ display: 'block', marginBottom: '8px' }}>Assign Sub Admin</label>
+                                            <select
+                                                className="input-field"
+                                                value={classData.subAdminId}
+                                                onChange={(e) => setClassData({ ...classData, subAdminId: e.target.value })}
+                                            >
+                                                <option value="">Select Sub Admin</option>
+                                                {subAdmins.map(s => <option key={s._id} value={s._id}>{s.name}</option>)}
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
-                                <button type="submit" className="btn btn-primary" style={{ marginTop: '15px' }}>Create Class</button>
-                                <button type="button" onClick={closeForm} style={{ marginLeft: '10px', color: '#ff6b6b' }}>Cancel</button>
-                            </form>
-                        ) : newItemType === 'Parent' ? (
-                            <form onSubmit={handleUserSubmit}>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                                    <input name="name" placeholder="Parent Name" className="input-field" value={userData.name} onChange={(e) => setUserData({ ...userData, name: e.target.value })} required />
-                                    <input name="email" type="email" placeholder="Email Address" className="input-field" value={userData.email} onChange={(e) => setUserData({ ...userData, email: e.target.value })} required />
-                                    <input name="password" type="password" placeholder="Temporary Password" className="input-field" value={userData.password} onChange={(e) => setUserData({ ...userData, password: e.target.value })} required />
-                                    <select className="input-field" value={userData.childId || ''} onChange={(e) => setUserData({ ...userData, childId: e.target.value })} required>
-                                        <option value="">Select Child</option>
-                                        {users.filter(u => u.role === 'Student').map(student => (
-                                            <option key={student._id} value={student._id}>{student.name} ({student.email})</option>
-                                        ))}
-                                    </select>
+                                <div style={{ marginTop: '20px' }}>
+                                    <button type="submit" className="btn btn-primary">Create Class</button>
+                                    <button type="button" onClick={() => setShowForm(false)} style={{ marginLeft: '10px', color: '#ff6b6b' }}>Cancel</button>
                                 </div>
-                                <button type="submit" className="btn btn-primary" style={{ marginTop: '15px' }}>Create Parent Account</button>
-                                <button type="button" onClick={closeForm} style={{ marginLeft: '10px', color: '#ff6b6b' }}>Cancel</button>
                             </form>
-                        ) : (
-                            <form onSubmit={handleUserSubmit}>
+                        )}
+
+                        {newItemType === 'SubAdmin' && (
+                            <form onSubmit={handleSubAdminSubmit}>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
                                     <input
-                                        name="name"
                                         placeholder="Full Name"
                                         className="input-field"
-                                        value={userData.name}
-                                        onChange={(e) => setUserData({ ...userData, name: e.target.value })}
+                                        value={subAdminData.name}
+                                        onChange={(e) => setSubAdminData({ ...subAdminData, name: e.target.value })}
                                         required
                                     />
                                     <input
-                                        name="email"
                                         type="email"
                                         placeholder="Email Address"
                                         className="input-field"
-                                        value={userData.email}
-                                        onChange={(e) => setUserData({ ...userData, email: e.target.value })}
+                                        value={subAdminData.email}
+                                        onChange={(e) => setSubAdminData({ ...subAdminData, email: e.target.value })}
                                         required
                                     />
                                     <input
-                                        name="password"
                                         type="password"
                                         placeholder="Temporary Password"
                                         className="input-field"
-                                        value={userData.password}
-                                        onChange={(e) => setUserData({ ...userData, password: e.target.value })}
+                                        value={subAdminData.password}
+                                        onChange={(e) => setSubAdminData({ ...subAdminData, password: e.target.value })}
                                         required
                                     />
                                 </div>
-                                <button type="submit" className="btn btn-primary" style={{ marginTop: '15px' }}>Save {newItemType}</button>
-                                <button type="button" onClick={closeForm} style={{ marginLeft: '10px', color: '#ff6b6b' }}>Cancel</button>
+                                <button type="submit" className="btn btn-primary" style={{ marginTop: '15px' }}>Create Sub Admin</button>
+                                <button type="button" onClick={() => setShowForm(false)} style={{ marginLeft: '10px', color: '#ff6b6b' }}>Cancel</button>
                             </form>
                         )}
                     </div>
                 )}
 
-                {activeTab === 'Rectifications' ? (
-                    <div style={{ overflowX: 'auto' }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                            <thead>
-                                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                                    <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Student</th>
-                                    <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Date</th>
-                                    <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Status</th>
-                                    <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Reason</th>
-                                    <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Action</th>
+                {/* Tables */}
+                {activeTab === 'Classes' && (
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <thead>
+                            <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                                <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Class Name</th>
+                                <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Class Teacher</th>
+                                <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Sub Admin</th>
+                                <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {classes.map(cls => (
+                                <tr key={cls._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <td style={{ padding: '15px' }}>{cls.className}</td>
+                                    <td style={{ padding: '15px' }}>{cls.teacherId?.name || <span style={{ opacity: 0.5 }}>Not Assigned</span>}</td>
+                                    <td style={{ padding: '15px' }}>{cls.subAdminId?.name || <span style={{ opacity: 0.5 }}>Not Assigned</span>}</td>
+                                    <td style={{ padding: '15px' }}>
+                                        <button style={{ color: 'hsl(var(--accent))' }}>Edit</button>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                {pendingRectifications.map(req => (
-                                    <tr key={req._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                        <td style={{ padding: '15px' }}>{req.userId?.name}</td>
-                                        <td style={{ padding: '15px' }}>{new Date(req.date).toLocaleDateString()}</td>
-                                        <td style={{ padding: '15px' }}>{req.status}</td>
-                                        <td style={{ padding: '15px' }}>{req.rectificationRequest.reason}</td>
-                                        <td style={{ padding: '15px' }}>
-                                            <button onClick={() => handleRectification(req._id, 'Approved')} style={{ marginRight: '10px', color: '#64ff96', border: '1px solid #64ff96', padding: '5px 10px', borderRadius: '5px' }}>Approve</button>
-                                            <button onClick={() => handleRectification(req._id, 'Rejected')} style={{ color: '#ff6b6b', border: '1px solid #ff6b6b', padding: '5px 10px', borderRadius: '5px' }}>Reject</button>
-                                        </td>
-                                    </tr>
-                                ))}
-                                {pendingRectifications.length === 0 && (
-                                    <tr>
-                                        <td colSpan="5" style={{ padding: '20px', textAlign: 'center', color: 'hsl(var(--text-dim))' }}>No pending requests</td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                ) : activeTab === 'Attendance' ? (
+                            ))}
+                            {classes.length === 0 && <tr><td colSpan="4" style={{ padding: '20px', textAlign: 'center', color: 'hsl(var(--text-dim))' }}>No classes found</td></tr>}
+                        </tbody>
+                    </table>
+                )}
+
+                {activeTab === 'SubAdmins' && (
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <thead>
+                            <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                                <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Name</th>
+                                <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Email</th>
+                                <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {subAdmins.map(admin => (
+                                <tr key={admin._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <td style={{ padding: '15px' }}>{admin.name}</td>
+                                    <td style={{ padding: '15px' }}>{admin.email}</td>
+                                    <td style={{ padding: '15px' }}>
+                                        <button style={{ color: 'hsl(var(--accent))' }}>Edit</button>
+                                    </td>
+                                </tr>
+                            ))}
+                            {subAdmins.length === 0 && <tr><td colSpan="3" style={{ padding: '20px', textAlign: 'center', color: 'hsl(var(--text-dim))' }}>No Sub Admins found</td></tr>}
+                        </tbody>
+                    </table>
+                )}
+
+                {activeTab === 'Attendance' && (
                     <div style={{ overflowX: 'auto' }}>
                         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                             <thead>
                                 <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                                    <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Student</th>
+                                    <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Person</th>
+                                    <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Role</th>
                                     <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Date</th>
                                     <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Status</th>
                                 </tr>
@@ -326,6 +390,7 @@ const AdminDashboard = () => {
                                 {attendanceRecords.map(record => (
                                     <tr key={record._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                                         <td style={{ padding: '15px' }}>{record.userId?.name}</td>
+                                        <td style={{ padding: '15px' }}>{record.userId?.role}</td>
                                         <td style={{ padding: '15px' }}>{new Date(record.date).toLocaleDateString()}</td>
                                         <td style={{ padding: '15px' }}>
                                             <span style={{
@@ -338,64 +403,10 @@ const AdminDashboard = () => {
                                             </span>
                                         </td>
                                     </tr>
-                                ))}
-                                {attendanceRecords.length === 0 && (
-                                    <tr>
-                                        <td colSpan="3" style={{ padding: '20px', textAlign: 'center', color: 'hsl(var(--text-dim))' }}>No attendance records found</td>
-                                    </tr>
-                                )}
+                                { attendanceRecords.length === 0 && <tr><td colSpan="4" style={{ padding: '20px', textAlign: 'center', color: 'hsl(var(--text-dim))' }}>No attendance records found</td></tr> }
                             </tbody>
                         </table>
                     </div>
-                ) : activeTab === 'Classes' ? (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '20px' }}>
-                        {classes.map(cls => (
-                            <div key={cls._id} style={{ background: 'rgba(255,255,255,0.05)', padding: '15px', borderRadius: '8px' }}>
-                                <h3>{cls.className}</h3>
-                            </div>
-                        ))}
-                        {classes.length === 0 && <p style={{ color: 'hsl(var(--text-dim))' }}>No classes found.</p>}
-                    </div>
-                ) : activeTab === 'Announcements' ? (
-                    <div style={{ color: 'hsl(var(--text-dim))' }}>
-                        <p>Announcement history viewing coming in next update. Currently only posting is supported.</p>
-                    </div>
-                ) : (
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                        <thead>
-                            <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                                <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Name</th>
-                                <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Email</th>
-                                <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Role</th>
-                                <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {users.filter(u => {
-                                if (activeTab === 'Overview') return true;
-                                if (activeTab === 'SubAdmins') return u.role === 'SubAdmin';
-                                return activeTab.includes(u.role);
-                            }).map(user => (
-                                <tr key={user._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                    <td style={{ padding: '15px' }}>{user.name}</td>
-                                    <td style={{ padding: '15px' }}>{user.email}</td>
-                                    <td style={{ padding: '15px' }}>
-                                        <span style={{
-                                            padding: '4px 10px', borderRadius: '15px', fontSize: '0.8rem',
-                                            background: user.role === 'Teacher' ? 'rgba(50, 200, 255, 0.2)' : user.role === 'SubAdmin' ? 'rgba(255, 200, 50, 0.2)' : 'rgba(100, 255, 150, 0.2)',
-                                            color: user.role === 'Teacher' ? '#32c8ff' : user.role === 'SubAdmin' ? '#ffc832' : '#64ff96',
-                                            fontWeight: 'bold'
-                                        }}>
-                                            {user.role}
-                                        </span>
-                                    </td>
-                                    <td style={{ padding: '15px' }}>
-                                        <button style={{ color: 'hsl(var(--accent))' }}>Edit</button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
                 )}
             </div>
         </div>
