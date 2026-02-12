@@ -58,16 +58,16 @@ const Login = () => {
 
                 <form onSubmit={handleSubmit}>
                     <div className="input-group">
-                        <label className="input-label">Email Address</label>
+                        <label className="input-label">Email / Username</label>
                         <div style={{ position: 'relative' }}>
                             <FaEnvelope style={{ position: 'absolute', left: '15px', top: '15px', color: 'hsl(var(--text-dim))' }} />
                             <input
-                                type="email"
+                                type="text"
                                 className="input-field"
                                 style={{ paddingLeft: '45px' }}
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                placeholder="admin@school.com"
+                                placeholder="Email or Username"
                                 required
                             />
                         </div>
