@@ -1,18 +1,21 @@
-import { useState, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
-import AuthContext from '../context/AuthContext';
-import { FaUserPlus, FaEnvelope, FaLock, FaUser } from 'react-icons/fa';
+import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import api from '../utils/api';
+import { FaSchool, FaMapMarkerAlt, FaPhone, FaUserTie, FaEnvelope, FaLock, FaLayerGroup } from 'react-icons/fa';
+import '../styles/global.css';
 
 const Register = () => {
     const [formData, setFormData] = useState({
         name: '',
-        email: '',
-        password: '',
-        role: 'SuperAdmin', // Default for initial setup
-        schoolId: null
+        address: '',
+        contact: '',
+        subscriptionPlan: 'Basic',
+        adminName: '',
+        adminEmail: '',
+        adminPassword: ''
     });
 
-    const { register: registerUser, error } = useContext(AuthContext);
+    const [error, setError] = useState(null);
     const navigate = useNavigate();
 
     const handleChange = (e) => {
@@ -21,117 +24,255 @@ const Register = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        await registerUser(formData);
-        // Redirect logic handled in App.jsx via isAuthenticated check
+        try {
+            await api.post('/api/schools/register', formData);
+            alert('School registered successfully! You can now login with the Principal credentials.');
+            navigate('/login');
+        } catch (err) {
+            setError(err.response && err.response.data.message ? err.response.data.message : 'Error registering school');
+        }
     };
 
     return (
-        <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+        <div className="login-container" style={{
+            background: 'radial-gradient(circle at bottom left, #2a2a72, #009ffd 0%, #000 70%)',
             minHeight: '100vh',
-            background: 'radial-gradient(circle at bottom left, #2a2a72, #009ffd 0%, #000 70%)'
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            color: '#fff'
         }}>
-            <div className="glass-panel fade-in" style={{ width: '100%', maxWidth: '500px', padding: '40px' }}>
-                <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-                    <div style={{
-                        width: '60px', height: '60px',
-                        background: 'linear-gradient(135deg, hsl(var(--secondary)), hsl(var(--primary)))',
-                        borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                        marginBottom: '10px', boxShadow: '0 0 20px rgba(var(--secondary), 0.6)'
-                    }}>
-                        <FaUserPlus size={30} color="#fff" />
-                    </div>
-                    <h1 style={{ fontSize: '2rem', marginBottom: '10px' }}>Join EduSphere</h1>
-                    <p style={{ color: 'hsl(var(--text-dim))' }}>Create your account to get started</p>
+            <div className="glass-panel fade-in" style={{
+                padding: '3rem',
+                borderRadius: '20px',
+                width: '100%',
+                maxWidth: '500px',
+                background: 'rgba(255, 255, 255, 0.1)',
+                backdropFilter: 'blur(10px)',
+                boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
+                border: '1px solid rgba(255, 255, 255, 0.18)'
+            }}>
+                <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+                    <FaSchool size={50} color="#00d4ff" />
+                    <h2 style={{ marginTop: '1rem', fontSize: '2rem', fontWeight: 'bold' }}>Register School</h2>
+                    <p style={{ color: '#ccc' }}>Create a new school and admin account</p>
                 </div>
 
                 {error && (
                     <div style={{
-                        background: 'rgba(255, 50, 50, 0.1)',
-                        border: '1px solid rgba(255, 50, 50, 0.3)',
-                        color: '#ff6b6b',
-                        padding: '12px',
-                        borderRadius: 'var(--radius)',
+                        background: 'rgba(255, 77, 77, 0.2)',
+                        color: '#ff4d4d',
+                        padding: '10px',
+                        borderRadius: '5px',
                         marginBottom: '20px',
-                        textAlign: 'center'
+                        textAlign: 'center',
+                        border: '1px solid rgba(255, 77, 77, 0.3)'
                     }}>
                         {error}
                     </div>
                 )}
 
                 <form onSubmit={handleSubmit}>
-                    <div className="input-group">
-                        <label className="input-label">Full Name</label>
-                        <div style={{ position: 'relative' }}>
-                            <FaUser style={{ position: 'absolute', left: '15px', top: '15px', color: 'hsl(var(--text-dim))' }} />
-                            <input
-                                type="text"
-                                name="name"
-                                className="input-field"
-                                style={{ paddingLeft: '45px' }}
-                                value={formData.name}
-                                onChange={handleChange}
-                                placeholder="John Doe"
-                                required
-                            />
-                        </div>
+                    {/* School Name */}
+                    <div className="input-group" style={{ marginBottom: '1.5rem', position: 'relative' }}>
+                        <FaSchool style={{ position: 'absolute', top: '15px', left: '15px', color: '#00d4ff' }} />
+                        <input
+                            type="text"
+                            name="name"
+                            placeholder="School Name"
+                            value={formData.name}
+                            onChange={handleChange}
+                            required
+                            style={{
+                                width: '100%',
+                                padding: '12px 12px 12px 45px',
+                                background: 'rgba(255, 255, 255, 0.05)',
+                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                borderRadius: '8px',
+                                color: '#fff',
+                                fontSize: '1rem',
+                                outline: 'none'
+                            }}
+                        />
                     </div>
 
-                    <div className="input-group">
-                        <label className="input-label">Email Address</label>
-                        <div style={{ position: 'relative' }}>
-                            <FaEnvelope style={{ position: 'absolute', left: '15px', top: '15px', color: 'hsl(var(--text-dim))' }} />
-                            <input
-                                type="email"
-                                name="email"
-                                className="input-field"
-                                style={{ paddingLeft: '45px' }}
-                                value={formData.email}
-                                onChange={handleChange}
-                                placeholder="john@example.com"
-                                required
-                            />
-                        </div>
+                    {/* Address */}
+                    <div className="input-group" style={{ marginBottom: '1.5rem', position: 'relative' }}>
+                        <FaMapMarkerAlt style={{ position: 'absolute', top: '15px', left: '15px', color: '#00d4ff' }} />
+                        <input
+                            type="text"
+                            name="address"
+                            placeholder="School Address"
+                            value={formData.address}
+                            onChange={handleChange}
+                            required
+                            style={{
+                                width: '100%',
+                                padding: '12px 12px 12px 45px',
+                                background: 'rgba(255, 255, 255, 0.05)',
+                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                borderRadius: '8px',
+                                color: '#fff',
+                                fontSize: '1rem',
+                                outline: 'none'
+                            }}
+                        />
                     </div>
 
-                    <div className="input-group">
-                        <label className="input-label">Password</label>
-                        <div style={{ position: 'relative' }}>
-                            <FaLock style={{ position: 'absolute', left: '15px', top: '15px', color: 'hsl(var(--text-dim))' }} />
-                            <input
-                                type="password"
-                                name="password"
-                                className="input-field"
-                                style={{ paddingLeft: '45px' }}
-                                value={formData.password}
-                                onChange={handleChange}
-                                placeholder="••••••••"
-                                required
-                            />
-                        </div>
+                    {/* Contact */}
+                    <div className="input-group" style={{ marginBottom: '1.5rem', position: 'relative' }}>
+                        <FaPhone style={{ position: 'absolute', top: '15px', left: '15px', color: '#00d4ff' }} />
+                        <input
+                            type="text"
+                            name="contact"
+                            placeholder="Contact Number"
+                            value={formData.contact}
+                            onChange={handleChange}
+                            required
+                            style={{
+                                width: '100%',
+                                padding: '12px 12px 12px 45px',
+                                background: 'rgba(255, 255, 255, 0.05)',
+                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                borderRadius: '8px',
+                                color: '#fff',
+                                fontSize: '1rem',
+                                outline: 'none'
+                            }}
+                        />
                     </div>
 
-                    <div className="input-group">
-                        <label className="input-label">Role</label>
-                        <select name="role" className="input-field" value={formData.role} onChange={handleChange}>
-                            <option value="SuperAdmin">Super Admin</option>
-                            <option value="Admin">Admin (Principal)</option>
-                            <option value="Teacher">Teacher</option>
-                            <option value="Student">Student</option>
-                            <option value="Parent">Parent</option>
+                    {/* Subscription Plan */}
+                    <div className="input-group" style={{ marginBottom: '1.5rem', position: 'relative' }}>
+                        <FaLayerGroup style={{ position: 'absolute', top: '15px', left: '15px', color: '#00d4ff' }} />
+                        <select
+                            name="subscriptionPlan"
+                            value={formData.subscriptionPlan}
+                            onChange={handleChange}
+                            required
+                            style={{
+                                width: '100%',
+                                padding: '12px 12px 12px 45px',
+                                background: 'rgba(255, 255, 255, 0.05)',
+                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                borderRadius: '8px',
+                                color: '#fff',
+                                fontSize: '1rem',
+                                outline: 'none',
+                                appearance: 'none' // Removes default arrow
+                            }}
+                        >
+                            <option value="Basic" style={{ color: '#000' }}>Basic Plan</option>
+                            <option value="Pro" style={{ color: '#000' }}>Pro Plan</option>
+                            <option value="Enterprise" style={{ color: '#000' }}>Enterprise Plan</option>
                         </select>
                     </div>
 
-                    <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '10px' }}>
-                        Create Account
+                    <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.1)', margin: '20px 0', paddingTop: '20px' }}>
+                        <p style={{ marginBottom: '15px', color: '#aaa', fontSize: '0.9rem' }}>Principal / Admin Details</p>
+                    </div>
+
+                    {/* Admin Name */}
+                    <div className="input-group" style={{ marginBottom: '1.5rem', position: 'relative' }}>
+                        <FaUserTie style={{ position: 'absolute', top: '15px', left: '15px', color: '#00d4ff' }} />
+                        <input
+                            type="text"
+                            name="adminName"
+                            placeholder="Principal Name"
+                            value={formData.adminName}
+                            onChange={handleChange}
+                            required
+                            style={{
+                                width: '100%',
+                                padding: '12px 12px 12px 45px',
+                                background: 'rgba(255, 255, 255, 0.05)',
+                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                borderRadius: '8px',
+                                color: '#fff',
+                                fontSize: '1rem',
+                                outline: 'none'
+                            }}
+                        />
+                    </div>
+
+                    {/* Admin Email */}
+                    <div className="input-group" style={{ marginBottom: '1.5rem', position: 'relative' }}>
+                        <FaEnvelope style={{ position: 'absolute', top: '15px', left: '15px', color: '#00d4ff' }} />
+                        <input
+                            type="email"
+                            name="adminEmail"
+                            placeholder="Principal Email"
+                            value={formData.adminEmail}
+                            onChange={handleChange}
+                            required
+                            style={{
+                                width: '100%',
+                                padding: '12px 12px 12px 45px',
+                                background: 'rgba(255, 255, 255, 0.05)',
+                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                borderRadius: '8px',
+                                color: '#fff',
+                                fontSize: '1rem',
+                                outline: 'none'
+                            }}
+                        />
+                    </div>
+
+                    {/* Admin Password */}
+                    <div className="input-group" style={{ marginBottom: '1.5rem', position: 'relative' }}>
+                        <FaLock style={{ position: 'absolute', top: '15px', left: '15px', color: '#00d4ff' }} />
+                        <input
+                            type="password"
+                            name="adminPassword"
+                            placeholder="Password"
+                            value={formData.adminPassword}
+                            onChange={handleChange}
+                            required
+                            style={{
+                                width: '100%',
+                                padding: '12px 12px 12px 45px',
+                                background: 'rgba(255, 255, 255, 0.05)',
+                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                borderRadius: '8px',
+                                color: '#fff',
+                                fontSize: '1rem',
+                                outline: 'none'
+                            }}
+                        />
+                    </div>
+
+                    <button
+                        type="submit"
+                        className="login-btn"
+                        style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'linear-gradient(to right, #00c6ff, #0072ff)',
+                            border: 'none',
+                            borderRadius: '8px',
+                            color: '#fff',
+                            fontSize: '1.1rem',
+                            fontWeight: 'bold',
+                            cursor: 'pointer',
+                            marginTop: '1rem',
+                            transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+                        }}
+                        onMouseOver={(e) => {
+                            e.currentTarget.style.transform = 'translateY(-2px)';
+                            e.currentTarget.style.boxShadow = '0 5px 15px rgba(0, 114, 255, 0.4)';
+                        }}
+                        onMouseOut={(e) => {
+                            e.currentTarget.style.transform = 'translateY(0)';
+                            e.currentTarget.style.boxShadow = 'none';
+                        }}
+                    >
+                        Register School
                     </button>
                 </form>
 
-                <div style={{ textAlign: 'center', marginTop: '30px', color: 'hsl(var(--text-dim))', fontSize: '0.9rem' }}>
-                    Already have an account? <a href="/login" style={{ color: 'hsl(var(--secondary))', fontWeight: 'bold' }}>Sign In</a>
-                </div>
+                <p style={{ marginTop: '2rem', textAlign: 'center', color: '#ccc' }}>
+                    Already have an account? <Link to="/login" style={{ color: '#00d4ff', textDecoration: 'none', fontWeight: 'bold' }}>Sign In</Link>
+                </p>
             </div>
         </div>
     );

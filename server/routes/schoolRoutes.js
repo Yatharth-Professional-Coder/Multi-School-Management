@@ -7,4 +7,6 @@ router.route('/')
     .post(protect, superAdmin, createSchool)
     .get(protect, superAdmin, getSchools);
 
+router.post('/register', createSchool); // Public registration for new schools
+
 module.exports = router;
