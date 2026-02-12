@@ -197,6 +197,18 @@ const AdminDashboard = () => {
         }
     };
 
+    const handleDeleteTeacher = async (id) => {
+        if (window.confirm('Are you sure you want to delete this Teacher? This cannot be undone.')) {
+            try {
+                await api.delete(`/api/users/${id}`, config);
+                setTeachers(teachers.filter(t => t._id !== id));
+                alert('Teacher deleted successfully');
+            } catch (error) {
+                alert(error.response?.data?.message || 'Error deleting Teacher');
+            }
+        }
+    };
+
     const handleAttendanceChange = (teacherId, status) => {
         setAttendanceData(prev => ({ ...prev, [teacherId]: status }));
     };
@@ -641,12 +653,20 @@ const AdminDashboard = () => {
                                                         </span>
                                                     </td>
                                                     <td style={{ padding: '15px' }}>
-                                                        <button
-                                                            onClick={() => setSelectedTeacherAttendance(teacher)}
-                                                            style={{ color: 'hsl(var(--accent))', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
-                                                        >
-                                                            View History
-                                                        </button>
+                                                        <div style={{ display: 'flex', gap: '10px' }}>
+                                                            <button
+                                                                onClick={() => setSelectedTeacherAttendance(teacher)}
+                                                                style={{ color: 'hsl(var(--accent))', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
+                                                            >
+                                                                View History
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleDeleteTeacher(teacher._id)}
+                                                                style={{ color: '#ff6b6b', background: 'none', border: 'none', cursor: 'pointer' }}
+                                                            >
+                                                                <FaTrash />
+                                                            </button>
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             );
