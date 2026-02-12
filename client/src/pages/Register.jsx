@@ -163,9 +163,12 @@ const Register = () => {
                             }}
                         >
                             <option value="Basic" style={{ color: '#000' }}>Basic Plan</option>
-                            <option value="Pro" style={{ color: '#000' }}>Pro Plan</option>
-                            <option value="Enterprise" style={{ color: '#000' }}>Enterprise Plan</option>
+                            <option value="Standard" style={{ color: '#000' }}>Standard Plan</option>
+                            <option value="Premium" style={{ color: '#000' }}>Premium Plan</option>
                         </select>
+                        <p style={{ marginTop: '5px', fontSize: '0.85rem', color: '#00d4ff', fontStyle: 'italic' }}>
+                            For pricing and details, contact: +91 8571099660
+                        </p>
                     </div>
 
                     <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.1)', margin: '20px 0', paddingTop: '20px' }}>
