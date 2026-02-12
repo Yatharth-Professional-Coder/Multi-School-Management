@@ -313,7 +313,7 @@ const AdminDashboard = () => {
                             <FaUserPlus style={{ marginRight: '8px' }} /> Add {activeTab === 'Classes' ? 'Class' : activeTab === 'SubAdmins' ? 'Sub Admin' : 'Announcement'}
                         </button>
                     )}
-                    {activeTab === 'Teacher Attendance' && (
+                    {activeTab === 'Teacher Attendance' && !selectedTeacherAttendance && (
                         <button className="btn btn-primary" onClick={() => {
                             setIsMarkingAttendance(true);
                             // Initialize all teachers as Present by default? Or empty?
@@ -325,8 +325,8 @@ const AdminDashboard = () => {
                             <FaClipboardList style={{ marginRight: '8px' }} /> Mark Attendance
                         </button>
                     )}
-                    {selectedClass && (
-                        <button className="btn btn-secondary" onClick={() => setSelectedClass(null)}>
+                    {(selectedClass || selectedTeacherAttendance) && (
+                        <button className="btn btn-secondary" onClick={() => { setSelectedClass(null); setSelectedTeacherAttendance(null); }}>
                             <FaArrowLeft style={{ marginRight: '5px' }} /> Back
                         </button>
                     )}
