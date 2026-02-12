@@ -110,51 +110,12 @@ const AdminDashboard = () => {
         }
     };
 
-    const handleUserSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            closeForm();
-            fetchData();
-            alert(`${newItemType} added successfully`);
-        } catch (error) {
-            alert(error.response?.data?.message || 'Error adding user');
-        }
-    };
-
-    const handleAnnouncementSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            await api.post('/api/announcements', announcementData, config);
-            closeForm();
-            alert('Announcement posted successfully');
-        } catch (error) {
-            alert(error.response?.data?.message || 'Error posting announcement');
-        }
-    };
-
-    const handleRectification = async (id, status) => {
-        try {
-            await api.put('/api/attendance/rectify/approve', { attendanceId: id, status }, config);
-            alert(`Request ${status}`);
-            fetchData();
-        } catch (error) {
-            alert(`Error handling request: ${error.response?.data?.message}`);
-        }
-    };
-
     const closeForm = () => {
         setShowForm(false);
-        setUserData({ name: '', email: '', password: '', role: 'Teacher' });
-        setClassData({ className: '' });
-        setAnnouncementData({ title: '', content: '', targetAudience: 'All' });
-    };
-
-    const stats = {
-        teachers: users.filter(u => u.role === 'Teacher').length,
-        students: users.filter(u => u.role === 'Student').length,
-        subAdmins: users.filter(u => u.role === 'SubAdmin').length,
-        classes: classes.length,
-        rectificationRequests: pendingRectifications.length
+        setClassData({ className: '', teacherId: '', subAdminId: '' });
+        setSubAdminData({ name: '', email: '', password: '', role: 'SubAdmin' });
+        setIsCreatingTeacher(false);
+        setNewTeacherData({ name: '', email: '', password: '', role: 'Teacher' });
     };
 
     return (
