@@ -11,6 +11,7 @@ const SuperAdminDashboard = () => {
     // Detailed View State
     const [selectedSchool, setSelectedSchool] = useState(null);
     const [schoolUsers, setSchoolUsers] = useState([]);
+    const [editingUser, setEditingUser] = useState(null);
     const [loadingUsers, setLoadingUsers] = useState(false);
 
     // Edit Plan State
@@ -109,16 +110,25 @@ const SuperAdminDashboard = () => {
         }
     };
 
-    const handleResetPassword = async () => {
-        if (!newPassword) return alert('Please enter a new password');
+
+
+    const handleUserUpdate = async (e) => {
+        e.preventDefault();
         try {
-            await api.put(`/api/users/${selectedSchool.adminId._id}`, { password: newPassword }, config);
-            setIsResettingPassword(false);
-            setNewPassword('');
-            alert('Principal password reset successfully');
+            const updatePayload = {
+                name: editingUser.name,
+                email: editingUser.email,
+                role: editingUser.role
+            };
+            if (editingUser.password) {
+                updatePayload.password = editingUser.password;
+            }
+            await api.put(`/api/users/${editingUser._id}`, updatePayload, config);
+            setEditingUser(null);
+            fetchSchoolUsers(selectedSchool._id);
+            alert('User updated successfully');
         } catch (error) {
-            console.error(error);
-            alert('Error resetting password');
+            alert(error.response?.data?.message || 'Error updating user');
         }
     };
 
@@ -283,6 +293,49 @@ const SuperAdminDashboard = () => {
                         </div>
                     </div>
 
+
+                    {editingUser && (
+                        <div className="glass-panel" style={{ padding: '30px', marginBottom: '30px' }}>
+                            <h3 style={{ marginBottom: '15px' }}>Edit {editingUser.role}: {editingUser.name}</h3>
+                            <form onSubmit={handleUserUpdate}>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                                    <div>
+                                        <label className="input-label">Full Name</label>
+                                        <input
+                                            className="input-field"
+                                            value={editingUser.name}
+                                            onChange={(e) => setEditingUser({ ...editingUser, name: e.target.value })}
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="input-label">Email / Username</label>
+                                        <input
+                                            className="input-field"
+                                            value={editingUser.email}
+                                            onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
+                                            required
+                                        />
+                                    </div>
+                                    <div style={{ gridColumn: 'span 2' }}>
+                                        <label className="input-label">New Password (Leave blank to keep current)</label>
+                                        <input
+                                            type="password"
+                                            className="input-field"
+                                            value={editingUser.password || ''}
+                                            onChange={(e) => setEditingUser({ ...editingUser, password: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+                                <div style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
+                                    <button type="submit" className="btn btn-primary">Update Credentials</button>
+                                    <button type="button" onClick={() => setEditingUser(null)} className="btn btn-secondary" style={{ color: '#ff6b6b' }}>Cancel</button>
+                                </div>
+                            </form>
+                        </div>
+                    )
+                    }
+
                     {/* Stats */}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '30px' }}>
                         <div className="glass-panel" style={{ padding: '20px', textAlign: 'center' }}>
@@ -307,6 +360,7 @@ const SuperAdminDashboard = () => {
                                         <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Name</th>
                                         <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Role</th>
                                         <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Email</th>
+                                        <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -325,9 +379,17 @@ const SuperAdminDashboard = () => {
                                                 </span>
                                             </td>
                                             <td style={{ padding: '15px' }}>{u.email}</td>
+                                            <td style={{ padding: '15px' }}>
+                                                <button
+                                                    onClick={() => setEditingUser(u)}
+                                                    style={{ color: 'hsl(var(--accent))', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
+                                                >
+                                                    Edit
+                                                </button>
+                                            </td>
                                         </tr>
                                     )) : (
-                                        <tr><td colSpan="3" style={{ textAlign: 'center', padding: '20px', color: 'hsl(var(--text-dim))' }}>No users found</td></tr>
+                                        <tr><td colSpan="4" style={{ textAlign: 'center', padding: '20px', color: 'hsl(var(--text-dim))' }}>No users found</td></tr>
                                     )}
                                 </tbody>
                             </table>

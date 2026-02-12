@@ -11,6 +11,9 @@ const AdminDashboard = () => {
     const [attendanceRecords, setAttendanceRecords] = useState([]);
     const [activeTab, setActiveTab] = useState('Classes'); // Default to Classes
     const [showForm, setShowForm] = useState(false);
+    const [showRegisterForm, setShowRegisterForm] = useState(false);
+    const [editingUser, setEditingUser] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
 
     // Form States
     const [newItemType, setNewItemType] = useState('Class'); // 'Class', 'SubAdmin'
@@ -206,6 +209,29 @@ const AdminDashboard = () => {
             } catch (error) {
                 alert(error.response?.data?.message || 'Error deleting Teacher');
             }
+        }
+    };
+    const handleUserUpdate = async (e) => {
+        e.preventDefault();
+        try {
+            const updatePayload = {
+                name: editingUser.name,
+                email: editingUser.email,
+                role: editingUser.role
+            };
+            if (editingUser.password) {
+                updatePayload.password = editingUser.password;
+            }
+            await api.put(`/api/users/${editingUser._id}`, updatePayload, config);
+            setEditingUser(null);
+
+            // Refresh counts/lists
+            if (activeTab === 'SubAdmins') fetchSubAdmins();
+            if (activeTab === 'Teacher Attendance') fetchTeachers();
+
+            alert('User updated successfully');
+        } catch (error) {
+            alert(error.response?.data?.message || 'Error updating user');
         }
     };
 
@@ -509,6 +535,40 @@ const AdminDashboard = () => {
                 )}
 
                 {/* Tables */}
+                {editingUser && (
+                    <div style={{ background: 'rgba(0,0,0,0.3)', padding: '20px', borderRadius: '8px', marginBottom: '20px' }}>
+                        <h3 style={{ marginBottom: '15px' }}>Edit {editingUser.role}: {editingUser.name}</h3>
+                        <form onSubmit={handleUserUpdate}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                                <input
+                                    placeholder="Full Name"
+                                    className="input-field"
+                                    value={editingUser.name}
+                                    onChange={(e) => setEditingUser({ ...editingUser, name: e.target.value })}
+                                    required
+                                />
+                                <input
+                                    placeholder="Email / Username"
+                                    className="input-field"
+                                    value={editingUser.email}
+                                    onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
+                                    required
+                                />
+                                <input
+                                    type="password"
+                                    placeholder="New Password (Leave blank to keep current)"
+                                    className="input-field"
+                                    value={editingUser.password || ''}
+                                    onChange={(e) => setEditingUser({ ...editingUser, password: e.target.value })}
+                                />
+                            </div>
+                            <div style={{ marginTop: '15px' }}>
+                                <button type="submit" className="btn btn-primary">Update User</button>
+                                <button type="button" onClick={() => setEditingUser(null)} className="btn btn-secondary" style={{ marginLeft: '10px', color: '#ff6b6b' }}>Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                )}
                 {activeTab === 'Classes' && !selectedClass && (
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
@@ -524,7 +584,6 @@ const AdminDashboard = () => {
                                 <tr key={cls._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                                     <td style={{ padding: '15px' }}>{cls.className}</td>
                                     <td style={{ padding: '15px' }}>{cls.teacherId?.name || <span style={{ opacity: 0.5 }}>Not Assigned</span>}</td>
-                                    <td style={{ padding: '15px' }}>{cls.subAdminId?.name || <span style={{ opacity: 0.5 }}>Not Assigned</span>}</td>
                                     <td style={{ padding: '15px' }}>{cls.subAdminId?.name || <span style={{ opacity: 0.5 }}>Not Assigned</span>}</td>
                                     <td style={{ padding: '15px', display: 'flex', gap: '10px' }}>
                                         <button onClick={() => handleEditClass(cls)} style={{ color: 'hsl(var(--accent))', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}>Edit</button>
@@ -553,7 +612,12 @@ const AdminDashboard = () => {
                                     <td style={{ padding: '15px' }}>{admin.name}</td>
                                     <td style={{ padding: '15px' }}>{admin.email}</td>
                                     <td style={{ padding: '15px', display: 'flex', gap: '10px' }}>
-                                        <button style={{ color: 'hsl(var(--accent))', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}>Edit</button>
+                                        <button
+                                            onClick={() => setEditingUser(admin)}
+                                            style={{ color: 'hsl(var(--accent))', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
+                                        >
+                                            Edit
+                                        </button>
                                         <button onClick={() => handleDeleteSubAdmin(admin._id)} style={{ color: '#ff6b6b', background: 'none', border: 'none', cursor: 'pointer' }}><FaTrash /></button>
                                     </td>
                                 </tr>
@@ -659,6 +723,12 @@ const AdminDashboard = () => {
                                                                 style={{ color: 'hsl(var(--accent))', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
                                                             >
                                                                 View History
+                                                            </button>
+                                                            <button
+                                                                onClick={() => setEditingUser(teacher)}
+                                                                style={{ color: 'hsl(var(--accent))', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
+                                                            >
+                                                                Edit
                                                             </button>
                                                             <button
                                                                 onClick={() => handleDeleteTeacher(teacher._id)}

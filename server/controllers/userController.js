@@ -122,15 +122,37 @@ const updateUser = async (req, res) => {
         const user = await User.findById(req.params.id);
 
         if (user) {
-            // Permission check: Admin/SuperAdmin can update users. 
-            // Self update logic is separate usually but let's allow Admin for now.
-            if (req.user.role !== 'Admin' && req.user.role !== 'SuperAdmin') {
-                return res.status(403).json({ message: 'Not authorized to update user' });
+            // Permission check: 
+            let canUpdate = false;
+
+            if (req.user.role === 'SuperAdmin') {
+                canUpdate = true;
+            } else if (req.user.role === 'Admin') {
+                // Admin can update users in their school, except SuperAdmins and other Admins
+                if (user.schoolId?.toString() === req.user.schoolId?.toString() &&
+                    ['SubAdmin', 'Teacher', 'Student', 'Parent'].includes(user.role)) {
+                    canUpdate = true;
+                }
+            } else if (req.user.role === 'Teacher') {
+                // Teacher can update Students in their school
+                if (user.schoolId?.toString() === req.user.schoolId?.toString() && user.role === 'Student') {
+                    canUpdate = true;
+                }
+            } else if (req.user._id.toString() === user._id.toString()) {
+                // Users can update their own basic info (except role usually)
+                canUpdate = true;
             }
 
-            user.name = name || user.name;
-            user.email = email || user.email;
-            user.role = role || user.role;
+            if (!canUpdate) {
+                return res.status(403).json({ message: 'Not authorized to update this user' });
+            }
+
+            // Prevent non-Admins/SuperAdmins from changing roles
+            if (role && (req.user.role !== 'Admin' && req.user.role !== 'SuperAdmin')) {
+                // Silent ignore or error? Let's just not set it.
+            } else {
+                user.role = role || user.role;
+            }
             if (password) {
                 user.password = password; // Will be hashed by pre-save hook
             }

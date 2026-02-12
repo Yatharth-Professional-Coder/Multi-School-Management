@@ -10,6 +10,7 @@ const TeacherDashboard = () => {
     const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
     const [activeTab, setActiveTab] = useState('Attendance'); // Attendance, Homework, Results
     const [showAddForm, setShowAddForm] = useState(false);
+    const [editingStudent, setEditingStudent] = useState(null);
     const [newStudentData, setNewStudentData] = useState({ name: '', email: '', password: '', role: 'Student' });
     const [teacherClass, setTeacherClass] = useState(null);
 
@@ -115,6 +116,25 @@ const TeacherDashboard = () => {
         }
     };
 
+    const handleStudentUpdate = async (e) => {
+        e.preventDefault();
+        try {
+            const updatePayload = {
+                name: editingStudent.name,
+                email: editingStudent.email
+            };
+            if (editingStudent.password) {
+                updatePayload.password = editingStudent.password;
+            }
+            await api.put(`/api/users/${editingStudent._id}`, updatePayload, config);
+            setEditingStudent(null);
+            fetchStudents();
+            alert('Student updated successfully');
+        } catch (error) {
+            alert(error.response?.data?.message || 'Error updating student');
+        }
+    };
+
     return (
         <div className="container fade-in" style={{ paddingTop: '40px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
@@ -177,12 +197,46 @@ const TeacherDashboard = () => {
                                 </form>
                             </div>
                         )}
+
+                        {editingStudent && (
+                            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '20px', borderRadius: '8px', marginBottom: '20px' }}>
+                                <h3 style={{ marginBottom: '15px' }}>Edit Student: {editingStudent.name}</h3>
+                                <form onSubmit={handleStudentUpdate}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                                        <input
+                                            placeholder="Full Name"
+                                            className="input-field"
+                                            value={editingStudent.name}
+                                            onChange={(e) => setEditingStudent({ ...editingStudent, name: e.target.value })}
+                                            required
+                                        />
+                                        <input
+                                            placeholder="Email / Username"
+                                            className="input-field"
+                                            value={editingStudent.email}
+                                            onChange={(e) => setEditingStudent({ ...editingStudent, email: e.target.value })}
+                                            required
+                                        />
+                                        <input
+                                            type="password"
+                                            placeholder="New Password (Leave blank to keep current)"
+                                            className="input-field"
+                                            value={editingStudent.password || ''}
+                                            onChange={(e) => setEditingStudent({ ...editingStudent, password: e.target.value })}
+                                        />
+                                    </div>
+                                    <button type="submit" className="btn btn-primary" style={{ marginTop: '15px' }}>Update Student</button>
+                                    <button type="button" onClick={() => setEditingStudent(null)} style={{ marginLeft: '10px', color: '#ff6b6b' }}>Cancel</button>
+                                </form>
+                            </div>
+                        )}
                         <div style={{ overflowX: 'auto' }}>
                             <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px' }}>
                                 <thead>
                                     <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
                                         <th style={{ textAlign: 'left', padding: '15px' }}>Student Name</th>
                                         <th style={{ textAlign: 'center', padding: '15px' }}>Status</th>
+                                        <th style={{ textAlign: 'right', padding: '15px' }}>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -195,6 +249,14 @@ const TeacherDashboard = () => {
                                                     <button onClick={() => handleAttendanceChange(student._id, 'Absent')} style={{ padding: '8px 16px', borderRadius: '20px', background: attendance[student._id] === 'Absent' ? 'hsl(0, 70%, 50%)' : 'transparent', color: '#fff', fontWeight: 'bold' }}>A</button>
                                                     <button onClick={() => handleAttendanceChange(student._id, 'Late')} style={{ padding: '8px 16px', borderRadius: '20px', background: attendance[student._id] === 'Late' ? 'hsl(40, 90%, 50%)' : 'transparent', color: '#fff', fontWeight: 'bold' }}>L</button>
                                                 </div>
+                                            </td>
+                                            <td style={{ padding: '15px', textAlign: 'right' }}>
+                                                <button
+                                                    onClick={() => setEditingStudent(student)}
+                                                    style={{ color: 'hsl(var(--accent))', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
+                                                >
+                                                    Edit Credentials
+                                                </button>
                                             </td>
                                         </tr>
                                     ))}
