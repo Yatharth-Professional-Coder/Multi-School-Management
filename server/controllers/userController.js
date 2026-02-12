@@ -57,11 +57,23 @@ const addUser = async (req, res) => {
 // @route   GET /api/users
 // @access  Private/Admin
 const getUsers = async (req, res) => {
-    const schoolId = req.user.schoolId;
+    let schoolId = req.user.schoolId;
     const { role } = req.query; // Optional filter by role
+
+    // Allow SuperAdmin to view users of any school if schoolId is provided in query
+    if (req.user.role === 'SuperAdmin' && req.query.schoolId) {
+        schoolId = req.query.schoolId;
+    }
 
     try {
         let query = { schoolId };
+        // If SuperAdmin doesn't provide schoolId, maybe show all? Or require it?
+        // Let's assume if schoolId is undefined (SuperAdmin without school), show all?
+        // But users belong to school.
+        if (!schoolId && req.user.role === 'SuperAdmin') {
+            delete query.schoolId; // Show all users across all schools if no specific school requested
+        }
+
         if (role) {
             query.role = role;
         }
@@ -73,30 +85,41 @@ const getUsers = async (req, res) => {
     }
 };
 
-// @desc    Get user by ID
-// @route   GET /api/users/:id
-// @access  Private
-const getUserById = async (req, res) => {
-    try {
-        const user = await User.findById(req.params.id).select('-password');
-        if (user) {
-            // Permission check: Admin, Teacher (for students), Parent (for child), Self
-            const isSelf = req.user._id.toString() === user._id.toString();
-            const isAdmin = req.user.role === 'Admin' || req.user.role === 'SuperAdmin'; // SuperAdmin logic might need more check?
-            const isParentOfChild = req.user.role === 'Parent' && req.user.childId && req.user.childId.toString() === user._id.toString();
-            // Teacher check omitted for simplicity, but could be added: const isTeacher = req.user.role === 'Teacher';
+// ... getUserById ...
 
-            if (isSelf || isAdmin || isParentOfChild) {
-                return res.json(user);
-            } else {
-                return res.status(403).json({ message: 'Not authorized to view this user profile' });
+const updateUser = async (req, res) => {
+    const { name, email, password, role } = req.body;
+    try {
+        const user = await User.findById(req.params.id);
+
+        if (user) {
+            // Permission check: Admin/SuperAdmin can update users. 
+            // Self update logic is separate usually but let's allow Admin for now.
+            if (req.user.role !== 'Admin' && req.user.role !== 'SuperAdmin') {
+                return res.status(403).json({ message: 'Not authorized to update user' });
             }
+
+            user.name = name || user.name;
+            user.email = email || user.email;
+            user.role = role || user.role;
+            if (password) {
+                user.password = password; // Will be hashed by pre-save hook
+            }
+
+            const updatedUser = await user.save();
+            res.json({
+                _id: updatedUser._id,
+                name: updatedUser.name,
+                email: updatedUser.email,
+                role: updatedUser.role,
+                schoolId: updatedUser.schoolId
+            });
         } else {
             res.status(404).json({ message: 'User not found' });
         }
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(400).json({ message: error.message });
     }
 };
 
-module.exports = { addUser, getUsers, getUserById };
+module.exports = { addUser, getUsers, getUserById, updateUser };

@@ -55,4 +55,24 @@ const getSchools = async (req, res) => {
     }
 };
 
-module.exports = { createSchool, getSchools };
+const updateSchool = async (req, res) => {
+    const { name, address, contact, subscriptionPlan } = req.body;
+    try {
+        const school = await School.findById(req.params.id);
+        if (school) {
+            school.name = name || school.name;
+            school.address = address || school.address;
+            school.contact = contact || school.contact;
+            school.subscriptionPlan = subscriptionPlan || school.subscriptionPlan;
+
+            const updatedSchool = await school.save();
+            res.json(updatedSchool);
+        } else {
+            res.status(404).json({ message: 'School not found' });
+        }
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
+module.exports = { createSchool, getSchools, updateSchool };
