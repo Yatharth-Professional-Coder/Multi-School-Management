@@ -26,6 +26,8 @@ const AdminDashboard = () => {
     const [isMarkingAttendance, setIsMarkingAttendance] = useState(false);
     const [attendanceDate, setAttendanceDate] = useState(new Date().toISOString().split('T')[0]);
     const [attendanceData, setAttendanceData] = useState({}); // { teacherId: 'Present' | 'Absent' }
+    const [selectedTeacherAttendance, setSelectedTeacherAttendance] = useState(null); // For viewing specific teacher history
+
 
     // Create Teacher Mode inside Class Modal
     const [isCreatingTeacher, setIsCreatingTeacher] = useState(false);
@@ -231,6 +233,15 @@ const AdminDashboard = () => {
     const handleViewAttendance = (cls) => {
         setSelectedClass(cls);
         fetchClassAttendance(cls._id);
+    };
+
+    // Helper to calculate stats
+    const getTeacherStats = (teacherId) => {
+        const records = attendanceRecords.filter(r => r.userId?._id === teacherId);
+        const total = records.length;
+        const present = records.filter(r => r.status === 'Present').length;
+        const percentage = total === 0 ? 0 : Math.round((present / total) * 100);
+        return { total, present, percentage };
     };
 
     return (
@@ -547,39 +558,89 @@ const AdminDashboard = () => {
                             </div>
                         )}
 
-                        <div style={{ overflowX: 'auto' }}>
-                            <h3 style={{ marginBottom: '15px', color: 'hsl(var(--text-dim))' }}>Attendance History</h3>
-                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                                <thead>
-                                    <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                                        <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Person</th>
-                                        <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Role</th>
-                                        <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Date</th>
-                                        <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {attendanceRecords.map(record => (
-                                        <tr key={record._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                            <td style={{ padding: '15px' }}>{record.userId?.name}</td>
-                                            <td style={{ padding: '15px' }}>{record.userId?.role}</td>
-                                            <td style={{ padding: '15px' }}>{new Date(record.date).toLocaleDateString()}</td>
-                                            <td style={{ padding: '15px' }}>
-                                                <span style={{
-                                                    padding: '4px 10px', borderRadius: '15px', fontSize: '0.8rem',
-                                                    background: record.status === 'Present' ? 'rgba(50, 200, 255, 0.2)' : 'rgba(255, 100, 100, 0.2)',
-                                                    color: record.status === 'Present' ? '#32c8ff' : '#ff6464',
-                                                    fontWeight: 'bold'
-                                                }}>
-                                                    {record.status}
-                                                </span>
-                                            </td>
+                        {!isMarkingAttendance && !selectedTeacherAttendance && (
+                            <div style={{ overflowX: 'auto' }}>
+                                <h3 style={{ marginBottom: '15px', color: 'hsl(var(--text-dim))' }}>Teachers Attendance Summary</h3>
+                                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                    <thead>
+                                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                                            <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Teacher</th>
+                                            <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Attendance (Present/Total)</th>
+                                            <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Percentage</th>
+                                            <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Actions</th>
                                         </tr>
-                                    ))}
-                                    {attendanceRecords.length === 0 && <tr><td colSpan="4" style={{ padding: '20px', textAlign: 'center', color: 'hsl(var(--text-dim))' }}>No attendance records found</td></tr>}
-                                </tbody>
-                            </table>
-                        </div>
+                                    </thead>
+                                    <tbody>
+                                        {teachers.map(teacher => {
+                                            const stats = getTeacherStats(teacher._id);
+                                            return (
+                                                <tr key={teacher._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                                    <td style={{ padding: '15px' }}>{teacher.name}</td>
+                                                    <td style={{ padding: '15px' }}>{stats.present} / {stats.total}</td>
+                                                    <td style={{ padding: '15px' }}>
+                                                        <span style={{
+                                                            padding: '4px 10px', borderRadius: '15px', fontSize: '0.8rem',
+                                                            background: stats.percentage >= 75 ? 'rgba(50, 200, 255, 0.2)' : 'rgba(255, 100, 100, 0.2)',
+                                                            color: stats.percentage >= 75 ? '#32c8ff' : '#ff6464',
+                                                            fontWeight: 'bold'
+                                                        }}>
+                                                            {stats.percentage}%
+                                                        </span>
+                                                    </td>
+                                                    <td style={{ padding: '15px' }}>
+                                                        <button
+                                                            onClick={() => setSelectedTeacherAttendance(teacher)}
+                                                            style={{ color: 'hsl(var(--accent))', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
+                                                        >
+                                                            View History
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                        {teachers.length === 0 && <tr><td colSpan="4" style={{ padding: '20px', textAlign: 'center', color: 'hsl(var(--text-dim))' }}>No teachers found</td></tr>}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+
+                        {selectedTeacherAttendance && (
+                            <div style={{ overflowX: 'auto' }}>
+                                <h3 style={{ marginBottom: '15px', color: 'hsl(var(--text-dim))' }}>Attendance History: {selectedTeacherAttendance.name}</h3>
+                                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                    <thead>
+                                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                                            <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Date</th>
+                                            <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Status</th>
+                                            <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Marked By</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {attendanceRecords
+                                            .filter(r => r.userId?._id === selectedTeacherAttendance._id)
+                                            .map(record => (
+                                                <tr key={record._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                                    <td style={{ padding: '15px' }}>{new Date(record.date).toLocaleDateString()}</td>
+                                                    <td style={{ padding: '15px' }}>
+                                                        <span style={{
+                                                            padding: '4px 10px', borderRadius: '15px', fontSize: '0.8rem',
+                                                            background: record.status === 'Present' ? 'rgba(50, 200, 255, 0.2)' : 'rgba(255, 100, 100, 0.2)',
+                                                            color: record.status === 'Present' ? '#32c8ff' : '#ff6464',
+                                                            fontWeight: 'bold'
+                                                        }}>
+                                                            {record.status}
+                                                        </span>
+                                                    </td>
+                                                    <td style={{ padding: '15px' }}>Admin</td>
+                                                </tr>
+                                            ))}
+                                        {attendanceRecords.filter(r => r.userId?._id === selectedTeacherAttendance._id).length === 0 &&
+                                            <tr><td colSpan="3" style={{ padding: '20px', textAlign: 'center', color: 'hsl(var(--text-dim))' }}>No attendance records found for this teacher</td></tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
                     </div>
                 )}
 
