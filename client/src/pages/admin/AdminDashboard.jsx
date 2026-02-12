@@ -16,6 +16,7 @@ const AdminDashboard = () => {
     const [newItemType, setNewItemType] = useState('Class'); // 'Class', 'SubAdmin'
     const [classData, setClassData] = useState({ className: '', teacherId: '', subAdminId: '' });
     const [subAdminData, setSubAdminData] = useState({ name: '', email: '', password: '', role: 'SubAdmin' });
+    const [teacherData, setTeacherData] = useState({ name: '', email: '', password: '', role: 'Teacher' }); // Separate state for direct teacher addition
     const [announcements, setAnnouncements] = useState([]);
     const [announcementData, setAnnouncementData] = useState({ title: '', content: '', targetAudience: 'All' });
     const [editId, setEditId] = useState(null);
@@ -148,6 +149,18 @@ const AdminDashboard = () => {
         }
     };
 
+    const handleTeacherSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const { data } = await api.post('/api/users', teacherData, config);
+            closeForm();
+            setTeachers([...teachers, data]);
+            alert('Teacher created successfully');
+        } catch (error) {
+            alert(error.response?.data?.message || 'Error creating Teacher');
+        }
+    };
+
     const handleAnnouncementSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -214,6 +227,7 @@ const AdminDashboard = () => {
         setEditId(null);
         setClassData({ className: '', teacherId: '', subAdminId: '' });
         setSubAdminData({ name: '', email: '', password: '', role: 'SubAdmin' });
+        setTeacherData({ name: '', email: '', password: '', role: 'Teacher' });
         setIsCreatingTeacher(false);
         setNewTeacherData({ name: '', email: '', password: '', role: 'Teacher' });
         setAnnouncementData({ title: '', content: '', targetAudience: 'All' });
@@ -314,16 +328,24 @@ const AdminDashboard = () => {
                         </button>
                     )}
                     {activeTab === 'Teacher Attendance' && !selectedTeacherAttendance && (
-                        <button className="btn btn-primary" onClick={() => {
-                            setIsMarkingAttendance(true);
-                            // Initialize all teachers as Present by default? Or empty?
-                            // Let's initialize empty or let user choose.
-                            const initialData = {};
-                            teachers.forEach(t => initialData[t._id] = 'Present');
-                            setAttendanceData(initialData);
-                        }}>
-                            <FaClipboardList style={{ marginRight: '8px' }} /> Mark Attendance
-                        </button>
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            <button className="btn btn-primary" onClick={() => {
+                                setIsMarkingAttendance(true);
+                                // Initialize all teachers as Present by default? Or empty?
+                                // Let's initialize empty or let user choose.
+                                const initialData = {};
+                                teachers.forEach(t => initialData[t._id] = 'Present');
+                                setAttendanceData(initialData);
+                            }}>
+                                <FaClipboardList style={{ marginRight: '8px' }} /> Mark Attendance
+                            </button>
+                            <button className="btn btn-secondary" onClick={() => {
+                                setShowForm(true);
+                                setNewItemType('Teacher');
+                            }}>
+                                <FaUserPlus style={{ marginRight: '8px' }} /> Add Teacher
+                            </button>
+                        </div>
                     )}
                     {(selectedClass || selectedTeacherAttendance) && (
                         <button className="btn btn-secondary" onClick={() => { setSelectedClass(null); setSelectedTeacherAttendance(null); }}>
@@ -423,6 +445,38 @@ const AdminDashboard = () => {
                                     />
                                 </div>
                                 <button type="submit" className="btn btn-primary" style={{ marginTop: '15px' }}>Create Sub Admin</button>
+                                <button type="button" onClick={() => setShowForm(false)} style={{ marginLeft: '10px', color: '#ff6b6b' }}>Cancel</button>
+                            </form>
+                        )}
+
+                        {newItemType === 'Teacher' && (
+                            <form onSubmit={handleTeacherSubmit}>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                                    <input
+                                        placeholder="Full Name"
+                                        className="input-field"
+                                        value={teacherData.name}
+                                        onChange={(e) => setTeacherData({ ...teacherData, name: e.target.value })}
+                                        required
+                                    />
+                                    <input
+                                        type="email"
+                                        placeholder="Email Address"
+                                        className="input-field"
+                                        value={teacherData.email}
+                                        onChange={(e) => setTeacherData({ ...teacherData, email: e.target.value })}
+                                        required
+                                    />
+                                    <input
+                                        type="password"
+                                        placeholder="Temporary Password"
+                                        className="input-field"
+                                        value={teacherData.password}
+                                        onChange={(e) => setTeacherData({ ...teacherData, password: e.target.value })}
+                                        required
+                                    />
+                                </div>
+                                <button type="submit" className="btn btn-primary" style={{ marginTop: '15px' }}>Create Teacher</button>
                                 <button type="button" onClick={() => setShowForm(false)} style={{ marginLeft: '10px', color: '#ff6b6b' }}>Cancel</button>
                             </form>
                         )}
