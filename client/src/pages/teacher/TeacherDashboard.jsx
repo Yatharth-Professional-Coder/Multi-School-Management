@@ -172,6 +172,7 @@ const TeacherDashboard = () => {
                 <button className={`btn ${activeTab === 'Attendance' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('Attendance')}>Attendance</button>
                 <button className={`btn ${activeTab === 'Homework' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('Homework')}>Homework</button>
                 <button className={`btn ${activeTab === 'Results' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('Results')}>Results</button>
+                <button className={`btn ${activeTab === 'Full Timetable' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('Full Timetable')}>Full Timetable</button>
             </div>
 
             <div className="glass-panel" style={{ padding: '30px' }}>
@@ -388,6 +389,51 @@ const TeacherDashboard = () => {
                                 <button type="submit" className="btn btn-primary">Upload Result</button>
                             </div>
                         </form>
+                    </div>
+                )}
+
+                {activeTab === 'Full Timetable' && (
+                    <div>
+                        <h2 style={{ marginBottom: '20px' }}>Weekly Schedule</h2>
+                        <div style={{ overflowX: 'auto' }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                <thead>
+                                    <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                                        <th style={{ textAlign: 'left', padding: '15px' }}>Day</th>
+                                        <th style={{ textAlign: 'left', padding: '15px' }}>Time</th>
+                                        <th style={{ textAlign: 'left', padding: '15px' }}>Class / Section</th>
+                                        <th style={{ textAlign: 'left', padding: '15px' }}>Subject</th>
+                                        <th style={{ textAlign: 'left', padding: '15px' }}>Period</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(day => {
+                                        const dayEntries = timetable.filter(e => e.day === day).sort((a, b) => a.period - b.period);
+                                        if (dayEntries.length === 0) return null;
+
+                                        return dayEntries.map((entry, index) => (
+                                            <tr key={entry._id} style={{
+                                                borderBottom: '1px solid rgba(255,255,255,0.05)',
+                                                background: entry.isBreak ? 'rgba(255, 100, 100, 0.05)' : 'transparent'
+                                            }}>
+                                                {index === 0 && (
+                                                    <td rowSpan={dayEntries.length} style={{ padding: '15px', fontWeight: 'bold', borderRight: '1px solid rgba(255,255,255,0.1)', verticalAlign: 'top' }}>
+                                                        {day}
+                                                    </td>
+                                                )}
+                                                <td style={{ padding: '15px' }}>{entry.startTime} - {entry.endTime}</td>
+                                                <td style={{ padding: '15px' }}>{entry.isBreak ? 'N/A' : entry.classId?.className || 'N/A'}</td>
+                                                <td style={{ padding: '15px' }}>
+                                                    {entry.subject} {entry.isBreak && <span style={{ fontSize: '0.7rem', background: 'rgba(255, 100, 100, 0.2)', color: '#ff6464', padding: '2px 6px', borderRadius: '10px', marginLeft: '5px' }}>Break</span>}
+                                                </td>
+                                                <td style={{ padding: '15px' }}>P{entry.period}</td>
+                                            </tr>
+                                        ));
+                                    })}
+                                    {timetable.length === 0 && <tr><td colSpan="5" style={{ padding: '20px', textAlign: 'center', color: 'hsl(var(--text-dim))' }}>No schedule entries found</td></tr>}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 )}
             </div>

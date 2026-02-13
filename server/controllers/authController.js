@@ -24,6 +24,7 @@ const loginUser = async (req, res) => {
                 role: user.role,
                 schoolId: user.schoolId,
                 childId: user.childId,
+                studentClass: user.studentClass,
                 token: generateToken(user._id),
             });
         } else {

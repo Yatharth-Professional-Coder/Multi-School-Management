@@ -10,6 +10,7 @@ const StudentDashboard = () => {
     const [homework, setHomework] = useState([]);
     const [results, setResults] = useState([]);
     const [announcements, setAnnouncements] = useState([]);
+    const [timetable, setTimetable] = useState([]);
 
     const config = {
         headers: { Authorization: `Bearer ${user.token}` },
@@ -33,6 +34,12 @@ const StudentDashboard = () => {
                 // Fetch Announcements
                 const annRes = await api.get('/api/announcements', config);
                 setAnnouncements(annRes.data);
+
+                // Fetch Timetable if student has a class
+                if (user.studentClass) {
+                    const ttRes = await api.get(`/api/timetable/class/${user.studentClass}`, config);
+                    setTimetable(ttRes.data);
+                }
 
             } catch (error) {
                 console.error("Error fetching student data", error);
@@ -85,6 +92,11 @@ const StudentDashboard = () => {
                     <FaBullhorn size={24} style={{ marginBottom: '10px', color: '#ff6464' }} />
                     <h3>{announcements.length}</h3>
                     <p style={{ fontSize: '0.8rem', color: 'hsl(var(--text-dim))' }}>Announcements</p>
+                </div>
+                <div onClick={() => setActiveTab('Timetable')} className="glass-panel" style={{ padding: '20px', cursor: 'pointer', border: activeTab === 'Timetable' ? '1px solid hsl(var(--primary))' : '' }}>
+                    <FaClipboardList size={24} style={{ marginBottom: '10px', color: '#a855f7' }} />
+                    <h3>Timetable</h3>
+                    <p style={{ fontSize: '0.8rem', color: 'hsl(var(--text-dim))' }}>Weekly Schedule</p>
                 </div>
             </div>
 
@@ -174,6 +186,48 @@ const StudentDashboard = () => {
                                     </p>
                                 </div>
                             ))}
+                        </div>
+                    )}
+
+                    {activeTab === 'Timetable' && (
+                        <div style={{ overflowX: 'auto' }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                <thead>
+                                    <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                                        <th style={{ textAlign: 'left', padding: '15px' }}>Day</th>
+                                        <th style={{ textAlign: 'left', padding: '15px' }}>Time</th>
+                                        <th style={{ textAlign: 'left', padding: '15px' }}>Class / Section</th>
+                                        <th style={{ textAlign: 'left', padding: '15px' }}>Subject</th>
+                                        <th style={{ textAlign: 'left', padding: '15px' }}>Teacher</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(day => {
+                                        const dayEntries = timetable.filter(e => e.day === day).sort((a, b) => a.period - b.period);
+                                        if (dayEntries.length === 0) return null;
+
+                                        return dayEntries.map((entry, index) => (
+                                            <tr key={entry._id} style={{
+                                                borderBottom: '1px solid rgba(255,255,255,0.05)',
+                                                background: entry.isBreak ? 'rgba(255, 100, 100, 0.05)' : 'transparent'
+                                            }}>
+                                                {index === 0 && (
+                                                    <td rowSpan={dayEntries.length} style={{ padding: '15px', fontWeight: 'bold', borderRight: '1px solid rgba(255,255,255,0.1)', verticalAlign: 'top' }}>
+                                                        {day}
+                                                    </td>
+                                                )}
+                                                <td style={{ padding: '15px' }}>{entry.startTime} - {entry.endTime}</td>
+                                                <td style={{ padding: '15px' }}>{entry.isBreak ? 'N/A' : entry.classId?.className || 'N/A'}</td>
+                                                <td style={{ padding: '15px' }}>
+                                                    {entry.subject} {entry.isBreak && <span style={{ fontSize: '0.7rem', background: 'rgba(255, 100, 100, 0.2)', color: '#ff6464', padding: '2px 6px', borderRadius: '10px', marginLeft: '5px' }}>Break</span>}
+                                                </td>
+                                                <td style={{ padding: '15px' }}>{entry.isBreak ? 'N/A' : entry.teacherId?.name || 'Assigned soon'}</td>
+                                            </tr>
+                                        ));
+                                    })}
+                                    {timetable.length === 0 && <tr><td colSpan="5" style={{ padding: '20px', textAlign: 'center', color: 'hsl(var(--text-dim))' }}>No schedule entries found. Please ask your teacher or admin.</td></tr>}
+                                </tbody>
+                            </table>
                         </div>
                     )}
 
