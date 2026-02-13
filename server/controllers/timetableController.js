@@ -9,6 +9,28 @@ const createTimetableEntry = async (req, res) => {
     const schoolId = req.user.schoolId;
 
     try {
+        // 1. Validation: Ensure period is positive
+        if (period < 1) {
+            return res.status(400).json({ message: 'Period number must be a positive integer' });
+        }
+
+        // 2. Validation: Ensure class doesn't already have this period (covered by unique index, but good to handle explicitly)
+        const classConflict = await Timetable.findOne({ classId, day, period });
+        if (classConflict) {
+            return res.status(400).json({ message: `Class already has a period (P${period}) scheduled for ${day}` });
+        }
+
+        // 3. Validation: Ensure teacher isn't double-booked
+        if (!isBreak && teacherId) {
+            const teacherConflict = await Timetable.findOne({ teacherId, day, period });
+            if (teacherConflict) {
+                const conflictClass = await Class.findById(teacherConflict.classId);
+                return res.status(400).json({
+                    message: `Teacher is already busy with ${conflictClass?.className} during P${period} on ${day}`
+                });
+            }
+        }
+
         const timetableEntry = await Timetable.create({
             schoolId,
             classId,

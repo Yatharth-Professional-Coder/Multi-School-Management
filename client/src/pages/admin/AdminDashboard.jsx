@@ -120,7 +120,7 @@ const AdminDashboard = () => {
             }
             await api.post('/api/timetable', payload, config);
             fetchTimetable(timetableFormData.classId);
-            setTimetableFormData({ ...timetableFormData, subject: '', isBreak: false });
+            setTimetableFormData(prev => ({ ...prev, subject: '', teacherId: '', isBreak: false }));
             alert('Timetable entry added');
         } catch (error) {
             alert(error.response?.data?.message || 'Error adding timetable entry');
@@ -139,12 +139,13 @@ const AdminDashboard = () => {
     };
 
     useEffect(() => {
-        if (selectedTimetableClass) {
+        if (selectedTimetableClass && activeTab === 'Timetable') {
             const dayEntries = timetableEntries.filter(e => e.day === timetableFormData.day);
             const maxP = dayEntries.reduce((max, e) => Math.max(max, e.period), 0);
-            setTimetableFormData(prev => ({ ...prev, period: maxP + 1 }));
+            // Only auto-update if period is currently 0 or we just added something
+            setTimetableFormData(prev => ({ ...prev, period: Math.max(1, maxP + 1) }));
         }
-    }, [timetableFormData.day, timetableEntries, selectedTimetableClass]);
+    }, [timetableFormData.day, timetableEntries, selectedTimetableClass, activeTab]);
 
     useEffect(() => {
         fetchClasses();
@@ -414,7 +415,7 @@ const AdminDashboard = () => {
                     <h2 style={{ color: 'hsl(var(--white))' }}>
                         {selectedClass ? `Attendance: ${selectedClass.className}` : activeTab === 'SubAdmins' ? 'Sub Admin Management' : activeTab === 'Teacher Attendance' ? 'Teacher Attendance' : `${activeTab} Management`}
                     </h2>
-                    {activeTab !== 'Teacher Attendance' && !selectedClass && (
+                    {activeTab !== 'Teacher Attendance' && activeTab !== 'Timetable' && !selectedClass && (
                         <button className="btn btn-primary" onClick={() => {
                             setShowForm(true);
                             setNewItemType(activeTab === 'Classes' ? 'Class' : activeTab === 'SubAdmins' ? 'SubAdmin' : 'Announcement');
