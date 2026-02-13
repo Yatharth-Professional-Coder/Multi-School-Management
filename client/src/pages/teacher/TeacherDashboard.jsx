@@ -8,7 +8,7 @@ const TeacherDashboard = () => {
     const [students, setStudents] = useState([]);
     const [attendance, setAttendance] = useState({});
     const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
-    const [activeTab, setActiveTab] = useState('Attendance'); // Attendance, Homework, Results
+    const [activeTab, setActiveTab] = useState('Attendance'); // Attendance, My Students, Homework, Results
     const [showAddForm, setShowAddForm] = useState(false);
     const [editingStudent, setEditingStudent] = useState(null);
     const [newStudentData, setNewStudentData] = useState({ name: '', email: '', password: '', role: 'Student' });
@@ -28,12 +28,15 @@ const TeacherDashboard = () => {
     };
 
     useEffect(() => {
-        // fetchStudents is now handled by period-sync effect for Attendance tab
-        if (activeTab !== 'Attendance') fetchStudents();
+        // Attendance tab fetch is handled by period-sync effect
+        if (activeTab === 'My Students' && teacherClass) {
+            fetchStudents(teacherClass._id);
+        } else if (activeTab === 'Homework') {
+            fetchHomework();
+        }
         fetchTeacherClass();
         fetchTimetable();
-        if (activeTab === 'Homework') fetchHomework();
-    }, [activeTab]);
+    }, [activeTab, teacherClass]);
 
     const fetchTeacherClass = async () => {
         try {
@@ -191,8 +194,9 @@ const TeacherDashboard = () => {
                 <button onClick={logout} style={{ color: 'hsl(var(--text-dim))', textDecoration: 'underline' }}>Logout</button>
             </div>
 
-            <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
-                {['Attendance', 'Homework', 'Results', 'Full Timetable'].filter(tab => {
+            <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap' }}>
+                {['Attendance', 'My Students', 'Homework', 'Results', 'Full Timetable'].filter(tab => {
+                    if (tab === 'My Students') return !!teacherClass;
                     if (tab === 'Homework') return user.schoolSettings?.features?.enableHomework !== false;
                     if (tab === 'Results') return user.schoolSettings?.features?.enableResults !== false;
                     if (tab === 'Full Timetable') return user.schoolSettings?.features?.enableTimetable !== false;
@@ -209,28 +213,6 @@ const TeacherDashboard = () => {
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                                 <h2>Mark Attendance</h2>
-                                {(() => {
-                                    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-                                    const dayOfWeek = days[new Date(selectedDate).getDay()];
-                                    const currentEntry = timetable.find(p => p.day === dayOfWeek && p.period === selectedPeriod);
-                                    const currentClassId = currentEntry?.classId?._id;
-                                    const isClassIncharge = teacherClass && currentClassId && teacherClass._id === currentClassId;
-
-                                    if (isClassIncharge) {
-                                        return (
-                                            <button className="btn btn-secondary" onClick={() => setShowAddForm(true)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                <FaUserPlus /> Add Student
-                                            </button>
-                                        );
-                                    } else if (currentClassId) {
-                                        return (
-                                            <span style={{ fontSize: '0.8rem', color: 'hsl(var(--text-dim))', fontStyle: 'italic' }}>
-                                                (Only Class Incharge can add students)
-                                            </span>
-                                        );
-                                    }
-                                    return null;
-                                })()}
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                                 <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className="input-field" style={{ width: 'auto' }} />
@@ -289,6 +271,59 @@ const TeacherDashboard = () => {
                             </div>
                         )}
 
+                        <div style={{ overflowX: 'auto' }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px' }}>
+                                <thead>
+                                    <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                                        <th style={{ textAlign: 'left', padding: '15px' }}>Student Name</th>
+                                        <th style={{ textAlign: 'center', padding: '15px' }}>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {students.map(student => (
+                                        <tr key={student._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                            <td style={{ padding: '15px' }}>{student.name}</td>
+                                            <td style={{ padding: '15px', textAlign: 'center' }}>
+                                                <div style={{ display: 'inline-flex', background: 'rgba(0,0,0,0.3)', borderRadius: '30px', padding: '4px' }}>
+                                                    <button onClick={() => handleAttendanceChange(student._id, 'Present')} style={{ padding: '8px 16px', borderRadius: '20px', background: attendance[student._id] === 'Present' ? 'hsl(140, 70%, 40%)' : 'transparent', color: '#fff', fontWeight: 'bold' }}>P</button>
+                                                    <button onClick={() => handleAttendanceChange(student._id, 'Absent')} style={{ padding: '8px 16px', borderRadius: '20px', background: attendance[student._id] === 'Absent' ? 'hsl(0, 70%, 50%)' : 'transparent', color: '#fff', fontWeight: 'bold' }}>A</button>
+                                                    <button onClick={() => handleAttendanceChange(student._id, 'Late')} style={{ padding: '8px 16px', borderRadius: '20px', background: attendance[student._id] === 'Late' ? 'hsl(40, 90%, 50%)' : 'transparent', color: '#fff', fontWeight: 'bold' }}>L</button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    {students.length === 0 && (
+                                        <tr>
+                                            <td colSpan="2" style={{ padding: '20px', textAlign: 'center', color: 'hsl(var(--text-dim))' }}>
+                                                No students found for this class.
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div style={{ marginTop: '30px', textAlign: 'right' }}>
+                            {timetable.find(p => p.period === selectedPeriod && p.day === ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][new Date(selectedDate).getDay()])?.isBreak ? (
+                                <p style={{ color: '#ff6464', fontWeight: 'bold' }}>Attendance cannot be marked for break periods.</p>
+                            ) : (
+                                <button className="btn btn-primary" onClick={submitAttendance}>Save Attendance</button>
+                            )}
+                        </div>
+                    </>
+                )}
+
+                {activeTab === 'My Students' && (
+                    <>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                            <div>
+                                <h2>Maintain Roster: {teacherClass?.className}</h2>
+                                <p style={{ color: 'hsl(var(--text-dim))', fontSize: '0.9rem' }}>You are the incharge of this class.</p>
+                            </div>
+                            <button className="btn btn-secondary" onClick={() => setShowAddForm(true)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <FaUserPlus /> Add Student
+                            </button>
+                        </div>
+
                         {showAddForm && (
                             <div style={{ background: 'rgba(0,0,0,0.3)', padding: '20px', borderRadius: '8px', marginBottom: '20px' }}>
                                 <h3 style={{ marginBottom: '15px' }}>Add New Student</h3>
@@ -318,7 +353,7 @@ const TeacherDashboard = () => {
                                         />
                                     </div>
                                     <button type="submit" className="btn btn-primary" style={{ marginTop: '15px' }}>Create Student</button>
-                                    <button type="button" onClick={() => setShowAddForm(false)} style={{ marginLeft: '10px', color: '#ff6b6b' }}>Cancel</button>
+                                    <button type="button" onClick={() => setShowAddForm(false)} style={{ marginLeft: '10px', color: '#ff6b6b', background: 'none', border: 'none', cursor: 'pointer' }}>Cancel</button>
                                 </form>
                             </div>
                         )}
@@ -351,16 +386,17 @@ const TeacherDashboard = () => {
                                         />
                                     </div>
                                     <button type="submit" className="btn btn-primary" style={{ marginTop: '15px' }}>Update Student</button>
-                                    <button type="button" onClick={() => setEditingStudent(null)} style={{ marginLeft: '10px', color: '#ff6b6b' }}>Cancel</button>
+                                    <button type="button" onClick={() => setEditingStudent(null)} style={{ marginLeft: '10px', color: '#ff6b6b', background: 'none', border: 'none', cursor: 'pointer' }}>Cancel</button>
                                 </form>
                             </div>
                         )}
+
                         <div style={{ overflowX: 'auto' }}>
                             <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px' }}>
                                 <thead>
                                     <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
                                         <th style={{ textAlign: 'left', padding: '15px' }}>Student Name</th>
-                                        <th style={{ textAlign: 'center', padding: '15px' }}>Status</th>
+                                        <th style={{ textAlign: 'left', padding: '15px' }}>Username/Email</th>
                                         <th style={{ textAlign: 'right', padding: '15px' }}>Actions</th>
                                     </tr>
                                 </thead>
@@ -368,32 +404,27 @@ const TeacherDashboard = () => {
                                     {students.map(student => (
                                         <tr key={student._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                                             <td style={{ padding: '15px' }}>{student.name}</td>
-                                            <td style={{ padding: '15px', textAlign: 'center' }}>
-                                                <div style={{ display: 'inline-flex', background: 'rgba(0,0,0,0.3)', borderRadius: '30px', padding: '4px' }}>
-                                                    <button onClick={() => handleAttendanceChange(student._id, 'Present')} style={{ padding: '8px 16px', borderRadius: '20px', background: attendance[student._id] === 'Present' ? 'hsl(140, 70%, 40%)' : 'transparent', color: '#fff', fontWeight: 'bold' }}>P</button>
-                                                    <button onClick={() => handleAttendanceChange(student._id, 'Absent')} style={{ padding: '8px 16px', borderRadius: '20px', background: attendance[student._id] === 'Absent' ? 'hsl(0, 70%, 50%)' : 'transparent', color: '#fff', fontWeight: 'bold' }}>A</button>
-                                                    <button onClick={() => handleAttendanceChange(student._id, 'Late')} style={{ padding: '8px 16px', borderRadius: '20px', background: attendance[student._id] === 'Late' ? 'hsl(40, 90%, 50%)' : 'transparent', color: '#fff', fontWeight: 'bold' }}>L</button>
-                                                </div>
-                                            </td>
+                                            <td style={{ padding: '15px' }}>{student.email}</td>
                                             <td style={{ padding: '15px', textAlign: 'right' }}>
                                                 <button
                                                     onClick={() => setEditingStudent(student)}
-                                                    style={{ color: 'hsl(var(--accent))', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
+                                                    className="btn btn-secondary"
+                                                    style={{ fontSize: '0.8rem', padding: '6px 12px' }}
                                                 >
                                                     Edit Credentials
                                                 </button>
                                             </td>
                                         </tr>
                                     ))}
+                                    {students.length === 0 && (
+                                        <tr>
+                                            <td colSpan="3" style={{ padding: '20px', textAlign: 'center', color: 'hsl(var(--text-dim))' }}>
+                                                No students found in your class.
+                                            </td>
+                                        </tr>
+                                    )}
                                 </tbody>
                             </table>
-                        </div>
-                        <div style={{ marginTop: '30px', textAlign: 'right' }}>
-                            {timetable.find(p => p.period === selectedPeriod && p.day === ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][new Date(selectedDate).getDay()])?.isBreak ? (
-                                <p style={{ color: '#ff6464', fontWeight: 'bold' }}>Attendance cannot be marked for break periods.</p>
-                            ) : (
-                                <button className="btn btn-primary" onClick={submitAttendance}>Save Attendance</button>
-                            )}
                         </div>
                     </>
                 )}
