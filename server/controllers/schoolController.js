@@ -8,13 +8,16 @@ const createSchool = async (req, res) => {
     const { name, address, contact, subscriptionPlan, adminEmail, adminName, adminPassword } = req.body;
 
     try {
+        // Only auto-approve if created by a SuperAdmin
+        const isApproved = req.user && req.user.role === 'SuperAdmin';
+
         // 1. Create the School
         const school = await School.create({
             name,
             address,
             contact,
             subscriptionPlan,
-            isApproved: true, // Schools created manually by SuperAdmin are auto-approved
+            isApproved: isApproved,
         });
 
         // 2. Create the Admin (Principal) for this school
