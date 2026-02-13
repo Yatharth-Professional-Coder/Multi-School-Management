@@ -4,57 +4,59 @@ const Class = require('../models/Class');
 // @desc    Create a timetable entry
 // @route   POST /api/timetable
 // @access  Private/Admin
+// Helper to check for overlaps
+const validateTimetableEntry = async (data, excludeId = null) => {
+    const { classId, teacherId, day, startTime, endTime, isBreak } = data;
+
+    if (!startTime || !endTime) throw new Error('Start and End times are required');
+    if (startTime >= endTime) throw new Error('Start time must be before End time');
+
+    // 1. Check Class Overlap
+    const classOverlap = await Timetable.findOne({
+        _id: { $ne: excludeId },
+        day,
+        classId,
+        $or: [
+            { startTime: { $lt: endTime, $gte: startTime } },
+            { endTime: { $gt: startTime, $lte: endTime } },
+            { startTime: { $lte: startTime }, endTime: { $gte: endTime } }
+        ]
+    });
+
+    if (classOverlap) {
+        throw new Error(`Class already has a scheduled period (${classOverlap.subject}) at this time (${classOverlap.startTime} - ${classOverlap.endTime})`);
+    }
+
+    // 2. Check Teacher Overlap
+    if (!isBreak && teacherId) {
+        const teacherOverlap = await Timetable.findOne({
+            _id: { $ne: excludeId },
+            day,
+            teacherId,
+            $or: [
+                { startTime: { $lt: endTime, $gte: startTime } },
+                { endTime: { $gt: startTime, $lte: endTime } },
+                { startTime: { $lte: startTime }, endTime: { $gte: endTime } }
+            ]
+        });
+
+        if (teacherOverlap) {
+            throw new Error('teacher is already assigned');
+        }
+    }
+    return true;
+};
+
 const createTimetableEntry = async (req, res) => {
     const { classId, teacherId, subject, day, period, startTime, endTime, isBreak } = req.body;
     const schoolId = req.user.schoolId;
 
     try {
-        // 1. Validation: Basic checks
-        if (!startTime || !endTime) {
-            return res.status(400).json({ message: 'Start and End times are required' });
-        }
         if (period < 1) {
             return res.status(400).json({ message: 'Period number must be a positive integer' });
         }
-        if (startTime >= endTime) {
-            return res.status(400).json({ message: 'Start time must be before End time' });
-        }
 
-        // Helper to check for overlaps
-        const checkOverlap = async (queryType, id) => {
-            const query = { day };
-            if (queryType === 'class') query.classId = id;
-            else query.teacherId = id;
-
-            const existingEntries = await Timetable.find(query);
-            for (const entry of existingEntries) {
-                // Check if current [startTime, endTime] overlaps with entry [entry.startTime, entry.endTime]
-                // Overlap condition: (StartA < EndB) and (EndA > StartB)
-                if (startTime < entry.endTime && endTime > entry.startTime) {
-                    return entry;
-                }
-            }
-            return null;
-        };
-
-        // 2. Validation: Class Overlap
-        const classOverlap = await checkOverlap('class', classId);
-        if (classOverlap) {
-            return res.status(400).json({
-                message: `Class already has a scheduled period (${classOverlap.subject}) at this time (${classOverlap.startTime} - ${classOverlap.endTime})`
-            });
-        }
-
-        // 3. Validation: Teacher Overlap
-        if (!isBreak && teacherId) {
-            const teacherOverlap = await checkOverlap('teacher', teacherId);
-            if (teacherOverlap) {
-                const conflictClass = await Class.findById(teacherOverlap.classId);
-                return res.status(400).json({
-                    message: `Teacher is already busy with ${conflictClass?.className} at this time (${teacherOverlap.startTime} - ${teacherOverlap.endTime})`
-                });
-            }
-        }
+        await validateTimetableEntry({ classId, teacherId, day, startTime, endTime, isBreak });
 
         const timetableEntry = await Timetable.create({
             schoolId,
