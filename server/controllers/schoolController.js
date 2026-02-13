@@ -8,6 +8,36 @@ const Announcement = require('../models/Announcement');
 const Result = require('../models/Result');
 const Homework = require('../models/Homework');
 
+const getPlanFeatures = (plan) => {
+    switch (plan) {
+        case 'Premium':
+            return {
+                enableTimetable: true,
+                enableAttendance: true,
+                enableHomework: true,
+                enableResults: true,
+                enableAnnouncements: true,
+            };
+        case 'Standard':
+            return {
+                enableTimetable: true,
+                enableAttendance: true,
+                enableHomework: true,
+                enableResults: false,
+                enableAnnouncements: true,
+            };
+        case 'Basic':
+        default:
+            return {
+                enableTimetable: false,
+                enableAttendance: true,
+                enableHomework: false,
+                enableResults: false,
+                enableAnnouncements: true,
+            };
+    }
+};
+
 // @desc    Create a new school
 // @route   POST /api/schools
 // @access  Private/SuperAdmin
@@ -15,23 +45,26 @@ const createSchool = async (req, res) => {
     const { name, address, contact, subscriptionPlan, adminEmail, adminName, adminPassword } = req.body;
 
     try {
-        // Only auto-approve if created by a SuperAdmin
         const isApproved = req.user && req.user.role === 'SuperAdmin';
+        const defaultFeatures = getPlanFeatures(subscriptionPlan || 'Basic');
 
         // 1. Create the School
         const school = await School.create({
             name,
             address,
             contact,
-            subscriptionPlan,
+            subscriptionPlan: subscriptionPlan || 'Basic',
             isApproved: isApproved,
+            settings: {
+                features: defaultFeatures
+            }
         });
 
         // 2. Create the Admin (Principal) for this school
         const admin = await User.create({
             name: adminName,
             email: adminEmail,
-            password: adminPassword, // Will be hashed by pre-save hook
+            password: adminPassword,
             role: 'Admin',
             schoolId: school._id,
         });
@@ -71,10 +104,20 @@ const updateSchool = async (req, res) => {
     try {
         const school = await School.findById(req.params.id);
         if (school) {
+            const oldPlan = school.subscriptionPlan;
             school.name = name || school.name;
             school.address = address || school.address;
             school.contact = contact || school.contact;
             school.subscriptionPlan = subscriptionPlan || school.subscriptionPlan;
+
+            // If plan changed, reset features to new plan defaults
+            if (subscriptionPlan && subscriptionPlan !== oldPlan) {
+                school.settings.features = getPlanFeatures(subscriptionPlan);
+                // Also reset grading system for non-premium
+                if (subscriptionPlan !== 'Premium') {
+                    school.settings.gradingSystem = 'Percentage';
+                }
+            }
 
             const updatedSchool = await school.save();
             res.json(updatedSchool);
@@ -92,7 +135,6 @@ const deleteSchool = async (req, res) => {
         if (school) {
             const schoolId = school._id;
 
-            // Cascading Delete: Remove all data associated with this school
             await User.deleteMany({ schoolId });
             await Class.deleteMany({ schoolId });
             await Section.deleteMany({ schoolId });
@@ -102,7 +144,6 @@ const deleteSchool = async (req, res) => {
             await Result.deleteMany({ schoolId });
             await Homework.deleteMany({ schoolId });
 
-            // Finally, delete the school
             await school.deleteOne();
             res.json({ message: 'School and all associated data removed successfully' });
         } else {
@@ -134,7 +175,6 @@ const rejectSchool = async (req, res) => {
         if (school) {
             const schoolId = school._id;
 
-            // Cascading Delete: Remove all data associated with this school
             await User.deleteMany({ schoolId });
             await Class.deleteMany({ schoolId });
             await Section.deleteMany({ schoolId });
@@ -144,7 +184,6 @@ const rejectSchool = async (req, res) => {
             await Result.deleteMany({ schoolId });
             await Homework.deleteMany({ schoolId });
 
-            // Delete the school
             await school.deleteOne();
             res.json({ message: 'School registration rejected and all associated data removed' });
         } else {
@@ -160,11 +199,21 @@ const updateSchoolSettings = async (req, res) => {
     try {
         const school = await School.findById(req.params.id);
         if (school) {
+            const planFeatures = getPlanFeatures(school.subscriptionPlan);
+
+            // Enforce plan-based feature limits
+            const restrictedFeatures = features ? { ...features } : { ...school.settings.features };
+            Object.keys(planFeatures).forEach(key => {
+                if (planFeatures[key] === false) {
+                    restrictedFeatures[key] = false;
+                }
+            });
+
             school.settings = {
                 themeColor: themeColor || school.settings.themeColor,
                 logoUrl: logoUrl !== undefined ? logoUrl : school.settings.logoUrl,
-                gradingSystem: gradingSystem || school.settings.gradingSystem,
-                features: { ...school.settings.features, ...features }
+                gradingSystem: (school.subscriptionPlan === 'Premium' ? (gradingSystem || school.settings.gradingSystem) : 'Percentage'),
+                features: restrictedFeatures
             };
 
             const updatedSchool = await school.save();

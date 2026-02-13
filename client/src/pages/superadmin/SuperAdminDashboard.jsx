@@ -421,32 +421,78 @@ const SuperAdminDashboard = () => {
                                             className="input-field"
                                             value={settingsData.gradingSystem}
                                             onChange={(e) => setSettingsData({ ...settingsData, gradingSystem: e.target.value })}
+                                            disabled={selectedSchool.subscriptionPlan !== 'Premium'}
+                                            style={{
+                                                cursor: selectedSchool.subscriptionPlan !== 'Premium' ? 'not-allowed' : 'pointer',
+                                                opacity: selectedSchool.subscriptionPlan !== 'Premium' ? 0.6 : 1
+                                            }}
                                         >
                                             <option value="Percentage">Percentage (0-100%)</option>
                                             <option value="GPA">GPA (4.0 Scale)</option>
                                         </select>
+                                        {selectedSchool.subscriptionPlan !== 'Premium' && (
+                                            <p style={{ fontSize: '0.75rem', color: 'hsl(var(--accent))', marginTop: '5px' }}>
+                                                ✨ GPA Grading requires **Premium Plan**
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
 
                                 <div>
                                     <h3 style={{ fontSize: '1.1rem', marginBottom: '15px', color: 'hsl(var(--secondary))' }}>Feature Toggles</h3>
                                     <div style={{ display: 'grid', gap: '10px' }}>
-                                        {Object.entries(settingsData.features).map(([key, value]) => (
-                                            <div key={key} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px' }}>
-                                                <input
-                                                    type="checkbox"
-                                                    id={key}
-                                                    checked={value}
-                                                    onChange={(e) => setSettingsData({
-                                                        ...settingsData,
-                                                        features: { ...settingsData.features, [key]: e.target.checked }
-                                                    })}
-                                                />
-                                                <label htmlFor={key} style={{ cursor: 'pointer', fontSize: '0.9rem' }}>
-                                                    {key.replace('enable', '').replace(/([A-Z])/g, ' $1').trim()}
-                                                </label>
-                                            </div>
-                                        ))}
+                                        {Object.entries(settingsData.features).map(([key, value]) => {
+                                            const label = key.replace('enable', '').replace(/([A-Z])/g, ' $1').trim();
+                                            const plan = selectedSchool.subscriptionPlan;
+                                            let isAllowed = true;
+                                            let upgradeTo = '';
+
+                                            if (key === 'enableTimetable' || key === 'enableHomework') {
+                                                if (plan === 'Basic') {
+                                                    isAllowed = false;
+                                                    upgradeTo = 'Standard';
+                                                }
+                                            } else if (key === 'enableResults') {
+                                                if (plan === 'Basic' || plan === 'Standard') {
+                                                    isAllowed = false;
+                                                    upgradeTo = 'Premium';
+                                                }
+                                            }
+
+                                            return (
+                                                <div key={key} style={{
+                                                    display: 'flex',
+                                                    flexDirection: 'column',
+                                                    gap: '5px',
+                                                    padding: '10px',
+                                                    background: 'rgba(255,255,255,0.05)',
+                                                    borderRadius: '8px',
+                                                    opacity: isAllowed ? 1 : 0.6
+                                                }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                        <input
+                                                            type="checkbox"
+                                                            id={key}
+                                                            checked={isAllowed ? value : false}
+                                                            disabled={!isAllowed}
+                                                            onChange={(e) => setSettingsData({
+                                                                ...settingsData,
+                                                                features: { ...settingsData.features, [key]: e.target.checked }
+                                                            })}
+                                                            style={{ cursor: isAllowed ? 'pointer' : 'not-allowed' }}
+                                                        />
+                                                        <label htmlFor={key} style={{ cursor: isAllowed ? 'pointer' : 'not-allowed', fontSize: '0.9rem' }}>
+                                                            {label}
+                                                        </label>
+                                                    </div>
+                                                    {!isAllowed && (
+                                                        <span style={{ fontSize: '0.7rem', color: 'hsl(var(--accent))', marginLeft: '25px' }}>
+                                                            Upgrade to **{upgradeTo}** to unlock
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             </div>
