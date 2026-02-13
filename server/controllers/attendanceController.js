@@ -61,19 +61,35 @@ const getAttendance = async (req, res) => {
 // @route   PUT /api/attendance/rectify
 // @access  Private/Student, Teacher
 const requestRectification = async (req, res) => {
-    const { date, reason } = req.body;
-    const userId = req.user._id;
+    const { date, reason, studentId, period } = req.body;
+
+    // If teacher is requesting, they must provide studentId
+    // If student is requesting, they use their own ID
+    const userId = req.user.role === 'Student' ? req.user._id : studentId;
+
+    if (!userId) {
+        return res.status(400).json({ message: 'User ID is required for rectification' });
+    }
 
     try {
-        const record = await Attendance.findOne({ userId, date: new Date(date) });
+        const query = {
+            userId,
+            date: new Date(date)
+        };
+
+        if (period) {
+            query.period = Number(period);
+        }
+
+        const record = await Attendance.findOne(query);
 
         if (!record) {
-            return res.status(404).json({ message: 'Attendance record not found for this date' });
+            return res.status(404).json({ message: 'Attendance record not found for this date/period' });
         }
 
         record.rectificationRequest = {
             requested: true,
-            reason,
+            reason: reason || 'Teacher requested rectification',
             status: 'Pending'
         };
 
@@ -84,6 +100,7 @@ const requestRectification = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
 
 // @desc    Approve/Reject Rectification
 // @route   PUT /api/attendance/rectify/approve

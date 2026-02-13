@@ -7,7 +7,9 @@ const SubAdminDashboard = () => {
     const { user, logout } = useContext(AuthContext);
     const [students, setStudents] = useState([]);
     const [attendanceRecords, setAttendanceRecords] = useState([]);
+    const [rectifications, setRectifications] = useState([]);
     const [activeTab, setActiveTab] = useState('Students');
+
     const [showForm, setShowForm] = useState(false);
 
     // Form State
@@ -35,6 +37,16 @@ const SubAdminDashboard = () => {
         }
     };
 
+    const fetchRectifications = async () => {
+        try {
+            const { data } = await api.get('/api/attendance/pending', config);
+            setRectifications(data);
+        } catch (error) {
+            console.error("Error fetching rectifications", error);
+        }
+    };
+
+
     useEffect(() => {
         fetchData();
     }, []);
@@ -42,8 +54,11 @@ const SubAdminDashboard = () => {
     useEffect(() => {
         if (activeTab === 'Attendance') {
             fetchAttendance();
+        } else if (activeTab === 'Rectification Requests') {
+            fetchRectifications();
         }
     }, [activeTab]);
+
 
     const handleStudentSubmit = async (e) => {
         e.preventDefault();
@@ -57,6 +72,17 @@ const SubAdminDashboard = () => {
             alert(error.response?.data?.message || 'Error adding student');
         }
     };
+
+    const handleRectify = async (attendanceId, status) => {
+        try {
+            await api.put('/api/attendance/rectify/approve', { attendanceId, status }, config);
+            alert(`Request ${status}`);
+            fetchRectifications();
+        } catch (error) {
+            alert('Error updating rectification');
+        }
+    };
+
 
     return (
         <div className="container fade-in" style={{ paddingTop: '20px' }}>
@@ -88,7 +114,11 @@ const SubAdminDashboard = () => {
             <div style={{ marginBottom: '30px', display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '10px', whiteSpace: 'nowrap' }}>
                 <button className={`btn ${activeTab === 'Students' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('Students')}>Students</button>
                 <button className={`btn ${activeTab === 'Attendance' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('Attendance')}>Attendance</button>
+                <button className={`btn ${activeTab === 'Rectification Requests' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('Rectification Requests')}>
+                    Rectification Requests {rectifications.length > 0 && <span style={{ background: '#ff6b6b', padding: '2px 6px', borderRadius: '50%', fontSize: '0.7rem' }}>{rectifications.length}</span>}
+                </button>
             </div>
+
 
             {/* Content Area */}
             <div className="glass-panel" style={{ padding: '20px' }}>
@@ -141,6 +171,7 @@ const SubAdminDashboard = () => {
 
                 {activeTab === 'Students' ? (
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        {/* ... existing students table ... */}
                         <thead>
                             <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
                                 <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Name</th>
@@ -161,7 +192,7 @@ const SubAdminDashboard = () => {
                             {students.length === 0 && <tr><td colSpan="3" style={{ padding: '20px', textAlign: 'center', color: 'hsl(var(--text-dim))' }}>No students found</td></tr>}
                         </tbody>
                     </table>
-                ) : (
+                ) : activeTab === 'Attendance' ? (
                     <div style={{ overflowX: 'auto' }}>
                         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                             <thead>
@@ -192,7 +223,35 @@ const SubAdminDashboard = () => {
                             </tbody>
                         </table>
                     </div>
+                ) : (
+                    <div style={{ overflowX: 'auto' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                            <thead>
+                                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                                    <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Student</th>
+                                    <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Date / Period</th>
+                                    <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Reason</th>
+                                    <th style={{ textAlign: 'right', padding: '15px', color: 'hsl(var(--secondary))' }}>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {rectifications.map(rect => (
+                                    <tr key={rect._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                        <td style={{ padding: '15px' }}>{rect.userId?.name}</td>
+                                        <td style={{ padding: '15px' }}>{new Date(rect.date).toLocaleDateString()} (P{rect.period})</td>
+                                        <td style={{ padding: '15px' }}>{rect.rectificationRequest?.reason}</td>
+                                        <td style={{ padding: '15px', textAlign: 'right' }}>
+                                            <button className="btn btn-primary" onClick={() => handleRectify(rect._id, 'Approved')} style={{ fontSize: '0.8rem', padding: '5px 10px', marginRight: '5px' }}>Approve</button>
+                                            <button className="btn btn-secondary" onClick={() => handleRectify(rect._id, 'Rejected')} style={{ fontSize: '0.8rem', padding: '5px 10px', color: '#ff6b6b' }}>Reject</button>
+                                        </td>
+                                    </tr>
+                                ))}
+                                {rectifications.length === 0 && <tr><td colSpan="4" style={{ padding: '20px', textAlign: 'center', color: 'hsl(var(--text-dim))' }}>No pending rectification requests</td></tr>}
+                            </tbody>
+                        </table>
+                    </div>
                 )}
+
             </div>
         </div>
     );

@@ -49,17 +49,22 @@ const StudentDashboard = () => {
         fetchData();
     }, []);
 
-    const requestRectification = async (date) => {
+    const requestRectification = async (date, period) => {
         const reason = prompt("Enter reason for rectification:");
         if (!reason) return;
 
         try {
-            await api.put('/api/attendance/rectify', { date, reason }, config);
+            await api.put('/api/attendance/rectify', { date, reason, period }, config);
             alert('Rectification requested');
+
+            // Refresh data
+            const attRes = await api.get(`/api/attendance/${user._id}`, config);
+            setAttendance(attRes.data);
         } catch (error) {
             alert('Error requesting rectification');
         }
     };
+
 
     return (
         <div className="container fade-in" style={{ paddingTop: '20px' }}>
@@ -137,8 +142,9 @@ const StudentDashboard = () => {
                                             <td style={{ padding: '10px', color: record.status === 'Present' ? '#64ff96' : '#ff6464' }}>{record.status}</td>
                                             <td style={{ padding: '10px' }}>
                                                 {record.status !== 'Present' && !record.rectificationRequest?.requested && (
-                                                    <button onClick={() => requestRectification(record.date)} style={{ fontSize: '0.8rem', textDecoration: 'underline', color: 'hsl(var(--accent))' }}>Rectify</button>
+                                                    <button onClick={() => requestRectification(record.date, record.period)} style={{ fontSize: '0.8rem', textDecoration: 'underline', color: 'hsl(var(--accent))' }}>Rectify</button>
                                                 )}
+
                                                 {record.rectificationRequest?.requested && <span style={{ fontSize: '0.8rem', color: 'orange' }}>Request {record.rectificationRequest.status}</span>}
                                             </td>
                                         </tr>

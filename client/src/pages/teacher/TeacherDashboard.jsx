@@ -15,6 +15,9 @@ const TeacherDashboard = () => {
     const [teacherClass, setTeacherClass] = useState(null);
     const [timetable, setTimetable] = useState([]);
     const [selectedPeriod, setSelectedPeriod] = useState(1);
+    const [isAlreadyMarked, setIsAlreadyMarked] = useState(false);
+    const [existingRecords, setExistingRecords] = useState([]);
+
 
     // Homework State
     const [homeworkList, setHomeworkList] = useState([]);
@@ -53,13 +56,30 @@ const TeacherDashboard = () => {
             let url = `/api/users?role=Student`;
             if (classId) url += `&classId=${classId}`;
 
-            const { data } = await api.get(url, config);
-            setStudents(data);
-            const initialAttendance = {};
-            data.forEach(student => { initialAttendance[student._id] = 'Present'; });
-            setAttendance(initialAttendance);
-        } catch (error) { console.error("Error fetching students", error); }
+            const { data: studentsData } = await api.get(url, config);
+            setStudents(studentsData);
+
+            // Check for existing attendance
+            const { data: attData } = await api.get(`/api/attendance/class/${classId}?date=${selectedDate}&period=${selectedPeriod}`, config);
+
+            if (attData.length > 0) {
+                setIsAlreadyMarked(true);
+                setExistingRecords(attData);
+                const markedAttendance = {};
+                attData.forEach(record => {
+                    markedAttendance[record.userId._id] = record.status;
+                });
+                setAttendance(markedAttendance);
+            } else {
+                setIsAlreadyMarked(false);
+                setExistingRecords([]);
+                const initialAttendance = {};
+                studentsData.forEach(student => { initialAttendance[student._id] = 'Present'; });
+                setAttendance(initialAttendance);
+            }
+        } catch (error) { console.error("Error fetching students/attendance", error); }
     };
+
 
     const fetchHomework = async () => {
         try {
@@ -121,8 +141,42 @@ const TeacherDashboard = () => {
             if (absentIds.length > 0) await api.post('/api/attendance', { ...attendancePayload, userIds: absentIds, status: 'Absent' }, config);
             if (lateIds.length > 0) await api.post('/api/attendance', { ...attendancePayload, userIds: lateIds, status: 'Late' }, config);
             alert(`Attendance for Period ${selectedPeriod} marked successfully!`);
+
+            // Refresh to show summary view
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const dayOfWeek = days[new Date(selectedDate).getDay()];
+            const periodEntry = timetable.find(p => p.day === dayOfWeek && p.period === selectedPeriod);
+            if (periodEntry && periodEntry.classId) {
+                fetchStudents(periodEntry.classId._id);
+            }
         } catch (error) { alert('Failed to mark attendance'); }
     };
+
+    const handleRectifyRequest = async (studentId) => {
+        const reason = prompt("Reason for rectification:");
+        if (!reason) return;
+
+        try {
+            await api.put('/api/attendance/rectify', {
+                date: selectedDate,
+                reason,
+                studentId,
+                period: selectedPeriod
+            }, config);
+            alert('Rectification request sent to Principal');
+
+            // Refresh records
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const dayOfWeek = days[new Date(selectedDate).getDay()];
+            const periodEntry = timetable.find(p => p.day === dayOfWeek && p.period === selectedPeriod);
+            if (periodEntry && periodEntry.classId) {
+                fetchStudents(periodEntry.classId._id);
+            }
+        } catch (error) {
+            alert('Failed to send rectification request');
+        }
+    };
+
 
     const submitHomework = async (e) => {
         e.preventDefault();
@@ -277,43 +331,94 @@ const TeacherDashboard = () => {
                         )}
 
                         <div style={{ overflowX: 'auto' }}>
-                            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px' }}>
-                                <thead>
-                                    <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                                        <th style={{ textAlign: 'left', padding: '15px' }}>Student Name</th>
-                                        <th style={{ textAlign: 'center', padding: '15px' }}>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {students.map(student => (
-                                        <tr key={student._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                            <td style={{ padding: '15px' }}>{student.name}</td>
-                                            <td style={{ padding: '15px', textAlign: 'center' }}>
-                                                <div style={{ display: 'inline-flex', background: 'rgba(0,0,0,0.3)', borderRadius: '30px', padding: '4px' }}>
-                                                    <button onClick={() => handleAttendanceChange(student._id, 'Present')} style={{ padding: '8px 16px', borderRadius: '20px', background: attendance[student._id] === 'Present' ? 'hsl(140, 70%, 40%)' : 'transparent', color: '#fff', fontWeight: 'bold' }}>P</button>
-                                                    <button onClick={() => handleAttendanceChange(student._id, 'Absent')} style={{ padding: '8px 16px', borderRadius: '20px', background: attendance[student._id] === 'Absent' ? 'hsl(0, 70%, 50%)' : 'transparent', color: '#fff', fontWeight: 'bold' }}>A</button>
-                                                    <button onClick={() => handleAttendanceChange(student._id, 'Late')} style={{ padding: '8px 16px', borderRadius: '20px', background: attendance[student._id] === 'Late' ? 'hsl(40, 90%, 50%)' : 'transparent', color: '#fff', fontWeight: 'bold' }}>L</button>
-                                                </div>
-                                            </td>
+                            {isAlreadyMarked ? (
+                                <div style={{ padding: '20px', background: 'rgba(100, 255, 150, 0.05)', borderRadius: '12px', border: '1px solid rgba(100, 255, 150, 0.2)' }}>
+                                    <h3 style={{ color: '#64ff96', marginBottom: '15px' }}>Already Marked</h3>
+                                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                        <thead>
+                                            <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                                                <th style={{ textAlign: 'left', padding: '10px' }}>Student Name</th>
+                                                <th style={{ textAlign: 'center', padding: '10px' }}>Status</th>
+                                                <th style={{ textAlign: 'right', padding: '10px' }}>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {existingRecords.map(record => (
+                                                <tr key={record._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                                    <td style={{ padding: '10px' }}>{record.userId.name}</td>
+                                                    <td style={{ padding: '10px', textAlign: 'center' }}>
+                                                        <span style={{
+                                                            color: record.status === 'Present' ? '#64ff96' : record.status === 'Absent' ? '#ff6464' : '#ffc832',
+                                                            fontWeight: 'bold',
+                                                            padding: '2px 8px',
+                                                            background: 'rgba(255,255,255,0.05)',
+                                                            borderRadius: '4px'
+                                                        }}>
+                                                            {record.status}
+                                                        </span>
+                                                    </td>
+                                                    <td style={{ padding: '10px', textAlign: 'right' }}>
+                                                        {record.rectificationRequest?.requested ? (
+                                                            <span style={{ fontSize: '0.8rem', color: 'hsl(var(--accent))' }}>
+                                                                Rectify {record.rectificationRequest.status}
+                                                            </span>
+                                                        ) : (
+                                                            <button
+                                                                onClick={() => handleRectifyRequest(record.userId._id)}
+                                                                style={{ fontSize: '0.8rem', color: 'hsl(var(--primary))', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
+                                                            >
+                                                                Send Rectify Request
+                                                            </button>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            ) : (
+                                <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px' }}>
+                                    <thead>
+                                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                                            <th style={{ textAlign: 'left', padding: '15px' }}>Student Name</th>
+                                            <th style={{ textAlign: 'center', padding: '15px' }}>Status</th>
                                         </tr>
-                                    ))}
-                                    {students.length === 0 && (
-                                        <tr>
-                                            <td colSpan="2" style={{ padding: '20px', textAlign: 'center', color: 'hsl(var(--text-dim))' }}>
-                                                No students found for this class.
-                                            </td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        {students.map(student => (
+                                            <tr key={student._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                                <td style={{ padding: '15px' }}>{student.name}</td>
+                                                <td style={{ padding: '15px', textAlign: 'center' }}>
+                                                    <div style={{ display: 'inline-flex', background: 'rgba(0,0,0,0.3)', borderRadius: '30px', padding: '4px' }}>
+                                                        <button onClick={() => handleAttendanceChange(student._id, 'Present')} style={{ padding: '8px 16px', borderRadius: '20px', background: attendance[student._id] === 'Present' ? 'hsl(140, 70%, 40%)' : 'transparent', color: '#fff', fontWeight: 'bold' }}>P</button>
+                                                        <button onClick={() => handleAttendanceChange(student._id, 'Absent')} style={{ padding: '8px 16px', borderRadius: '20px', background: attendance[student._id] === 'Absent' ? 'hsl(0, 70%, 50%)' : 'transparent', color: '#fff', fontWeight: 'bold' }}>A</button>
+                                                        <button onClick={() => handleAttendanceChange(student._id, 'Late')} style={{ padding: '8px 16px', borderRadius: '20px', background: attendance[student._id] === 'Late' ? 'hsl(40, 90%, 50%)' : 'transparent', color: '#fff', fontWeight: 'bold' }}>L</button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                        {students.length === 0 && (
+                                            <tr>
+                                                <td colSpan="2" style={{ padding: '20px', textAlign: 'center', color: 'hsl(var(--text-dim))' }}>
+                                                    No students found for this class.
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            )}
                         </div>
+
                         <div style={{ marginTop: '30px', textAlign: 'right' }}>
                             {timetable.find(p => p.period === selectedPeriod && p.day === ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][new Date(selectedDate).getDay()])?.isBreak ? (
                                 <p style={{ color: '#ff6464', fontWeight: 'bold' }}>Attendance cannot be marked for break periods.</p>
+                            ) : isAlreadyMarked ? (
+                                <p style={{ color: 'hsl(var(--text-dim))' }}>Attendance has already been submitted for this period.</p>
                             ) : (
                                 <button className="btn btn-primary" onClick={submitAttendance}>Save Attendance</button>
                             )}
                         </div>
+
                     </>
                 )}
 
