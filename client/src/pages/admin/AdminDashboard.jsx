@@ -120,7 +120,7 @@ const AdminDashboard = () => {
             }
             await api.post('/api/timetable', payload, config);
             fetchTimetable(timetableFormData.classId);
-            setTimetableFormData({ ...timetableFormData, subject: '', period: timetableFormData.period + 1, isBreak: false });
+            setTimetableFormData({ ...timetableFormData, subject: '', isBreak: false });
             alert('Timetable entry added');
         } catch (error) {
             alert(error.response?.data?.message || 'Error adding timetable entry');
@@ -137,6 +137,14 @@ const AdminDashboard = () => {
             }
         }
     };
+
+    useEffect(() => {
+        if (selectedTimetableClass) {
+            const dayEntries = timetableEntries.filter(e => e.day === timetableFormData.day);
+            const maxP = dayEntries.reduce((max, e) => Math.max(max, e.period), 0);
+            setTimetableFormData(prev => ({ ...prev, period: maxP + 1 }));
+        }
+    }, [timetableFormData.day, timetableEntries, selectedTimetableClass]);
 
     useEffect(() => {
         fetchClasses();
