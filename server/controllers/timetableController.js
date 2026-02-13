@@ -5,19 +5,20 @@ const Class = require('../models/Class');
 // @route   POST /api/timetable
 // @access  Private/Admin
 const createTimetableEntry = async (req, res) => {
-    const { classId, teacherId, subject, day, period, startTime, endTime } = req.body;
+    const { classId, teacherId, subject, day, period, startTime, endTime, isBreak } = req.body;
     const schoolId = req.user.schoolId;
 
     try {
         const timetableEntry = await Timetable.create({
             schoolId,
             classId,
-            teacherId,
+            teacherId: isBreak ? null : teacherId,
             subject,
             day,
             period,
             startTime,
-            endTime
+            endTime,
+            isBreak: !!isBreak
         });
         res.status(201).json(timetableEntry);
     } catch (error) {

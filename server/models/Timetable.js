@@ -14,11 +14,15 @@ const timetableSchema = new mongoose.Schema({
     teacherId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: true,
+        required: function () { return !this.isBreak; } // Only required if not a break
     },
     subject: {
         type: String,
         required: true,
+    },
+    isBreak: {
+        type: Boolean,
+        default: false
     },
     day: {
         type: String,

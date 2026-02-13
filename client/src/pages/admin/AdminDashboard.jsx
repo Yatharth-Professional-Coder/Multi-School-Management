@@ -35,7 +35,7 @@ const AdminDashboard = () => {
     // Timetable State
     const [timetableEntries, setTimetableEntries] = useState([]);
     const [timetableFormData, setTimetableFormData] = useState({
-        classId: '', teacherId: '', subject: '', day: 'Monday', period: 1, startTime: '', endTime: ''
+        classId: '', teacherId: '', subject: '', day: 'Monday', period: 1, startTime: '', endTime: '', isBreak: false
     });
     const [selectedTimetableClass, setSelectedTimetableClass] = useState(null);
 
@@ -114,9 +114,13 @@ const AdminDashboard = () => {
     const handleTimetableSubmit = async (e) => {
         e.preventDefault();
         try {
-            await api.post('/api/timetable', timetableFormData, config);
+            const payload = { ...timetableFormData };
+            if (payload.isBreak) {
+                payload.teacherId = null; // Ensure teacherId is null if it's a break
+            }
+            await api.post('/api/timetable', payload, config);
             fetchTimetable(timetableFormData.classId);
-            setTimetableFormData({ ...timetableFormData, subject: '', period: timetableFormData.period + 1 });
+            setTimetableFormData({ ...timetableFormData, subject: '', period: timetableFormData.period + 1, isBreak: false });
             alert('Timetable entry added');
         } catch (error) {
             alert(error.response?.data?.message || 'Error adding timetable entry');
@@ -885,22 +889,33 @@ const AdminDashboard = () => {
                                                 <option key={d} value={d}>{d}</option>
                                             ))}
                                         </select>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'hsl(var(--text-dim))' }}>
+                                            <input
+                                                type="checkbox"
+                                                id="isBreak"
+                                                checked={timetableFormData.isBreak}
+                                                onChange={(e) => setTimetableFormData({ ...timetableFormData, isBreak: e.target.checked })}
+                                            />
+                                            <label htmlFor="isBreak">Mark as Break Time</label>
+                                        </div>
                                         <input
-                                            placeholder="Subject"
+                                            placeholder={timetableFormData.isBreak ? "Break Name (e.g., Lunch)" : "Subject"}
                                             className="input-field"
                                             value={timetableFormData.subject}
                                             onChange={(e) => setTimetableFormData({ ...timetableFormData, subject: e.target.value })}
                                             required
                                         />
-                                        <select
-                                            className="input-field"
-                                            value={timetableFormData.teacherId}
-                                            onChange={(e) => setTimetableFormData({ ...timetableFormData, teacherId: e.target.value })}
-                                            required
-                                        >
-                                            <option value="">Select Teacher</option>
-                                            {teachers.map(t => <option key={t._id} value={t._id}>{t.name}</option>)}
-                                        </select>
+                                        {!timetableFormData.isBreak && (
+                                            <select
+                                                className="input-field"
+                                                value={timetableFormData.teacherId}
+                                                onChange={(e) => setTimetableFormData({ ...timetableFormData, teacherId: e.target.value })}
+                                                required
+                                            >
+                                                <option value="">Select Teacher</option>
+                                                {teachers.map(t => <option key={t._id} value={t._id}>{t.name}</option>)}
+                                            </select>
+                                        )}
                                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
                                             <input
                                                 type="number"
@@ -948,8 +963,10 @@ const AdminDashboard = () => {
                                                 <tr key={entry._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                                                     <td style={{ padding: '12px' }}>{entry.day}</td>
                                                     <td style={{ padding: '12px' }}>P{entry.period}</td>
-                                                    <td style={{ padding: '12px' }}>{entry.subject}</td>
-                                                    <td style={{ padding: '12px' }}>{entry.teacherId?.name}</td>
+                                                    <td style={{ padding: '12px' }}>
+                                                        {entry.subject} {entry.isBreak && <span style={{ fontSize: '0.7rem', background: 'rgba(255, 100, 100, 0.2)', color: '#ff6464', padding: '2px 6px', borderRadius: '10px', marginLeft: '5px' }}>Break</span>}
+                                                    </td>
+                                                    <td style={{ padding: '12px' }}>{entry.isBreak ? 'N/A' : entry.teacherId?.name}</td>
                                                     <td style={{ padding: '12px' }}>{entry.startTime} - {entry.endTime}</td>
                                                     <td style={{ padding: '12px' }}>
                                                         <button onClick={() => handleDeleteTimetable(entry._id)} style={{ color: '#ff6b6b', background: 'none', border: 'none', cursor: 'pointer' }}>

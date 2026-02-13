@@ -210,18 +210,21 @@ const TeacherDashboard = () => {
                                     .map(p => (
                                         <div
                                             key={p._id}
-                                            onClick={() => setSelectedPeriod(p.period)}
+                                            onClick={() => !p.isBreak && setSelectedPeriod(p.period)}
                                             style={{
                                                 minWidth: '150px',
                                                 padding: '12px',
                                                 borderRadius: '8px',
-                                                background: selectedPeriod === p.period ? 'rgba(50, 200, 255, 0.2)' : 'rgba(255,255,255,0.05)',
-                                                border: selectedPeriod === p.period ? '1px solid #32c8ff' : '1px solid transparent',
-                                                cursor: 'pointer'
+                                                background: p.isBreak ? 'rgba(255, 100, 100, 0.1)' : selectedPeriod === p.period ? 'rgba(50, 200, 255, 0.2)' : 'rgba(255,255,255,0.05)',
+                                                border: p.isBreak ? '1px solid rgba(255, 100, 100, 0.3)' : selectedPeriod === p.period ? '1px solid #32c8ff' : '1px solid transparent',
+                                                cursor: p.isBreak ? 'default' : 'pointer',
+                                                opacity: p.isBreak ? 0.7 : 1
                                             }}
                                         >
-                                            <div style={{ fontWeight: 'bold', color: selectedPeriod === p.period ? '#32c8ff' : 'inherit' }}>P{p.period}: {p.subject}</div>
-                                            <div style={{ fontSize: '0.8rem', color: 'hsl(var(--text-dim))' }}>{p.classId?.className}</div>
+                                            <div style={{ fontWeight: 'bold', color: p.isBreak ? '#ff6464' : selectedPeriod === p.period ? '#32c8ff' : 'inherit' }}>
+                                                P{p.period}: {p.subject} {p.isBreak && '(Break)'}
+                                            </div>
+                                            <div style={{ fontSize: '0.8rem', color: 'hsl(var(--text-dim))' }}>{p.isBreak ? 'Break' : p.classId?.className}</div>
                                             <div style={{ fontSize: '0.7rem' }}>{p.startTime} - {p.endTime}</div>
                                         </div>
                                     ))}
@@ -328,7 +331,11 @@ const TeacherDashboard = () => {
                             </table>
                         </div>
                         <div style={{ marginTop: '30px', textAlign: 'right' }}>
-                            <button className="btn btn-primary" onClick={submitAttendance}>Save Attendance</button>
+                            {timetable.find(p => p.period === selectedPeriod && p.day === ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][new Date(selectedDate).getDay()])?.isBreak ? (
+                                <p style={{ color: '#ff6464', fontWeight: 'bold' }}>Attendance cannot be marked for break periods.</p>
+                            ) : (
+                                <button className="btn btn-primary" onClick={submitAttendance}>Save Attendance</button>
+                            )}
                         </div>
                     </>
                 )}
