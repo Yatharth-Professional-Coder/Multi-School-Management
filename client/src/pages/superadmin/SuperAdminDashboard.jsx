@@ -207,34 +207,37 @@ const SuperAdminDashboard = () => {
     const students = schoolUsers.filter(u => u.role === 'Student');
 
     return (
-        <div className="container fade-in" style={{ paddingTop: '40px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+        <div className="container fade-in" style={{ paddingTop: '20px' }}>
+
+            <div className="flex-mobile-col" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', gap: '15px' }}>
                 <div>
                     <h1>Super Admin Dashboard</h1>
                     <p style={{ color: 'hsl(var(--text-dim))' }}>Manage All Schools</p>
                 </div>
                 {!selectedSchool && (
-                    <button className="btn btn-primary" onClick={() => setShowForm(!showForm)}>
+                    <button className="btn btn-primary w-full-mobile" onClick={() => setShowForm(!showForm)}>
                         <FaPlus style={{ marginRight: '8px' }} /> Add School
                     </button>
                 )}
                 {selectedSchool && (
-                    <div style={{ display: 'flex', gap: '10px' }}>
-                        <button className="btn btn-danger" onClick={handleDeleteSchool} style={{ background: 'rgba(255, 77, 77, 0.2)', color: '#ff4d4d', border: '1px solid rgba(255, 77, 77, 0.3)' }}>
+                    <div className="flex-mobile-col w-full-mobile" style={{ display: 'flex', gap: '10px' }}>
+                        <button className="btn btn-danger w-full-mobile" onClick={handleDeleteSchool} style={{ background: 'rgba(255, 77, 77, 0.2)', color: '#ff4d4d', border: '1px solid rgba(255, 77, 77, 0.3)' }}>
                             <FaTrash style={{ marginRight: '8px' }} /> Delete School
                         </button>
-                        <button className="btn btn-secondary" onClick={() => setSelectedSchool(null)}>
+                        <button className="btn btn-secondary w-full-mobile" onClick={() => setSelectedSchool(null)}>
                             <FaArrowLeft style={{ marginRight: '8px' }} /> Back to Schools
                         </button>
                     </div>
                 )}
             </div>
 
+
             {/* School Registration Form (Only visible when no school selected) */}
             {!selectedSchool && showForm && (
                 <div className="glass-panel fade-in" style={{ padding: '30px', marginBottom: '30px' }}>
                     <h2 style={{ marginBottom: '20px' }}>Register New School</h2>
-                    <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                    <form onSubmit={handleSubmit} className="grid-mobile-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+
                         <div><label className="input-label">School Name</label><input name="name" className="input-field" onChange={handleChange} required value={formData.name} /></div>
                         <div><label className="input-label">Address</label><input name="address" className="input-field" onChange={handleChange} required value={formData.address} /></div>
                         <div><label className="input-label">Contact</label><input name="contact" className="input-field" onChange={handleChange} required value={formData.contact} /></div>
@@ -253,8 +256,9 @@ const SuperAdminDashboard = () => {
                         <div><label className="input-label">Principal Email</label><input name="adminEmail" type="email" className="input-field" onChange={handleChange} required value={formData.adminEmail} /></div>
                         <div><label className="input-label">Password</label><input name="adminPassword" type="password" className="input-field" onChange={handleChange} required value={formData.adminPassword} /></div>
                         <div style={{ gridColumn: 'span 2', textAlign: 'right' }}>
-                            <button type="submit" className="btn btn-primary">Create School</button>
+                            <button type="submit" className="btn btn-primary w-full-mobile">Create School</button>
                         </div>
+
                     </form>
                 </div>
             )}
@@ -393,7 +397,8 @@ const SuperAdminDashboard = () => {
                                 <button className="btn btn-secondary" onClick={() => setIsEditingSettings(false)}>Close</button>
                             </div>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
+                            <div className="grid-mobile-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
+
                                 <div>
                                     <h3 style={{ fontSize: '1.1rem', marginBottom: '15px', color: 'hsl(var(--secondary))' }}>Branding</h3>
                                     <div style={{ marginBottom: '15px' }}>
@@ -547,72 +552,79 @@ const SuperAdminDashboard = () => {
                     }
 
                     {/* Stats */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '30px' }}>
-                        <div className="glass-panel" style={{ padding: '20px', textAlign: 'center' }}>
-                            <FaChalkboardTeacher size={30} color="hsl(var(--secondary))" style={{ marginBottom: '10px' }} />
-                            <h3>{teachers.length}</h3>
-                            <p style={{ opacity: 0.7 }}>Teachers</p>
-                        </div>
-                        <div className="glass-panel" style={{ padding: '20px', textAlign: 'center' }}>
-                            <FaUserGraduate size={30} color="hsl(var(--accent))" style={{ marginBottom: '10px' }} />
-                            <h3>{students.length}</h3>
-                            <p style={{ opacity: 0.7 }}>Students</p>
-                        </div>
-                    </div>
+                    <div className="grid-mobile-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '30px' }}>
+                        <div className="grid-mobile-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '30px' }}>
 
-                    {/* Users List */}
-                    <div className="glass-panel" style={{ padding: '30px' }}>
-                        <h2>School Users</h2>
-                        {loadingUsers ? <p>Loading users...</p> : (
-                            <table className="data-table" style={{ width: '100%', marginTop: '20px', borderCollapse: 'collapse' }}>
-                                <thead>
-                                    <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                                        <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Name</th>
-                                        <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Role</th>
-                                        <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Email</th>
-                                        <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {schoolUsers.length > 0 ? schoolUsers.map(u => (
-                                        <tr key={u._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                            <td style={{ padding: '15px' }}>{u.name}</td>
-                                            <td style={{ padding: '15px' }}>
-                                                <span className={`status-badge status-${u.role === 'Teacher' ? 'present' : 'pending'}`}
-                                                    style={{
-                                                        padding: '4px 10px', borderRadius: '15px', fontSize: '0.8rem',
-                                                        background: u.role === 'Teacher' ? 'rgba(50, 200, 255, 0.2)' : 'rgba(100, 255, 150, 0.2)',
-                                                        color: u.role === 'Teacher' ? '#32c8ff' : '#64ff96'
-                                                    }}
-                                                >
-                                                    {u.role}
-                                                </span>
-                                            </td>
-                                            <td style={{ padding: '15px' }}>{u.email}</td>
-                                            <td style={{ padding: '15px' }}>
-                                                <button
-                                                    onClick={() => setEditingUser(u)}
-                                                    style={{ color: 'hsl(var(--accent))', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
-                                                >
-                                                    Edit
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    )) : (
-                                        <tr><td colSpan="4" style={{ textAlign: 'center', padding: '20px', color: 'hsl(var(--text-dim))' }}>No users found</td></tr>
-                                    )}
-                                </tbody>
-                            </table>
-                        )}
+
+                            <div className="glass-panel" style={{ padding: '20px', textAlign: 'center' }}>
+                                <FaChalkboardTeacher size={30} color="hsl(var(--secondary))" style={{ marginBottom: '10px' }} />
+                                <h3>{teachers.length}</h3>
+                                <p style={{ opacity: 0.7 }}>Teachers</p>
+                            </div>
+                            <div className="glass-panel" style={{ padding: '20px', textAlign: 'center' }}>
+                                <FaUserGraduate size={30} color="hsl(var(--accent))" style={{ marginBottom: '10px' }} />
+                                <h3>{students.length}</h3>
+                                <p style={{ opacity: 0.7 }}>Students</p>
+                            </div>
+                        </div>
+
+                        {/* Users List */}
+                        <div className="glass-panel" style={{ padding: '30px' }}>
+                            <h2>School Users</h2>
+                            {loadingUsers ? <p>Loading users...</p> : (
+                                <div style={{ overflowX: 'auto' }}>
+                                    <table className="data-table" style={{ width: '100%', marginTop: '20px', borderCollapse: 'collapse' }}>
+
+                                        <thead>
+                                            <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                                                <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Name</th>
+                                                <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Role</th>
+                                                <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Email</th>
+                                                <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {schoolUsers.length > 0 ? schoolUsers.map(u => (
+                                                <tr key={u._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                                    <td style={{ padding: '15px' }}>{u.name}</td>
+                                                    <td style={{ padding: '15px' }}>
+                                                        <span className={`status-badge status-${u.role === 'Teacher' ? 'present' : 'pending'}`}
+                                                            style={{
+                                                                padding: '4px 10px', borderRadius: '15px', fontSize: '0.8rem',
+                                                                background: u.role === 'Teacher' ? 'rgba(50, 200, 255, 0.2)' : 'rgba(100, 255, 150, 0.2)',
+                                                                color: u.role === 'Teacher' ? '#32c8ff' : '#64ff96'
+                                                            }}
+                                                        >
+                                                            {u.role}
+                                                        </span>
+                                                    </td>
+                                                    <td style={{ padding: '15px' }}>{u.email}</td>
+                                                    <td style={{ padding: '15px' }}>
+                                                        <button
+                                                            onClick={() => setEditingUser(u)}
+                                                            style={{ color: 'hsl(var(--accent))', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
+                                                        >
+                                                            Edit
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            )) : (
+                                                <tr><td colSpan="4" style={{ textAlign: 'center', padding: '20px', color: 'hsl(var(--text-dim))' }}>No users found</td></tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                            )}
+                        </div>
                     </div>
-                </div>
             )}
 
-            <button onClick={logout} style={{ marginTop: '40px', color: 'hsl(var(--accent))', textDecoration: 'underline' }}>
-                Logout
-            </button>
-        </div>
-    );
+                    <button onClick={logout} style={{ marginTop: '40px', color: 'hsl(var(--accent))', textDecoration: 'underline' }}>
+                        Logout
+                    </button>
+                </div>
+            );
 };
 
-export default SuperAdminDashboard;
+            export default SuperAdminDashboard;

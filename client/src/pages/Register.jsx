@@ -42,8 +42,8 @@ const Register = () => {
             alignItems: 'center',
             color: '#fff'
         }}>
-            <div className="glass-panel fade-in" style={{
-                padding: '3rem',
+            <div className="glass-panel fade-in w-full-mobile" style={{
+                padding: '2rem',
                 borderRadius: '20px',
                 width: '100%',
                 maxWidth: '500px',
@@ -52,6 +52,7 @@ const Register = () => {
                 boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
                 border: '1px solid rgba(255, 255, 255, 0.18)'
             }}>
+
                 <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
                     <FaSchool size={50} color="#00d4ff" />
                     <h2 style={{ marginTop: '1rem', fontSize: '2rem', fontWeight: 'bold' }}>Register School</h2>

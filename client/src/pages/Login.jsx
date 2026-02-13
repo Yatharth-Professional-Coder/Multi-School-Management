@@ -28,7 +28,8 @@ const Login = () => {
             minHeight: '100vh',
             background: 'radial-gradient(circle at top right, #2a2a72, #009ffd 0%, #000 70%)'
         }}>
-            <div className="glass-panel fade-in" style={{ width: '100%', maxWidth: '450px', padding: '40px' }}>
+            <div className="glass-panel fade-in w-full-mobile" style={{ width: '100%', maxWidth: '450px', padding: '40px' }}>
+
                 <div style={{ textAlign: 'center', marginBottom: '30px' }}>
                     <div style={{
                         width: '60px', height: '60px',

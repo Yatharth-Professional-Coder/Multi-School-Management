@@ -350,17 +350,20 @@ const AdminDashboard = () => {
     };
 
     return (
-        <div className="container fade-in" style={{ paddingTop: '40px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+        <div className="container fade-in" style={{ paddingTop: '20px' }}>
+
+            <div className="flex-mobile-col" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', gap: '15px' }}>
                 <div>
                     <h1>Admin Dashboard</h1>
                     <p style={{ color: 'hsl(var(--text-dim))' }}>Hello, {user.name}</p>
                 </div>
-                <button onClick={logout} style={{ color: 'hsl(var(--accent))', textDecoration: 'underline' }}>Logout</button>
+                <button onClick={logout} className="btn btn-danger" style={{ alignSelf: 'flex-start' }}>Logout</button>
             </div>
 
+
             {/* Quick Stats */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '40px' }}>
+            <div className="grid-mobile-1" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '40px' }}>
+
                 <div className="glass-panel" style={{ padding: '20px', display: 'flex', alignItems: 'center' }}>
                     <div style={{ padding: '15px', background: 'rgba(50, 200, 255, 0.2)', borderRadius: '12px', marginRight: '15px' }}>
                         <FaChalkboardTeacher size={24} color="#32c8ff" />
@@ -392,7 +395,8 @@ const AdminDashboard = () => {
 
             {/* Actions */}
             {/* Actions */}
-            <div style={{ marginBottom: '30px', display: 'flex', gap: '10px' }}>
+            <div style={{ marginBottom: '30px', display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '10px', whiteSpace: 'nowrap' }}>
+
                 {['Classes', 'SubAdmins', 'Teacher Attendance', 'Announcements', 'Timetable'].filter(tab => {
                     if (tab === 'Announcements') return user.schoolSettings?.features?.enableAnnouncements !== false;
                     if (tab === 'Timetable') return user.schoolSettings?.features?.enableTimetable !== false;
@@ -410,13 +414,14 @@ const AdminDashboard = () => {
             </div>
 
             {/* Content Area */}
-            <div className="glass-panel" style={{ padding: '30px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', alignItems: 'center' }}>
+            <div className="glass-panel" style={{ padding: '20px' }}>
+
+                <div className="flex-mobile-col" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', alignItems: 'flex-start', gap: '15px' }}>
                     <h2 style={{ color: 'hsl(var(--white))' }}>
                         {selectedClass ? `Attendance: ${selectedClass.className}` : activeTab === 'SubAdmins' ? 'Sub Admin Management' : activeTab === 'Teacher Attendance' ? 'Teacher Attendance' : `${activeTab} Management`}
                     </h2>
                     {activeTab !== 'Teacher Attendance' && activeTab !== 'Timetable' && !selectedClass && (
-                        <button className="btn btn-primary" onClick={() => {
+                        <button className="btn btn-primary w-full-mobile" onClick={() => {
                             setShowForm(true);
                             setNewItemType(activeTab === 'Classes' ? 'Class' : activeTab === 'SubAdmins' ? 'SubAdmin' : 'Announcement');
                         }}>
@@ -424,8 +429,8 @@ const AdminDashboard = () => {
                         </button>
                     )}
                     {activeTab === 'Teacher Attendance' && !selectedTeacherAttendance && (
-                        <div style={{ display: 'flex', gap: '10px' }}>
-                            <button className="btn btn-primary" onClick={() => {
+                        <div className="flex-mobile-col w-full-mobile" style={{ display: 'flex', gap: '10px' }}>
+                            <button className="btn btn-primary w-full-mobile" onClick={() => {
                                 setIsMarkingAttendance(true);
                                 const initialData = {};
                                 teachers.forEach(t => initialData[t._id] = 'Present');
@@ -433,7 +438,7 @@ const AdminDashboard = () => {
                             }}>
                                 <FaClipboardList style={{ marginRight: '8px' }} /> Mark Attendance
                             </button>
-                            <button className="btn btn-secondary" onClick={() => {
+                            <button className="btn btn-secondary w-full-mobile" onClick={() => {
                                 setShowForm(true);
                                 setNewItemType('Teacher');
                             }}>
@@ -442,16 +447,17 @@ const AdminDashboard = () => {
                         </div>
                     )}
                     {activeTab === 'Timetable' && selectedTimetableClass && (
-                        <button className="btn btn-secondary" onClick={() => setSelectedTimetableClass(null)}>
+                        <button className="btn btn-secondary w-full-mobile" onClick={() => setSelectedTimetableClass(null)}>
                             <FaArrowLeft style={{ marginRight: '5px' }} /> Back to Classes
                         </button>
                     )}
                     {(selectedClass || selectedTeacherAttendance) && (
-                        <button className="btn btn-secondary" onClick={() => { setSelectedClass(null); setSelectedTeacherAttendance(null); }}>
+                        <button className="btn btn-secondary w-full-mobile" onClick={() => { setSelectedClass(null); setSelectedTeacherAttendance(null); }}>
                             <FaArrowLeft style={{ marginRight: '5px' }} /> Back
                         </button>
                     )}
                 </div>
+
 
                 {showForm && (
                     <div style={{ background: 'rgba(0,0,0,0.3)', padding: '20px', borderRadius: '8px', marginBottom: '20px' }}>
@@ -468,7 +474,8 @@ const AdminDashboard = () => {
                                         required
                                     />
 
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                                    <div className="grid-mobile-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+
                                         <div>
                                             <label style={{ display: 'block', marginBottom: '8px' }}>Class Teacher</label>
                                             <div style={{ display: 'flex', gap: '10px' }}>
@@ -481,7 +488,8 @@ const AdminDashboard = () => {
                                                     <option value="">Select Teacher</option>
                                                     {teachers.map(t => <option key={t._id} value={t._id}>{t.name}</option>)}
                                                 </select>
-                                                <button type="button" className="btn btn-secondary" onClick={() => setIsCreatingTeacher(!isCreatingTeacher)} disabled={!!editId}>
+                                                <button type="button" className="btn btn-secondary" onClick={() => setIsCreatingTeacher(!isCreatingTeacher)} disabled={!!editId} style={{ whiteSpace: 'nowrap' }}>
+
                                                     {isCreatingTeacher ? 'Select Existing' : 'Create New'}
                                                 </button>
                                             </div>
@@ -518,7 +526,8 @@ const AdminDashboard = () => {
 
                         {newItemType === 'SubAdmin' && (
                             <form onSubmit={handleSubAdminSubmit}>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                                <div className="grid-mobile-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+
                                     <input
                                         placeholder="Full Name"
                                         className="input-field"
@@ -549,7 +558,8 @@ const AdminDashboard = () => {
 
                         {newItemType === 'Teacher' && (
                             <form onSubmit={handleTeacherSubmit}>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                                <div className="grid-mobile-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+
                                     <input
                                         placeholder="Full Name"
                                         className="input-field"
@@ -599,7 +609,8 @@ const AdminDashboard = () => {
                     <div style={{ background: 'rgba(0,0,0,0.3)', padding: '20px', borderRadius: '8px', marginBottom: '20px' }}>
                         <h3 style={{ marginBottom: '15px' }}>Edit {editingUser.role}: {editingUser.name}</h3>
                         <form onSubmit={handleUserUpdate}>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                            <div className="grid-mobile-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+
                                 <input
                                     placeholder="Full Name"
                                     className="input-field"

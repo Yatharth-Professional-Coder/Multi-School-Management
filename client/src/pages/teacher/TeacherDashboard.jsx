@@ -185,16 +185,19 @@ const TeacherDashboard = () => {
     };
 
     return (
-        <div className="container fade-in" style={{ paddingTop: '40px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+        <div className="container fade-in" style={{ paddingTop: '20px' }}>
+
+            <div className="flex-mobile-col" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', gap: '15px' }}>
                 <div>
                     <h1>Teacher Dashboard</h1>
                     <p style={{ color: 'hsl(var(--text-dim))' }}>Welcome, {user.name}</p>
                 </div>
-                <button onClick={logout} style={{ color: 'hsl(var(--text-dim))', textDecoration: 'underline' }}>Logout</button>
+                <button onClick={logout} className="btn btn-danger" style={{ alignSelf: 'flex-start' }}>Logout</button>
             </div>
 
-            <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap' }}>
+
+            <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'nowrap', overflowX: 'auto', paddingBottom: '10px' }}>
+
                 {['Attendance', 'My Students', 'Homework', 'Results', 'Full Timetable'].filter(tab => {
                     if (tab === 'My Students') return !!teacherClass;
                     if (tab === 'Homework') return user.schoolSettings?.features?.enableHomework !== false;
@@ -207,19 +210,20 @@ const TeacherDashboard = () => {
                 ))}
             </div>
 
-            <div className="glass-panel" style={{ padding: '30px' }}>
+            <div className="glass-panel" style={{ padding: '20px' }}>
+
                 {activeTab === 'Attendance' && (
                     <>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                        <div className="flex-mobile-col" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px', gap: '15px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                                 <h2>Mark Attendance</h2>
                             </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                                <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className="input-field" style={{ width: 'auto' }} />
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <span style={{ color: 'hsl(var(--text-dim))' }}>Period:</span>
+                            <div className="flex-mobile-col w-full-mobile" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className="input-field w-full-mobile" style={{ width: 'auto' }} />
+                                <div className="w-full-mobile" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <span style={{ color: 'hsl(var(--text-dim))', whiteSpace: 'nowrap' }}>Period:</span>
                                     <select
-                                        className="input-field"
+                                        className="input-field w-full-mobile"
                                         style={{ width: 'auto' }}
                                         value={selectedPeriod}
                                         onChange={(e) => setSelectedPeriod(parseInt(e.target.value))}
@@ -231,6 +235,7 @@ const TeacherDashboard = () => {
                                 </div>
                             </div>
                         </div>
+
 
                         {/* Schedule Helper */}
                         {timetable.length > 0 && (
@@ -314,21 +319,23 @@ const TeacherDashboard = () => {
 
                 {activeTab === 'My Students' && (
                     <>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                        <div className="flex-mobile-col" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px', gap: '15px' }}>
                             <div>
                                 <h2>Maintain Roster: {teacherClass?.className}</h2>
                                 <p style={{ color: 'hsl(var(--text-dim))', fontSize: '0.9rem' }}>You are the incharge of this class.</p>
                             </div>
-                            <button className="btn btn-secondary" onClick={() => setShowAddForm(true)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <button className="btn btn-secondary w-full-mobile" onClick={() => setShowAddForm(true)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <FaUserPlus /> Add Student
                             </button>
                         </div>
+
 
                         {showAddForm && (
                             <div style={{ background: 'rgba(0,0,0,0.3)', padding: '20px', borderRadius: '8px', marginBottom: '20px' }}>
                                 <h3 style={{ marginBottom: '15px' }}>Add New Student</h3>
                                 <form onSubmit={handleStudentSubmit}>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                                    <div className="grid-mobile-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+
                                         <input
                                             placeholder="Full Name"
                                             className="input-field"
@@ -362,7 +369,8 @@ const TeacherDashboard = () => {
                             <div style={{ background: 'rgba(0,0,0,0.3)', padding: '20px', borderRadius: '8px', marginBottom: '20px' }}>
                                 <h3 style={{ marginBottom: '15px' }}>Edit Student: {editingStudent.name}</h3>
                                 <form onSubmit={handleStudentUpdate}>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                                    <div className="grid-mobile-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+
                                         <input
                                             placeholder="Full Name"
                                             className="input-field"
@@ -430,7 +438,8 @@ const TeacherDashboard = () => {
                 )}
 
                 {activeTab === 'Homework' && (
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
+                    <div className="grid-mobile-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
+
                         <div>
                             <h3>Assign Homework</h3>
                             <form onSubmit={submitHomework} style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '15px' }}>
@@ -462,7 +471,8 @@ const TeacherDashboard = () => {
                 {activeTab === 'Results' && (
                     <div>
                         <h3>Upload Results</h3>
-                        <form onSubmit={submitResult} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginTop: '20px' }}>
+                        <form onSubmit={submitResult} className="grid-mobile-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginTop: '20px' }}>
+
                             <select className="input-field" value={resultData.studentId} onChange={e => setResultData({ ...resultData, studentId: e.target.value })} required>
                                 <option value="">Select Student</option>
                                 {students.map(s => <option key={s._id} value={s._id}>{s.name}</option>)}

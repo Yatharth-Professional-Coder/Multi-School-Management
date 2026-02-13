@@ -59,17 +59,20 @@ const SubAdminDashboard = () => {
     };
 
     return (
-        <div className="container fade-in" style={{ paddingTop: '40px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+        <div className="container fade-in" style={{ paddingTop: '20px' }}>
+
+            <div className="flex-mobile-col" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', gap: '15px' }}>
                 <div>
                     <h1>Sub Admin Dashboard</h1>
                     <p style={{ color: 'hsl(var(--text-dim))' }}>Hello, {user.name}</p>
                 </div>
-                <button onClick={logout} style={{ color: 'hsl(var(--accent))', textDecoration: 'underline' }}>Logout</button>
+                <button onClick={logout} className="btn btn-danger" style={{ alignSelf: 'flex-start' }}>Logout</button>
             </div>
 
+
+
             {/* Quick Stats */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '40px' }}>
+            <div className="grid-mobile-1" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '40px' }}>
                 <div className="glass-panel" style={{ padding: '20px', display: 'flex', alignItems: 'center' }}>
                     <div style={{ padding: '15px', background: 'rgba(100, 255, 150, 0.2)', borderRadius: '12px', marginRight: '15px' }}>
                         <FaUserGraduate size={24} color="#64ff96" />
@@ -82,21 +85,22 @@ const SubAdminDashboard = () => {
             </div>
 
             {/* Actions */}
-            <div style={{ marginBottom: '30px', display: 'flex', gap: '10px' }}>
+            <div style={{ marginBottom: '30px', display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '10px', whiteSpace: 'nowrap' }}>
                 <button className={`btn ${activeTab === 'Students' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('Students')}>Students</button>
                 <button className={`btn ${activeTab === 'Attendance' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('Attendance')}>Attendance</button>
             </div>
 
             {/* Content Area */}
-            <div className="glass-panel" style={{ padding: '30px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+            <div className="glass-panel" style={{ padding: '20px' }}>
+                <div className="flex-mobile-col" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', alignItems: 'flex-start', gap: '15px' }}>
                     <h2 style={{ color: 'hsl(var(--white))' }}>{activeTab} Management</h2>
                     {activeTab === 'Students' && (
-                        <button className="btn btn-primary" onClick={() => setShowForm(true)}>
+                        <button className="btn btn-primary w-full-mobile" onClick={() => setShowForm(true)}>
                             <FaUserPlus style={{ marginRight: '8px' }} /> Add Student
                         </button>
                     )}
                 </div>
+
 
                 {showForm && (
                     <div style={{ background: 'rgba(0,0,0,0.3)', padding: '20px', borderRadius: '8px', marginBottom: '20px' }}>
@@ -190,7 +194,7 @@ const SubAdminDashboard = () => {
                     </div>
                 )}
             </div>
-        </div>
+        </div >
     );
 };
 

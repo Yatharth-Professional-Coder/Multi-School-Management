@@ -62,17 +62,20 @@ const StudentDashboard = () => {
     };
 
     return (
-        <div className="container fade-in" style={{ paddingTop: '40px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+        <div className="container fade-in" style={{ paddingTop: '20px' }}>
+
+            <div className="flex-mobile-col" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', gap: '15px' }}>
                 <div>
                     <h1>Student Portal</h1>
                     <p style={{ color: 'hsl(var(--text-dim))' }}>Welcome, {user.name}</p>
                 </div>
-                <button onClick={logout} style={{ color: 'hsl(var(--text-dim))', textDecoration: 'underline' }}>Logout</button>
+                <button onClick={logout} className="btn btn-danger" style={{ alignSelf: 'flex-start' }}>Logout</button>
             </div>
 
+
             {/* Stats Overview */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '30px' }}>
+            <div className="grid-mobile-1" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '30px' }}>
+
                 {user.schoolSettings?.features?.enableAttendance !== false && (
                     <div onClick={() => setActiveTab('Attendance')} className="glass-panel" style={{ padding: '20px', cursor: 'pointer', border: activeTab === 'Attendance' ? '1px solid hsl(var(--primary))' : '' }}>
                         <FaClipboardList size={24} style={{ marginBottom: '10px', color: '#32c8ff' }} />
