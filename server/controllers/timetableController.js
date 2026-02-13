@@ -9,24 +9,49 @@ const createTimetableEntry = async (req, res) => {
     const schoolId = req.user.schoolId;
 
     try {
-        // 1. Validation: Ensure period is positive
+        // 1. Validation: Basic checks
+        if (!startTime || !endTime) {
+            return res.status(400).json({ message: 'Start and End times are required' });
+        }
         if (period < 1) {
             return res.status(400).json({ message: 'Period number must be a positive integer' });
         }
-
-        // 2. Validation: Ensure class doesn't already have this period (covered by unique index, but good to handle explicitly)
-        const classConflict = await Timetable.findOne({ classId, day, period });
-        if (classConflict) {
-            return res.status(400).json({ message: `Class already has a period (P${period}) scheduled for ${day}` });
+        if (startTime >= endTime) {
+            return res.status(400).json({ message: 'Start time must be before End time' });
         }
 
-        // 3. Validation: Ensure teacher isn't double-booked
+        // Helper to check for overlaps
+        const checkOverlap = async (queryType, id) => {
+            const query = { day };
+            if (queryType === 'class') query.classId = id;
+            else query.teacherId = id;
+
+            const existingEntries = await Timetable.find(query);
+            for (const entry of existingEntries) {
+                // Check if current [startTime, endTime] overlaps with entry [entry.startTime, entry.endTime]
+                // Overlap condition: (StartA < EndB) and (EndA > StartB)
+                if (startTime < entry.endTime && endTime > entry.startTime) {
+                    return entry;
+                }
+            }
+            return null;
+        };
+
+        // 2. Validation: Class Overlap
+        const classOverlap = await checkOverlap('class', classId);
+        if (classOverlap) {
+            return res.status(400).json({
+                message: `Class already has a scheduled period (${classOverlap.subject}) at this time (${classOverlap.startTime} - ${classOverlap.endTime})`
+            });
+        }
+
+        // 3. Validation: Teacher Overlap
         if (!isBreak && teacherId) {
-            const teacherConflict = await Timetable.findOne({ teacherId, day, period });
-            if (teacherConflict) {
-                const conflictClass = await Class.findById(teacherConflict.classId);
+            const teacherOverlap = await checkOverlap('teacher', teacherId);
+            if (teacherOverlap) {
+                const conflictClass = await Class.findById(teacherOverlap.classId);
                 return res.status(400).json({
-                    message: `Teacher is already busy with ${conflictClass?.className} during P${period} on ${day}`
+                    message: `Teacher is already busy with ${conflictClass?.className} at this time (${teacherOverlap.startTime} - ${teacherOverlap.endTime})`
                 });
             }
         }
