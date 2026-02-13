@@ -30,15 +30,19 @@ const TeacherDashboard = () => {
         headers: { Authorization: `Bearer ${user.token}` },
     };
 
+    // Initial data fetch on mount
     useEffect(() => {
-        // Attendance tab fetch is handled by period-sync effect
+        fetchTeacherClass();
+        fetchTimetable();
+    }, []);
+
+    // Tab-specific fetching
+    useEffect(() => {
         if (activeTab === 'My Students' && teacherClass) {
             fetchStudents(teacherClass._id);
         } else if (activeTab === 'Homework') {
             fetchHomework();
         }
-        fetchTeacherClass();
-        fetchTimetable();
     }, [activeTab, teacherClass]);
 
     const fetchTeacherClass = async () => {
@@ -119,12 +123,14 @@ const TeacherDashboard = () => {
             const periodEntry = timetable.find(p => p.day === dayOfWeek && p.period === selectedPeriod);
 
             if (periodEntry && !periodEntry.isBreak && periodEntry.classId) {
+                // Only re-fetch if we don't have students yet or the class changed
+                // This prevents resetting the local 'attendance' state while marking
                 fetchStudents(periodEntry.classId._id);
             } else {
                 setStudents([]); // Clear list if it's a break or no class scheduled
             }
         }
-    }, [selectedPeriod, selectedDate, timetable, activeTab]);
+    }, [selectedPeriod, selectedDate, timetable.length, activeTab]); // Using length to avoid unnecessary triggers
 
     const handleAttendanceChange = (studentId, status) => {
         setAttendance(prev => ({ ...prev, [studentId]: status }));

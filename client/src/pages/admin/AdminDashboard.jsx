@@ -14,6 +14,7 @@ const AdminDashboard = () => {
     const [showRegisterForm, setShowRegisterForm] = useState(false);
     const [editingUser, setEditingUser] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [rectifications, setRectifications] = useState([]);
 
     // Form States
     const [newItemType, setNewItemType] = useState('Class'); // 'Class', 'SubAdmin'
@@ -111,6 +112,15 @@ const AdminDashboard = () => {
         }
     };
 
+    const fetchRectifications = async () => {
+        try {
+            const { data } = await api.get('/api/attendance/pending', config);
+            setRectifications(data);
+        } catch (error) {
+            console.error("Error fetching rectifications", error);
+        }
+    };
+
     const handleTimetableSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -151,6 +161,7 @@ const AdminDashboard = () => {
         fetchClasses();
         fetchSubAdmins();
         fetchTeachers(); // Need teachers for class assignment
+        fetchRectifications(); // Fetch once for tab badge
     }, []);
 
     useEffect(() => {
@@ -159,6 +170,9 @@ const AdminDashboard = () => {
         }
         if (activeTab === 'Announcements') {
             fetchAnnouncements();
+        }
+        if (activeTab === 'Rectification Requests') {
+            fetchRectifications();
         }
     }, [activeTab]);
 
@@ -313,6 +327,17 @@ const AdminDashboard = () => {
         }
     };
 
+    const handleRectifyAction = async (attendanceId, status) => {
+        if (!window.confirm(`Are you sure you want to ${status.toLowerCase()} this request?`)) return;
+        try {
+            await api.put('/api/attendance/rectify/approve', { attendanceId, status }, config);
+            alert(`Request ${status}`);
+            fetchRectifications();
+        } catch (error) {
+            alert('Error updating rectification');
+        }
+    };
+
     const closeForm = () => {
         setShowForm(false);
         setEditId(null);
@@ -402,13 +427,18 @@ const AdminDashboard = () => {
                     if (tab === 'Timetable') return user.schoolSettings?.features?.enableTimetable !== false;
                     if (tab === 'Teacher Attendance') return user.schoolSettings?.features?.enableAttendance !== false;
                     return true;
-                }).map(tab => (
+                }).concat('Rectification Requests').map(tab => (
                     <button
                         key={tab}
                         className={`btn ${activeTab === tab ? 'btn-primary' : ''}`}
                         onClick={() => { setActiveTab(tab); setSelectedClass(null); setSelectedTimetableClass(null); }}
                     >
                         {tab === 'SubAdmins' ? 'Sub Admins' : tab}
+                        {tab === 'Rectification Requests' && rectifications.length > 0 && (
+                            <span style={{ marginLeft: '8px', background: '#ff6b6b', padding: '2px 6px', borderRadius: '10px', fontSize: '0.7rem' }}>
+                                {rectifications.length}
+                            </span>
+                        )}
                     </button>
                 ))}
             </div>
@@ -873,6 +903,35 @@ const AdminDashboard = () => {
                             </div>
                         ))}
                         {announcements.length === 0 && <p style={{ textAlign: 'center', color: 'hsl(var(--text-dim))' }}>No announcements found</p>}
+                    </div>
+                )}
+
+                {activeTab === 'Rectification Requests' && (
+                    <div style={{ overflowX: 'auto' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                            <thead>
+                                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                                    <th style={{ textAlign: 'left', padding: '15px' }}>Student</th>
+                                    <th style={{ textAlign: 'left', padding: '15px' }}>Date / Period</th>
+                                    <th style={{ textAlign: 'left', padding: '15px' }}>Reason</th>
+                                    <th style={{ textAlign: 'right', padding: '15px' }}>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {rectifications.map(rect => (
+                                    <tr key={rect._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                        <td style={{ padding: '15px' }}>{rect.userId?.name} <br /> <small style={{ color: 'hsl(var(--text-dim))' }}>{rect.userId?.email}</small></td>
+                                        <td style={{ padding: '15px' }}>{new Date(rect.date).toLocaleDateString()} (P{rect.period})</td>
+                                        <td style={{ padding: '15px' }}>{rect.rectificationRequest?.reason}</td>
+                                        <td style={{ padding: '15px', textAlign: 'right' }}>
+                                            <button className="btn btn-primary" onClick={() => handleRectifyAction(rect._id, 'Approved')} style={{ fontSize: '0.8rem', padding: '5px 10px', marginRight: '5px' }}>Approve</button>
+                                            <button className="btn btn-secondary" onClick={() => handleRectifyAction(rect._id, 'Rejected')} style={{ fontSize: '0.8rem', padding: '5px 10px', color: '#ff6b6b' }}>Reject</button>
+                                        </td>
+                                    </tr>
+                                ))}
+                                {rectifications.length === 0 && <tr><td colSpan="4" style={{ padding: '20px', textAlign: 'center', color: 'hsl(var(--text-dim))' }}>No pending rectification requests</td></tr>}
+                            </tbody>
+                        </table>
                     </div>
                 )}
                 {activeTab === 'Timetable' && (
