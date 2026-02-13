@@ -209,9 +209,28 @@ const TeacherDashboard = () => {
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                                 <h2>Mark Attendance</h2>
-                                <button className="btn btn-secondary" onClick={() => setShowAddForm(true)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <FaUserPlus /> Add Student
-                                </button>
+                                {(() => {
+                                    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                                    const dayOfWeek = days[new Date(selectedDate).getDay()];
+                                    const currentEntry = timetable.find(p => p.day === dayOfWeek && p.period === selectedPeriod);
+                                    const currentClassId = currentEntry?.classId?._id;
+                                    const isClassIncharge = teacherClass && currentClassId && teacherClass._id === currentClassId;
+
+                                    if (isClassIncharge) {
+                                        return (
+                                            <button className="btn btn-secondary" onClick={() => setShowAddForm(true)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <FaUserPlus /> Add Student
+                                            </button>
+                                        );
+                                    } else if (currentClassId) {
+                                        return (
+                                            <span style={{ fontSize: '0.8rem', color: 'hsl(var(--text-dim))', fontStyle: 'italic' }}>
+                                                (Only Class Incharge can add students)
+                                            </span>
+                                        );
+                                    }
+                                    return null;
+                                })()}
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                                 <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className="input-field" style={{ width: 'auto' }} />
