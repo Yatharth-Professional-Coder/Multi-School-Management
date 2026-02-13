@@ -47,4 +47,13 @@ const superAdmin = (req, res, next) => {
     }
 };
 
-module.exports = { protect, admin, superAdmin };
+const staff = (req, res, next) => {
+    if (req.user && ['Admin', 'SuperAdmin', 'SubAdmin', 'Teacher'].includes(req.user.role)) {
+        next();
+    } else {
+        res.status(401);
+        throw new Error('Not authorized as staff');
+    }
+};
+
+module.exports = { protect, admin, superAdmin, staff };

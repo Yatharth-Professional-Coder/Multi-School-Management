@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const { addUser, getUsers, getUserById, updateUser, deleteUser } = require('../controllers/userController');
-const { protect, admin } = require('../middleware/authMiddleware');
+const { protect, admin, staff } = require('../middleware/authMiddleware');
 
 router.route('/')
-    .post(protect, admin, addUser)
-    .get(protect, admin, getUsers);
+    .post(protect, staff, addUser)
+    .get(protect, staff, getUsers);
 
 router.route('/:id')
     .get(protect, getUserById)
