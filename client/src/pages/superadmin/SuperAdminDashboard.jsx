@@ -110,6 +110,30 @@ const SuperAdminDashboard = () => {
         }
     };
 
+    const handleApproveSchool = async (id) => {
+        try {
+            await api.put(`/api/schools/${id}/approve`, {}, config);
+            alert('School approved successfully');
+            fetchSchools();
+        } catch (error) {
+            console.error(error);
+            alert('Error approving school');
+        }
+    };
+
+    const handleRejectSchool = async (id) => {
+        if (window.confirm('Are you sure you want to REJECT this school registration? This will permanently delete the school and its admin account.')) {
+            try {
+                await api.delete(`/api/schools/${id}/reject`, config);
+                alert('School rejected and removed');
+                fetchSchools();
+            } catch (error) {
+                console.error(error);
+                alert('Error rejecting school');
+            }
+        }
+    };
+
 
 
     const handleUserUpdate = async (e) => {
@@ -199,42 +223,74 @@ const SuperAdminDashboard = () => {
                 </div>
             )}
 
-            {/* Main School List */}
-            {!selectedSchool && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
-                    {schools.map(school => (
-                        <div key={school._id} className="glass-panel" style={{ padding: '20px', cursor: 'pointer', transition: 'transform 0.2s' }}
-                            onClick={() => handleSchoolClick(school)}
-                            onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
-                            onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-                        >
-                            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '15px' }}>
-                                <div style={{
-                                    width: '50px', height: '50px', borderRadius: '50%',
-                                    background: 'rgba(255,255,255,0.1)', display: 'flex',
-                                    alignItems: 'center', justifyContent: 'center', marginRight: '15px'
-                                }}>
-                                    <FaSchool size={24} />
+            {/* Pending Approvals */}
+            {!selectedSchool && schools.some(s => !s.isApproved) && (
+                <div style={{ marginBottom: '40px' }}>
+                    <h2 style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#ff9800' }}></span>
+                        Pending Approvals
+                    </h2>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
+                        {schools.filter(s => !s.isApproved).map(school => (
+                            <div key={school._id} className="glass-panel" style={{ padding: '20px', border: '1px solid rgba(255, 152, 0, 0.3)' }}>
+                                <div style={{ marginBottom: '15px' }}>
+                                    <h3 style={{ marginBottom: '5px' }}>{school.name}</h3>
+                                    <p style={{ fontSize: '0.85rem', opacity: 0.7 }}>{school.address}</p>
                                 </div>
-                                <div>
-                                    <h3 style={{ fontSize: '1.2rem' }}>{school.name}</h3>
-                                    <span style={{
-                                        fontSize: '0.8rem', padding: '4px 8px', borderRadius: '20px',
-                                        background: school.subscriptionPlan === 'Premium' ? 'gold' : 'rgba(255,255,255,0.1)',
-                                        color: school.subscriptionPlan === 'Premium' ? '#000' : 'inherit'
-                                    }}>
-                                        {school.subscriptionPlan} Plan
-                                    </span>
+                                <div style={{ fontSize: '0.9rem', marginBottom: '15px' }}>
+                                    <p><strong>Principal:</strong> {school.adminId?.name || 'N/A'}</p>
+                                    <p><strong>Email:</strong> {school.adminId?.email || 'N/A'}</p>
+                                    <p><strong>Plan:</strong> {school.subscriptionPlan}</p>
+                                </div>
+                                <div style={{ display: 'flex', gap: '10px' }}>
+                                    <button className="btn btn-primary" style={{ flex: 1, fontSize: '0.85rem' }} onClick={() => handleApproveSchool(school._id)}>Approve</button>
+                                    <button className="btn btn-secondary" style={{ flex: 1, fontSize: '0.85rem', color: '#ff6b6b' }} onClick={() => handleRejectSchool(school._id)}>Reject</button>
                                 </div>
                             </div>
-                            <p style={{ color: 'hsl(var(--text-dim))', fontSize: '0.9rem', marginBottom: '8px' }}>
-                                <strong>Principal:</strong> {school.adminId?.name || 'N/A'}
-                            </p>
-                            <p style={{ color: 'hsl(var(--text-dim))', fontSize: '0.9rem' }}>
-                                <strong>Contact:</strong> {school.contact}
-                            </p>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Main School List */}
+            {!selectedSchool && (
+                <div>
+                    <h2 style={{ marginBottom: '20px' }}>Approved Schools</h2>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
+                        {schools.filter(s => s.isApproved).map(school => (
+                            <div key={school._id} className="glass-panel" style={{ padding: '20px', cursor: 'pointer', transition: 'transform 0.2s' }}
+                                onClick={() => handleSchoolClick(school)}
+                                onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
+                                onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                            >
+                                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '15px' }}>
+                                    <div style={{
+                                        width: '50px', height: '50px', borderRadius: '50%',
+                                        background: 'rgba(255,255,255,0.1)', display: 'flex',
+                                        alignItems: 'center', justifyContent: 'center', marginRight: '15px'
+                                    }}>
+                                        <FaSchool size={24} />
+                                    </div>
+                                    <div>
+                                        <h3 style={{ fontSize: '1.2rem' }}>{school.name}</h3>
+                                        <span style={{
+                                            fontSize: '0.8rem', padding: '4px 8px', borderRadius: '20px',
+                                            background: school.subscriptionPlan === 'Premium' ? 'gold' : 'rgba(255,255,255,0.1)',
+                                            color: school.subscriptionPlan === 'Premium' ? '#000' : 'inherit'
+                                        }}>
+                                            {school.subscriptionPlan} Plan
+                                        </span>
+                                    </div>
+                                </div>
+                                <p style={{ color: 'hsl(var(--text-dim))', fontSize: '0.9rem', marginBottom: '8px' }}>
+                                    <strong>Principal:</strong> {school.adminId?.name || 'N/A'}
+                                </p>
+                                <p style={{ color: 'hsl(var(--text-dim))', fontSize: '0.9rem' }}>
+                                    <strong>Contact:</strong> {school.contact}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             )}
 

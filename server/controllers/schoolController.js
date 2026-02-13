@@ -14,6 +14,7 @@ const createSchool = async (req, res) => {
             address,
             contact,
             subscriptionPlan,
+            isApproved: true, // Schools created manually by SuperAdmin are auto-approved
         });
 
         // 2. Create the Admin (Principal) for this school
@@ -93,4 +94,36 @@ const deleteSchool = async (req, res) => {
     }
 };
 
-module.exports = { createSchool, getSchools, updateSchool, deleteSchool };
+const approveSchool = async (req, res) => {
+    try {
+        const school = await School.findById(req.params.id);
+        if (school) {
+            school.isApproved = true;
+            await school.save();
+            res.json({ message: 'School approved successfully', school });
+        } else {
+            res.status(404).json({ message: 'School not found' });
+        }
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
+const rejectSchool = async (req, res) => {
+    try {
+        const school = await School.findById(req.params.id);
+        if (school) {
+            // Delete all users associated with this school
+            await User.deleteMany({ schoolId: school._id });
+            // Delete the school
+            await school.deleteOne();
+            res.json({ message: 'School registration rejected and removed' });
+        } else {
+            res.status(404).json({ message: 'School not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+module.exports = { createSchool, getSchools, updateSchool, deleteSchool, approveSchool, rejectSchool };

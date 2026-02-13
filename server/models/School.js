@@ -22,6 +22,10 @@ const schoolSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
     },
+    isApproved: {
+        type: Boolean,
+        default: false,
+    },
 }, { timestamps: true });
 
 module.exports = mongoose.model('School', schoolSchema);

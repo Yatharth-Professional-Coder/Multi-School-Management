@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { createSchool, getSchools, updateSchool, deleteSchool } = require('../controllers/schoolController');
+const { createSchool, getSchools, updateSchool, deleteSchool, approveSchool, rejectSchool } = require('../controllers/schoolController');
 const { protect, superAdmin } = require('../middleware/authMiddleware');
 
 router.route('/')
@@ -10,6 +10,9 @@ router.route('/')
 router.route('/:id')
     .put(protect, superAdmin, updateSchool)
     .delete(protect, superAdmin, deleteSchool);
+
+router.put('/:id/approve', protect, superAdmin, approveSchool);
+router.delete('/:id/reject', protect, superAdmin, rejectSchool);
 
 router.post('/register', createSchool); // Public registration for new schools
 

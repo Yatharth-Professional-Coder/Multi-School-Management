@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const School = require('../models/School');
 const jwt = require('jsonwebtoken');
 
 const generateToken = (id) => {
@@ -14,15 +15,28 @@ const loginUser = async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ email }).populate('schoolId');
 
         if (user && (await user.matchPassword(password))) {
+            // Check if school is approved (SuperAdmin bypass)
+            if (user.role !== 'SuperAdmin') {
+                if (!user.schoolId) {
+                    return res.status(403).json({ message: 'User is not associated with any school' });
+                }
+                if (!user.schoolId.isApproved) {
+                    return res.status(403).json({
+                        message: 'School pending approval. Please contact support.',
+                        isPending: true
+                    });
+                }
+            }
+
             res.json({
                 _id: user._id,
                 name: user.name,
                 email: user.email,
                 role: user.role,
-                schoolId: user.schoolId,
+                schoolId: user.schoolId?._id,
                 childId: user.childId,
                 studentClass: user.studentClass,
                 token: generateToken(user._id),
