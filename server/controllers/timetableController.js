@@ -107,19 +107,28 @@ const getTeacherTimetable = async (req, res) => {
 const updateTimetableEntry = async (req, res) => {
     try {
         const timetableEntry = await Timetable.findById(req.params.id);
-        if (timetableEntry) {
-            timetableEntry.teacherId = req.body.teacherId || timetableEntry.teacherId;
-            timetableEntry.subject = req.body.subject || timetableEntry.subject;
-            timetableEntry.day = req.body.day || timetableEntry.day;
-            timetableEntry.period = req.body.period || timetableEntry.period;
-            timetableEntry.startTime = req.body.startTime || timetableEntry.startTime;
-            timetableEntry.endTime = req.body.endTime || timetableEntry.endTime;
-
-            const updatedEntry = await timetableEntry.save();
-            res.json(updatedEntry);
-        } else {
-            res.status(404).json({ message: 'Timetable entry not found' });
+        if (!timetableEntry) {
+            return res.status(404).json({ message: 'Timetable entry not found' });
         }
+
+        const updateData = {
+            classId: timetableEntry.classId,
+            teacherId: req.body.teacherId !== undefined ? req.body.teacherId : timetableEntry.teacherId,
+            subject: req.body.subject || timetableEntry.subject,
+            day: req.body.day || timetableEntry.day,
+            period: req.body.period || timetableEntry.period,
+            startTime: req.body.startTime || timetableEntry.startTime,
+            endTime: req.body.endTime || timetableEntry.endTime,
+            isBreak: req.body.isBreak !== undefined ? req.body.isBreak : timetableEntry.isBreak
+        };
+
+        // Validate the updated data against others (excluding self)
+        await validateTimetableEntry(updateData, timetableEntry._id);
+
+        Object.assign(timetableEntry, updateData);
+        const updatedEntry = await timetableEntry.save();
+        res.json(updatedEntry);
+
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
