@@ -513,8 +513,7 @@ const AdminDashboard = () => {
                                         required
                                     />
                                     <input
-                                        type="email"
-                                        placeholder="Email Address"
+                                        placeholder="Email / Username"
                                         className="input-field"
                                         value={subAdminData.email}
                                         onChange={(e) => setSubAdminData({ ...subAdminData, email: e.target.value })}
