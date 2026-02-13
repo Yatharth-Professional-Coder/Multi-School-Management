@@ -66,7 +66,7 @@ const addUser = async (req, res) => {
 // @access  Private/Admin
 const getUsers = async (req, res) => {
     let schoolId = req.user.schoolId;
-    const { role } = req.query; // Optional filter by role
+    const { role, classId } = req.query; // Optional filters
 
     // Allow SuperAdmin to view users of any school if schoolId is provided in query
     if (req.user.role === 'SuperAdmin' && req.query.schoolId) {
@@ -84,6 +84,10 @@ const getUsers = async (req, res) => {
 
         if (role) {
             query.role = role;
+        }
+
+        if (classId) {
+            query.studentClass = classId;
         }
 
         const users = await User.find(query).select('-password');

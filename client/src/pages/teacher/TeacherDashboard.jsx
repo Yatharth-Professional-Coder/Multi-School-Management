@@ -28,7 +28,8 @@ const TeacherDashboard = () => {
     };
 
     useEffect(() => {
-        fetchStudents();
+        // fetchStudents is now handled by period-sync effect for Attendance tab
+        if (activeTab !== 'Attendance') fetchStudents();
         fetchTeacherClass();
         fetchTimetable();
         if (activeTab === 'Homework') fetchHomework();
@@ -44,9 +45,12 @@ const TeacherDashboard = () => {
         }
     };
 
-    const fetchStudents = async () => {
+    const fetchStudents = async (classId) => {
         try {
-            const { data } = await api.get(`/api/users?role=Student`, config);
+            let url = `/api/users?role=Student`;
+            if (classId) url += `&classId=${classId}`;
+
+            const { data } = await api.get(url, config);
             setStudents(data);
             const initialAttendance = {};
             data.forEach(student => { initialAttendance[student._id] = 'Present'; });
@@ -73,12 +77,31 @@ const TeacherDashboard = () => {
             const today = days[new Date().getDay()];
             const todaysPeriods = sorted.filter(p => p.day === today);
             if (todaysPeriods.length > 0) {
-                setSelectedPeriod(todaysPeriods[0].period);
+                const firstPeriod = todaysPeriods[0];
+                setSelectedPeriod(firstPeriod.period);
+                if (!firstPeriod.isBreak && firstPeriod.classId) {
+                    fetchStudents(firstPeriod.classId._id);
+                }
             }
         } catch (error) {
             console.error("Error fetching timetable", error);
         }
     };
+
+    // Effect to fetch students whenever period or day changes
+    useEffect(() => {
+        if (activeTab === 'Attendance' && timetable.length > 0) {
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const dayOfWeek = days[new Date(selectedDate).getDay()];
+            const periodEntry = timetable.find(p => p.day === dayOfWeek && p.period === selectedPeriod);
+
+            if (periodEntry && !periodEntry.isBreak && periodEntry.classId) {
+                fetchStudents(periodEntry.classId._id);
+            } else {
+                setStudents([]); // Clear list if it's a break or no class scheduled
+            }
+        }
+    }, [selectedPeriod, selectedDate, timetable, activeTab]);
 
     const handleAttendanceChange = (studentId, status) => {
         setAttendance(prev => ({ ...prev, [studentId]: status }));
@@ -210,30 +233,40 @@ const TeacherDashboard = () => {
 
                         {/* Schedule Helper */}
                         {timetable.length > 0 && (
-                            <div style={{ marginBottom: '20px', display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '10px' }}>
-                                {timetable
-                                    .filter(p => p.day === ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][new Date(selectedDate).getDay()])
-                                    .map(p => (
-                                        <div
-                                            key={p._id}
-                                            onClick={() => !p.isBreak && setSelectedPeriod(p.period)}
-                                            style={{
-                                                minWidth: '150px',
-                                                padding: '12px',
-                                                borderRadius: '8px',
-                                                background: p.isBreak ? 'rgba(255, 100, 100, 0.1)' : selectedPeriod === p.period ? 'rgba(50, 200, 255, 0.2)' : 'rgba(255,255,255,0.05)',
-                                                border: p.isBreak ? '1px solid rgba(255, 100, 100, 0.3)' : selectedPeriod === p.period ? '1px solid #32c8ff' : '1px solid transparent',
-                                                cursor: p.isBreak ? 'default' : 'pointer',
-                                                opacity: p.isBreak ? 0.7 : 1
-                                            }}
-                                        >
-                                            <div style={{ fontWeight: 'bold', color: p.isBreak ? '#ff6464' : selectedPeriod === p.period ? '#32c8ff' : 'inherit' }}>
-                                                P{p.period}: {p.subject} {p.isBreak && '(Break)'}
+                            <div style={{ marginBottom: '20px' }}>
+                                <div style={{ marginBottom: '10px', color: 'hsl(var(--accent))', fontWeight: 'bold' }}>
+                                    {(() => {
+                                        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                                        const dayOfWeek = days[new Date(selectedDate).getDay()];
+                                        const current = timetable.find(p => p.day === dayOfWeek && p.period === selectedPeriod);
+                                        return current ? (current.isBreak ? "Current: Break Time" : `Current Class: ${current.classId?.className || 'Unknown'}`) : "No class scheduled for this period";
+                                    })()}
+                                </div>
+                                <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '10px' }}>
+                                    {timetable
+                                        .filter(p => p.day === ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][new Date(selectedDate).getDay()])
+                                        .map(p => (
+                                            <div
+                                                key={p._id}
+                                                onClick={() => !p.isBreak && setSelectedPeriod(p.period)}
+                                                style={{
+                                                    minWidth: '150px',
+                                                    padding: '12px',
+                                                    borderRadius: '8px',
+                                                    background: p.isBreak ? 'rgba(255, 100, 100, 0.1)' : selectedPeriod === p.period ? 'rgba(50, 200, 255, 0.2)' : 'rgba(255,255,255,0.05)',
+                                                    border: p.isBreak ? '1px solid rgba(255, 100, 100, 0.3)' : selectedPeriod === p.period ? '1px solid #32c8ff' : '1px solid transparent',
+                                                    cursor: p.isBreak ? 'default' : 'pointer',
+                                                    opacity: p.isBreak ? 0.7 : 1
+                                                }}
+                                            >
+                                                <div style={{ fontWeight: 'bold', color: p.isBreak ? '#ff6464' : selectedPeriod === p.period ? '#32c8ff' : 'inherit' }}>
+                                                    P{p.period}: {p.subject} {p.isBreak && '(Break)'}
+                                                </div>
+                                                <div style={{ fontSize: '0.8rem', color: 'hsl(var(--text-dim))' }}>{p.isBreak ? 'Break' : p.classId?.className}</div>
+                                                <div style={{ fontSize: '0.7rem' }}>{p.startTime} - {p.endTime}</div>
                                             </div>
-                                            <div style={{ fontSize: '0.8rem', color: 'hsl(var(--text-dim))' }}>{p.isBreak ? 'Break' : p.classId?.className}</div>
-                                            <div style={{ fontSize: '0.7rem' }}>{p.startTime} - {p.endTime}</div>
-                                        </div>
-                                    ))}
+                                        ))}
+                                </div>
                             </div>
                         )}
 
