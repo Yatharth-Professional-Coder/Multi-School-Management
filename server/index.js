@@ -36,6 +36,7 @@ app.use('/api/attendance', attendanceRoutes);
 app.use('/api/results', resultRoutes);
 app.use('/api/homework', homeworkRoutes);
 app.use('/api/announcements', announcementRoutes);
+app.use('/api/timetable', timetableRoutes);
 
 app.get('/', (req, res) => {
     res.send('School Management System API is running');
