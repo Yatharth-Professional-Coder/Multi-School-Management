@@ -1,5 +1,11 @@
 const Class = require('../models/Class');
 const Section = require('../models/Section');
+const User = require('../models/User');
+const Attendance = require('../models/Attendance');
+const Timetable = require('../models/Timetable');
+const Result = require('../models/Result');
+const Homework = require('../models/Homework');
+const Announcement = require('../models/Announcement');
 
 // @desc    Create a new class
 // @route   POST /api/classes
@@ -97,8 +103,24 @@ const deleteClass = async (req, res) => {
         const classDoc = await Class.findById(req.params.id);
 
         if (classDoc) {
+            const classId = classDoc._id;
+
+            // Cascading Delete: Remove all data associated with this class
+            await Section.deleteMany({ classId });
+            await Attendance.deleteMany({ classId });
+            await Timetable.deleteMany({ classId });
+            await Result.deleteMany({ classId });
+            await Homework.deleteMany({ classId });
+            await Announcement.deleteMany({ classId });
+
+            // Update Users: Unset studentClass for all students in this class
+            await User.updateMany(
+                { studentClass: classId },
+                { $set: { studentClass: null } }
+            );
+
             await classDoc.deleteOne();
-            res.json({ message: 'Class removed' });
+            res.json({ message: 'Class and all associated data removed successfully' });
         } else {
             res.status(404).json({ message: 'Class not found' });
         }

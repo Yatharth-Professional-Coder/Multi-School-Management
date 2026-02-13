@@ -1,4 +1,6 @@
 const User = require('../models/User');
+const Attendance = require('../models/Attendance');
+const Result = require('../models/Result');
 
 // @desc    Add a user (Teacher, Student, SubAdmin)
 // @route   POST /api/users
@@ -194,8 +196,19 @@ const deleteUser = async (req, res) => {
                 return res.status(403).json({ message: 'Not authorized to delete users' });
             }
 
+            const userId = user._id;
+
+            // Cascading Delete: Remove all data associated with this user
+            if (user.role === 'Student') {
+                await Attendance.deleteMany({ studentId: userId });
+                await Result.deleteMany({ studentId: userId });
+            } else if (user.role === 'Teacher') {
+                // Remove attendance records marked by this teacher or where they are the subject teacher
+                await Attendance.deleteMany({ teacherId: userId });
+            }
+
             await user.deleteOne();
-            res.json({ message: 'User removed' });
+            res.json({ message: `User (${user.role}) and all associated records removed` });
         } else {
             res.status(404).json({ message: 'User not found' });
         }
