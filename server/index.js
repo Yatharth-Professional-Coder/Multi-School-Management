@@ -25,6 +25,7 @@ const attendanceRoutes = require('./routes/attendanceRoutes');
 const resultRoutes = require('./routes/resultRoutes');
 const homeworkRoutes = require('./routes/homeworkRoutes');
 const announcementRoutes = require('./routes/announcementRoutes');
+const timetableRoutes = require('./routes/timetableRoutes'); // Added timetableRoutes
 
 // Routes
 app.use('/api/auth', authRoutes);

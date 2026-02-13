@@ -13,6 +13,8 @@ const TeacherDashboard = () => {
     const [editingStudent, setEditingStudent] = useState(null);
     const [newStudentData, setNewStudentData] = useState({ name: '', email: '', password: '', role: 'Student' });
     const [teacherClass, setTeacherClass] = useState(null);
+    const [timetable, setTimetable] = useState([]);
+    const [selectedPeriod, setSelectedPeriod] = useState(1);
 
     // Homework State
     const [homeworkList, setHomeworkList] = useState([]);
@@ -28,6 +30,7 @@ const TeacherDashboard = () => {
     useEffect(() => {
         fetchStudents();
         fetchTeacherClass();
+        fetchTimetable();
         if (activeTab === 'Homework') fetchHomework();
     }, [activeTab]);
 
@@ -58,6 +61,25 @@ const TeacherDashboard = () => {
         } catch (error) { console.error("Error fetching homework", error); }
     };
 
+    const fetchTimetable = async () => {
+        try {
+            const { data } = await api.get(`/api/timetable/teacher/${user._id}`, config);
+            // Sort by period
+            const sorted = data.sort((a, b) => a.period - b.period);
+            setTimetable(sorted);
+
+            // Auto-select current day's first period if available
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const today = days[new Date().getDay()];
+            const todaysPeriods = sorted.filter(p => p.day === today);
+            if (todaysPeriods.length > 0) {
+                setSelectedPeriod(todaysPeriods[0].period);
+            }
+        } catch (error) {
+            console.error("Error fetching timetable", error);
+        }
+    };
+
     const handleAttendanceChange = (studentId, status) => {
         setAttendance(prev => ({ ...prev, [studentId]: status }));
     };
@@ -68,10 +90,11 @@ const TeacherDashboard = () => {
         const lateIds = Object.keys(attendance).filter(id => attendance[id] === 'Late');
 
         try {
-            if (presentIds.length > 0) await api.post('/api/attendance', { userIds: presentIds, date: selectedDate, status: 'Present' }, config);
-            if (absentIds.length > 0) await api.post('/api/attendance', { userIds: absentIds, date: selectedDate, status: 'Absent' }, config);
-            if (lateIds.length > 0) await api.post('/api/attendance', { userIds: lateIds, date: selectedDate, status: 'Late' }, config);
-            alert('Attendance marked successfully!');
+            const attendancePayload = { date: selectedDate, period: selectedPeriod };
+            if (presentIds.length > 0) await api.post('/api/attendance', { ...attendancePayload, userIds: presentIds, status: 'Present' }, config);
+            if (absentIds.length > 0) await api.post('/api/attendance', { ...attendancePayload, userIds: absentIds, status: 'Absent' }, config);
+            if (lateIds.length > 0) await api.post('/api/attendance', { ...attendancePayload, userIds: lateIds, status: 'Late' }, config);
+            alert(`Attendance for Period ${selectedPeriod} marked successfully!`);
         } catch (error) { alert('Failed to mark attendance'); }
     };
 
@@ -161,8 +184,49 @@ const TeacherDashboard = () => {
                                     <FaUserPlus /> Add Student
                                 </button>
                             </div>
-                            <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className="input-field" style={{ width: 'auto' }} />
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                                <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className="input-field" style={{ width: 'auto' }} />
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <span style={{ color: 'hsl(var(--text-dim))' }}>Period:</span>
+                                    <select
+                                        className="input-field"
+                                        style={{ width: 'auto' }}
+                                        value={selectedPeriod}
+                                        onChange={(e) => setSelectedPeriod(parseInt(e.target.value))}
+                                    >
+                                        {[1, 2, 3, 4, 5, 6, 7, 8].map(p => (
+                                            <option key={p} value={p}>Period {p}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
                         </div>
+
+                        {/* Schedule Helper */}
+                        {timetable.length > 0 && (
+                            <div style={{ marginBottom: '20px', display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '10px' }}>
+                                {timetable
+                                    .filter(p => p.day === ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][new Date(selectedDate).getDay()])
+                                    .map(p => (
+                                        <div
+                                            key={p._id}
+                                            onClick={() => setSelectedPeriod(p.period)}
+                                            style={{
+                                                minWidth: '150px',
+                                                padding: '12px',
+                                                borderRadius: '8px',
+                                                background: selectedPeriod === p.period ? 'rgba(50, 200, 255, 0.2)' : 'rgba(255,255,255,0.05)',
+                                                border: selectedPeriod === p.period ? '1px solid #32c8ff' : '1px solid transparent',
+                                                cursor: 'pointer'
+                                            }}
+                                        >
+                                            <div style={{ fontWeight: 'bold', color: selectedPeriod === p.period ? '#32c8ff' : 'inherit' }}>P{p.period}: {p.subject}</div>
+                                            <div style={{ fontSize: '0.8rem', color: 'hsl(var(--text-dim))' }}>{p.classId?.className}</div>
+                                            <div style={{ fontSize: '0.7rem' }}>{p.startTime} - {p.endTime}</div>
+                                        </div>
+                                    ))}
+                            </div>
+                        )}
 
                         {showAddForm && (
                             <div style={{ background: 'rgba(0,0,0,0.3)', padding: '20px', borderRadius: '8px', marginBottom: '20px' }}>

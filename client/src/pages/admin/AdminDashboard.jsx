@@ -32,6 +32,13 @@ const AdminDashboard = () => {
     const [attendanceData, setAttendanceData] = useState({}); // { teacherId: 'Present' | 'Absent' }
     const [selectedTeacherAttendance, setSelectedTeacherAttendance] = useState(null); // For viewing specific teacher history
 
+    // Timetable State
+    const [timetableEntries, setTimetableEntries] = useState([]);
+    const [timetableFormData, setTimetableFormData] = useState({
+        classId: '', teacherId: '', subject: '', day: 'Monday', period: 1, startTime: '', endTime: ''
+    });
+    const [selectedTimetableClass, setSelectedTimetableClass] = useState(null);
+
 
     // Create Teacher Mode inside Class Modal
     const [isCreatingTeacher, setIsCreatingTeacher] = useState(false);
@@ -92,6 +99,38 @@ const AdminDashboard = () => {
             setClassAttendance(data);
         } catch (error) {
             console.error(error);
+        }
+    };
+
+    const fetchTimetable = async (classId) => {
+        try {
+            const { data } = await api.get(`/api/timetable/class/${classId}`, config);
+            setTimetableEntries(data);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const handleTimetableSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            await api.post('/api/timetable', timetableFormData, config);
+            fetchTimetable(timetableFormData.classId);
+            setTimetableFormData({ ...timetableFormData, subject: '', period: timetableFormData.period + 1 });
+            alert('Timetable entry added');
+        } catch (error) {
+            alert(error.response?.data?.message || 'Error adding timetable entry');
+        }
+    };
+
+    const handleDeleteTimetable = async (id) => {
+        if (window.confirm('Delete this timetable entry?')) {
+            try {
+                await api.delete(`/api/timetable/${id}`, config);
+                setTimetableEntries(timetableEntries.filter(t => t._id !== id));
+            } catch (error) {
+                alert('Error deleting timetable');
+            }
         }
     };
 
@@ -341,11 +380,11 @@ const AdminDashboard = () => {
             {/* Actions */}
             {/* Actions */}
             <div style={{ marginBottom: '30px', display: 'flex', gap: '10px' }}>
-                {['Classes', 'SubAdmins', 'Teacher Attendance', 'Announcements'].map(tab => (
+                {['Classes', 'SubAdmins', 'Teacher Attendance', 'Announcements', 'Timetable'].map(tab => (
                     <button
                         key={tab}
                         className={`btn ${activeTab === tab ? 'btn-primary' : ''}`}
-                        onClick={() => { setActiveTab(tab); setSelectedClass(null); }}
+                        onClick={() => { setActiveTab(tab); setSelectedClass(null); setSelectedTimetableClass(null); }}
                     >
                         {tab === 'SubAdmins' ? 'Sub Admins' : tab}
                     </button>
@@ -370,8 +409,6 @@ const AdminDashboard = () => {
                         <div style={{ display: 'flex', gap: '10px' }}>
                             <button className="btn btn-primary" onClick={() => {
                                 setIsMarkingAttendance(true);
-                                // Initialize all teachers as Present by default? Or empty?
-                                // Let's initialize empty or let user choose.
                                 const initialData = {};
                                 teachers.forEach(t => initialData[t._id] = 'Present');
                                 setAttendanceData(initialData);
@@ -385,6 +422,11 @@ const AdminDashboard = () => {
                                 <FaUserPlus style={{ marginRight: '8px' }} /> Add Teacher
                             </button>
                         </div>
+                    )}
+                    {activeTab === 'Timetable' && selectedTimetableClass && (
+                        <button className="btn btn-secondary" onClick={() => setSelectedTimetableClass(null)}>
+                            <FaArrowLeft style={{ marginRight: '5px' }} /> Back to Classes
+                        </button>
                     )}
                     {(selectedClass || selectedTeacherAttendance) && (
                         <button className="btn btn-secondary" onClick={() => { setSelectedClass(null); setSelectedTeacherAttendance(null); }}>
@@ -803,6 +845,125 @@ const AdminDashboard = () => {
                             </div>
                         ))}
                         {announcements.length === 0 && <p style={{ textAlign: 'center', color: 'hsl(var(--text-dim))' }}>No announcements found</p>}
+                    </div>
+                )}
+                {activeTab === 'Timetable' && (
+                    <div>
+                        {!selectedTimetableClass ? (
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '20px' }}>
+                                {classes.map(cls => (
+                                    <div
+                                        key={cls._id}
+                                        className="glass-panel"
+                                        style={{ padding: '20px', cursor: 'pointer', transition: 'transform 0.2s' }}
+                                        onClick={() => {
+                                            setSelectedTimetableClass(cls);
+                                            fetchTimetable(cls._id);
+                                            setTimetableFormData({ ...timetableFormData, classId: cls._id });
+                                        }}
+                                        onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
+                                        onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                                    >
+                                        <h3 style={{ color: 'hsl(var(--primary))' }}>{cls.className}</h3>
+                                        <p style={{ color: 'hsl(var(--text-dim))', fontSize: '0.9rem' }}>Manage Schedule</p>
+                                    </div>
+                                ))}
+                                {classes.length === 0 && <p style={{ color: 'hsl(var(--text-dim))' }}>No classes found</p>}
+                            </div>
+                        ) : (
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '30px' }}>
+                                {/* Add Entry Form */}
+                                <div style={{ background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '12px' }}>
+                                    <h3 style={{ marginBottom: '20px' }}>Add Period</h3>
+                                    <form onSubmit={handleTimetableSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                                        <select
+                                            className="input-field"
+                                            value={timetableFormData.day}
+                                            onChange={(e) => setTimetableFormData({ ...timetableFormData, day: e.target.value })}
+                                        >
+                                            {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(d => (
+                                                <option key={d} value={d}>{d}</option>
+                                            ))}
+                                        </select>
+                                        <input
+                                            placeholder="Subject"
+                                            className="input-field"
+                                            value={timetableFormData.subject}
+                                            onChange={(e) => setTimetableFormData({ ...timetableFormData, subject: e.target.value })}
+                                            required
+                                        />
+                                        <select
+                                            className="input-field"
+                                            value={timetableFormData.teacherId}
+                                            onChange={(e) => setTimetableFormData({ ...timetableFormData, teacherId: e.target.value })}
+                                            required
+                                        >
+                                            <option value="">Select Teacher</option>
+                                            {teachers.map(t => <option key={t._id} value={t._id}>{t.name}</option>)}
+                                        </select>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
+                                            <input
+                                                type="number"
+                                                placeholder="P #"
+                                                className="input-field"
+                                                value={timetableFormData.period}
+                                                onChange={(e) => setTimetableFormData({ ...timetableFormData, period: parseInt(e.target.value) })}
+                                                required
+                                            />
+                                            <input
+                                                type="time"
+                                                className="input-field"
+                                                value={timetableFormData.startTime}
+                                                onChange={(e) => setTimetableFormData({ ...timetableFormData, startTime: e.target.value })}
+                                                required
+                                            />
+                                            <input
+                                                type="time"
+                                                className="input-field"
+                                                value={timetableFormData.endTime}
+                                                onChange={(e) => setTimetableFormData({ ...timetableFormData, endTime: e.target.value })}
+                                                required
+                                            />
+                                        </div>
+                                        <button className="btn btn-primary" type="submit">Add to Schedule</button>
+                                    </form>
+                                </div>
+
+                                {/* Current Schedule View */}
+                                <div style={{ overflowX: 'auto' }}>
+                                    <h3 style={{ marginBottom: '20px' }}>{selectedTimetableClass.className} Schedule</h3>
+                                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                        <thead>
+                                            <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                                                <th style={{ textAlign: 'left', padding: '12px' }}>Day</th>
+                                                <th style={{ textAlign: 'left', padding: '12px' }}>Period</th>
+                                                <th style={{ textAlign: 'left', padding: '12px' }}>Subject</th>
+                                                <th style={{ textAlign: 'left', padding: '12px' }}>Teacher</th>
+                                                <th style={{ textAlign: 'left', padding: '12px' }}>Time</th>
+                                                <th style={{ textAlign: 'left', padding: '12px' }}></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {timetableEntries.map(entry => (
+                                                <tr key={entry._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                                    <td style={{ padding: '12px' }}>{entry.day}</td>
+                                                    <td style={{ padding: '12px' }}>P{entry.period}</td>
+                                                    <td style={{ padding: '12px' }}>{entry.subject}</td>
+                                                    <td style={{ padding: '12px' }}>{entry.teacherId?.name}</td>
+                                                    <td style={{ padding: '12px' }}>{entry.startTime} - {entry.endTime}</td>
+                                                    <td style={{ padding: '12px' }}>
+                                                        <button onClick={() => handleDeleteTimetable(entry._id)} style={{ color: '#ff6b6b', background: 'none', border: 'none', cursor: 'pointer' }}>
+                                                            <FaTrash size={14} />
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                            {timetableEntries.length === 0 && <tr><td colSpan="6" style={{ padding: '20px', textAlign: 'center' }}>No schedule set</td></tr>}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>

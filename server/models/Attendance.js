@@ -20,6 +20,10 @@ const attendanceSchema = new mongoose.Schema({
         enum: ['Present', 'Absent', 'Late'],
         required: true,
     },
+    period: {
+        type: Number,
+        default: 1, // Default to period 1 for backward compatibility
+    },
     markedBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
@@ -32,7 +36,7 @@ const attendanceSchema = new mongoose.Schema({
     },
 }, { timestamps: true });
 
-// Ensure one attendance record per user per day
-attendanceSchema.index({ date: 1, userId: 1 }, { unique: true });
+// Ensure one attendance record per user per day per period
+attendanceSchema.index({ date: 1, userId: 1, period: 1 }, { unique: true });
 
 module.exports = mongoose.model('Attendance', attendanceSchema);

@@ -5,8 +5,7 @@ const User = require('../models/User');
 // @route   POST /api/attendance
 // @access  Private/Admin, Teacher
 const markAttendance = async (req, res) => {
-    const { userIds, date, status } = req.body; // userIds is array, status is "Present" or "Absent"
-    // For simplicity, we assume bulk marking for now.
+    const { userIds, date, status, period } = req.body; // userIds is array, status is "Present" or "Absent", period is Number
     const schoolId = req.user.schoolId;
     const markedBy = req.user._id;
 
@@ -15,15 +14,14 @@ const markAttendance = async (req, res) => {
             userId,
             date: new Date(date),
             status,
+            period: period || 1,
             schoolId,
             markedBy
         }));
 
-        // Using bulkWrite for efficiency or insertMany
-        // However, if we need to update existing (re-marking), bulkWrite with updateOne upsert is better
         const operations = attendanceRecords.map(record => ({
             updateOne: {
-                filter: { userId: record.userId, date: record.date },
+                filter: { userId: record.userId, date: record.date, period: record.period },
                 update: { $set: record },
                 upsert: true
             }
@@ -135,30 +133,27 @@ const getPendingRectifications = async (req, res) => {
 // @access  Private/Admin, Teacher
 const getClassAttendance = async (req, res) => {
     const { classId } = req.params;
-    const { date } = req.query; // Optional date filter
+    const { date, period } = req.query; // Optional date and period filter
 
     try {
-        // Find all students in this class
         const students = await User.find({ role: 'Student', studentClass: classId }).select('_id name');
         const studentIds = students.map(s => s._id);
 
         let query = { userId: { $in: studentIds } };
         if (date) {
-            // Match exact date (ignoring time if stored as ISO string date part, 
-            // but usually stored as full ISODate. Here we assume exact match or range needed)
-            // For now, let's assume date is passed as YYYY-MM-DD and stored as Date at 00:00:00Z
-            // or we filter by range for that day.
             const startDate = new Date(date);
             startDate.setUTCHours(0, 0, 0, 0);
             const endDate = new Date(date);
             endDate.setUTCHours(23, 59, 59, 999);
-
             query.date = { $gte: startDate, $lte: endDate };
+        }
+        if (period) {
+            query.period = Number(period);
         }
 
         const attendance = await Attendance.find(query)
             .populate('userId', 'name')
-            .sort({ date: -1 });
+            .sort({ date: -1, period: 1 });
 
         res.json(attendance);
     } catch (error) {
