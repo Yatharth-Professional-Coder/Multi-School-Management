@@ -1,5 +1,12 @@
 const School = require('../models/School');
 const User = require('../models/User');
+const Class = require('../models/Class');
+const Section = require('../models/Section');
+const Attendance = require('../models/Attendance');
+const Timetable = require('../models/Timetable');
+const Announcement = require('../models/Announcement');
+const Result = require('../models/Result');
+const Homework = require('../models/Homework');
 
 // @desc    Create a new school
 // @route   POST /api/schools
@@ -83,12 +90,21 @@ const deleteSchool = async (req, res) => {
     try {
         const school = await School.findById(req.params.id);
         if (school) {
-            // Delete all users associated with this school
-            await User.deleteMany({ schoolId: school._id });
+            const schoolId = school._id;
 
-            // Delete the school
+            // Cascading Delete: Remove all data associated with this school
+            await User.deleteMany({ schoolId });
+            await Class.deleteMany({ schoolId });
+            await Section.deleteMany({ schoolId });
+            await Attendance.deleteMany({ schoolId });
+            await Timetable.deleteMany({ schoolId });
+            await Announcement.deleteMany({ schoolId });
+            await Result.deleteMany({ schoolId });
+            await Homework.deleteMany({ schoolId });
+
+            // Finally, delete the school
             await school.deleteOne();
-            res.json({ message: 'School and all associated users removed' });
+            res.json({ message: 'School and all associated data removed successfully' });
         } else {
             res.status(404).json({ message: 'School not found' });
         }
@@ -116,11 +132,21 @@ const rejectSchool = async (req, res) => {
     try {
         const school = await School.findById(req.params.id);
         if (school) {
-            // Delete all users associated with this school
-            await User.deleteMany({ schoolId: school._id });
+            const schoolId = school._id;
+
+            // Cascading Delete: Remove all data associated with this school
+            await User.deleteMany({ schoolId });
+            await Class.deleteMany({ schoolId });
+            await Section.deleteMany({ schoolId });
+            await Attendance.deleteMany({ schoolId });
+            await Timetable.deleteMany({ schoolId });
+            await Announcement.deleteMany({ schoolId });
+            await Result.deleteMany({ schoolId });
+            await Homework.deleteMany({ schoolId });
+
             // Delete the school
             await school.deleteOne();
-            res.json({ message: 'School registration rejected and removed' });
+            res.json({ message: 'School registration rejected and all associated data removed' });
         } else {
             res.status(404).json({ message: 'School not found' });
         }
