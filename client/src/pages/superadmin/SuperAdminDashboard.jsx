@@ -27,6 +27,19 @@ const SuperAdminDashboard = () => {
         adminName: '', adminEmail: '', adminPassword: ''
     });
 
+    const [isEditingSettings, setIsEditingSettings] = useState(false);
+    const [settingsData, setSettingsData] = useState({
+        themeColor: '#32c8ff',
+        gradingSystem: 'Percentage',
+        features: {
+            enableTimetable: true,
+            enableAttendance: true,
+            enableHomework: true,
+            enableResults: true,
+            enableAnnouncements: true,
+        }
+    });
+
     const config = {
         headers: {
             Authorization: `Bearer ${user.token}`,
@@ -94,6 +107,17 @@ const SuperAdminDashboard = () => {
     const handleSchoolClick = (school) => {
         setSelectedSchool(school);
         setNewPlan(school.subscriptionPlan);
+        setSettingsData(school.settings || {
+            themeColor: '#32c8ff',
+            gradingSystem: 'Percentage',
+            features: {
+                enableTimetable: true,
+                enableAttendance: true,
+                enableHomework: true,
+                enableResults: true,
+                enableAnnouncements: true,
+            }
+        });
         fetchSchoolUsers(school._id);
     };
 
@@ -131,6 +155,18 @@ const SuperAdminDashboard = () => {
                 console.error(error);
                 alert('Error rejecting school');
             }
+        }
+    };
+
+    const handleSettingsUpdate = async () => {
+        try {
+            const { data } = await api.put(`/api/schools/${selectedSchool._id}/settings`, settingsData, config);
+            setSelectedSchool({ ...selectedSchool, settings: data.settings });
+            setIsEditingSettings(false);
+            alert('School settings updated successfully');
+        } catch (error) {
+            console.error(error);
+            alert('Error updating settings');
         }
     };
 
@@ -325,6 +361,13 @@ const SuperAdminDashboard = () => {
                                             </span>
                                         )}
                                     </div>
+                                    <button
+                                        className="btn btn-secondary"
+                                        style={{ background: 'rgba(50, 200, 255, 0.1)', color: '#32c8ff', border: '1px solid rgba(50, 200, 255, 0.2)' }}
+                                        onClick={() => setIsEditingSettings(!isEditingSettings)}
+                                    >
+                                        <FaEdit style={{ marginRight: '8px' }} /> Customize Branding & Features
+                                    </button>
                                 </div>
                             </div>
 
@@ -341,6 +384,78 @@ const SuperAdminDashboard = () => {
                             </div>
                         </div>
                     </div>
+
+                    {/* School Settings Form */}
+                    {isEditingSettings && (
+                        <div className="glass-panel fade-in" style={{ padding: '30px', marginBottom: '30px', border: '1px solid rgba(50, 200, 255, 0.3)' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                                <h2 style={{ margin: 0 }}>School Personalization</h2>
+                                <button className="btn btn-secondary" onClick={() => setIsEditingSettings(false)}>Close</button>
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
+                                <div>
+                                    <h3 style={{ fontSize: '1.1rem', marginBottom: '15px', color: 'hsl(var(--secondary))' }}>Branding</h3>
+                                    <div style={{ marginBottom: '15px' }}>
+                                        <label className="input-label">Primary Theme Color</label>
+                                        <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+                                            <input
+                                                type="color"
+                                                value={settingsData.themeColor}
+                                                onChange={(e) => setSettingsData({ ...settingsData, themeColor: e.target.value })}
+                                                style={{ width: '50px', height: '40px', border: 'none', borderRadius: '5px', cursor: 'pointer', background: 'none' }}
+                                            />
+                                            <input
+                                                type="text"
+                                                className="input-field"
+                                                value={settingsData.themeColor}
+                                                onChange={(e) => setSettingsData({ ...settingsData, themeColor: e.target.value })}
+                                                style={{ width: '120px' }}
+                                            />
+                                            <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: settingsData.themeColor, border: '1px solid rgba(255,255,255,0.2)' }}></div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="input-label">Grading System</label>
+                                        <select
+                                            className="input-field"
+                                            value={settingsData.gradingSystem}
+                                            onChange={(e) => setSettingsData({ ...settingsData, gradingSystem: e.target.value })}
+                                        >
+                                            <option value="Percentage">Percentage (0-100%)</option>
+                                            <option value="GPA">GPA (4.0 Scale)</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h3 style={{ fontSize: '1.1rem', marginBottom: '15px', color: 'hsl(var(--secondary))' }}>Feature Toggles</h3>
+                                    <div style={{ display: 'grid', gap: '10px' }}>
+                                        {Object.entries(settingsData.features).map(([key, value]) => (
+                                            <div key={key} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px' }}>
+                                                <input
+                                                    type="checkbox"
+                                                    id={key}
+                                                    checked={value}
+                                                    onChange={(e) => setSettingsData({
+                                                        ...settingsData,
+                                                        features: { ...settingsData.features, [key]: e.target.checked }
+                                                    })}
+                                                />
+                                                <label htmlFor={key} style={{ cursor: 'pointer', fontSize: '0.9rem' }}>
+                                                    {key.replace('enable', '').replace(/([A-Z])/g, ' $1').trim()}
+                                                </label>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style={{ marginTop: '30px', display: 'flex', gap: '15px', justifyContent: 'flex-end' }}>
+                                <button className="btn btn-primary" onClick={handleSettingsUpdate}>Save Customizations</button>
+                            </div>
+                        </div>
+                    )}
 
 
                     {editingUser && (

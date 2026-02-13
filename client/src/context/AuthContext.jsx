@@ -59,6 +59,18 @@ export const AuthProvider = ({ children }) => {
         }
     }, []);
 
+    // Inject School Theme Color
+    useEffect(() => {
+        if (state.user?.schoolSettings?.themeColor) {
+            document.documentElement.style.setProperty('--primary-hex', state.user.schoolSettings.themeColor);
+            // Also override the --primary HSL variable for components using it
+            // Note: This is an approximation. Ideally we'd convert hex to HSL, 
+            // but for now, we'll use the hex directly for custom components.
+        } else {
+            document.documentElement.style.removeProperty('--primary-hex');
+        }
+    }, [state.user]);
+
     const login = async (email, password) => {
         dispatch({ type: 'SET_LOADING' });
         try {

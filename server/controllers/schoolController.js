@@ -155,4 +155,26 @@ const rejectSchool = async (req, res) => {
     }
 };
 
-module.exports = { createSchool, getSchools, updateSchool, deleteSchool, approveSchool, rejectSchool };
+const updateSchoolSettings = async (req, res) => {
+    const { themeColor, logoUrl, gradingSystem, features } = req.body;
+    try {
+        const school = await School.findById(req.params.id);
+        if (school) {
+            school.settings = {
+                themeColor: themeColor || school.settings.themeColor,
+                logoUrl: logoUrl !== undefined ? logoUrl : school.settings.logoUrl,
+                gradingSystem: gradingSystem || school.settings.gradingSystem,
+                features: { ...school.settings.features, ...features }
+            };
+
+            const updatedSchool = await school.save();
+            res.json(updatedSchool);
+        } else {
+            res.status(404).json({ message: 'School not found' });
+        }
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
+module.exports = { createSchool, getSchools, updateSchool, deleteSchool, approveSchool, rejectSchool, updateSchoolSettings };

@@ -169,10 +169,15 @@ const TeacherDashboard = () => {
             </div>
 
             <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
-                <button className={`btn ${activeTab === 'Attendance' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('Attendance')}>Attendance</button>
-                <button className={`btn ${activeTab === 'Homework' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('Homework')}>Homework</button>
-                <button className={`btn ${activeTab === 'Results' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('Results')}>Results</button>
-                <button className={`btn ${activeTab === 'Full Timetable' ? 'btn-primary' : ''}`} onClick={() => setActiveTab('Full Timetable')}>Full Timetable</button>
+                {['Attendance', 'Homework', 'Results', 'Full Timetable'].filter(tab => {
+                    if (tab === 'Homework') return user.schoolSettings?.features?.enableHomework !== false;
+                    if (tab === 'Results') return user.schoolSettings?.features?.enableResults !== false;
+                    if (tab === 'Full Timetable') return user.schoolSettings?.features?.enableTimetable !== false;
+                    if (tab === 'Attendance') return user.schoolSettings?.features?.enableAttendance !== false;
+                    return true;
+                }).map(tab => (
+                    <button key={tab} className={`btn ${activeTab === tab ? 'btn-primary' : ''}`} onClick={() => setActiveTab(tab)}>{tab}</button>
+                ))}
             </div>
 
             <div className="glass-panel" style={{ padding: '30px' }}>

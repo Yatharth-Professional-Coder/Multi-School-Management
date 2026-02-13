@@ -392,7 +392,12 @@ const AdminDashboard = () => {
             {/* Actions */}
             {/* Actions */}
             <div style={{ marginBottom: '30px', display: 'flex', gap: '10px' }}>
-                {['Classes', 'SubAdmins', 'Teacher Attendance', 'Announcements', 'Timetable'].map(tab => (
+                {['Classes', 'SubAdmins', 'Teacher Attendance', 'Announcements', 'Timetable'].filter(tab => {
+                    if (tab === 'Announcements') return user.schoolSettings?.features?.enableAnnouncements !== false;
+                    if (tab === 'Timetable') return user.schoolSettings?.features?.enableTimetable !== false;
+                    if (tab === 'Teacher Attendance') return user.schoolSettings?.features?.enableAttendance !== false;
+                    return true;
+                }).map(tab => (
                     <button
                         key={tab}
                         className={`btn ${activeTab === tab ? 'btn-primary' : ''}`}

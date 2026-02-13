@@ -77,26 +77,34 @@ const ParentDashboard = () => {
 
             {/* Stats Overview */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '30px' }}>
-                <div onClick={() => setActiveTab('Attendance')} className="glass-panel" style={{ padding: '20px', cursor: 'pointer', border: activeTab === 'Attendance' ? '1px solid hsl(var(--primary))' : '' }}>
-                    <FaClipboardList size={24} style={{ marginBottom: '10px', color: '#32c8ff' }} />
-                    <h3>{attendance.length > 0 ? ((attendance.filter(a => a.status === 'Present').length / attendance.length) * 100).toFixed(1) : 0}%</h3>
-                    <p style={{ fontSize: '0.8rem', color: 'hsl(var(--text-dim))' }}>Attendance</p>
-                </div>
-                <div onClick={() => setActiveTab('Homework')} className="glass-panel" style={{ padding: '20px', cursor: 'pointer', border: activeTab === 'Homework' ? '1px solid hsl(var(--primary))' : '' }}>
-                    <FaBookOpen size={24} style={{ marginBottom: '10px', color: '#ffc832' }} />
-                    <h3>{homework.length}</h3>
-                    <p style={{ fontSize: '0.8rem', color: 'hsl(var(--text-dim))' }}>Assignments</p>
-                </div>
-                <div onClick={() => setActiveTab('Results')} className="glass-panel" style={{ padding: '20px', cursor: 'pointer', border: activeTab === 'Results' ? '1px solid hsl(var(--primary))' : '' }}>
-                    <FaChartLine size={24} style={{ marginBottom: '10px', color: '#64ff96' }} />
-                    <h3>Results</h3>
-                    <p style={{ fontSize: '0.8rem', color: 'hsl(var(--text-dim))' }}>Academic Performance</p>
-                </div>
-                <div onClick={() => setActiveTab('Announcements')} className="glass-panel" style={{ padding: '20px', cursor: 'pointer', border: activeTab === 'Announcements' ? '1px solid hsl(var(--primary))' : '' }}>
-                    <FaBullhorn size={24} style={{ marginBottom: '10px', color: '#ff6464' }} />
-                    <h3>{announcements.length}</h3>
-                    <p style={{ fontSize: '0.8rem', color: 'hsl(var(--text-dim))' }}>School Updates</p>
-                </div>
+                {user.schoolSettings?.features?.enableAttendance !== false && (
+                    <div onClick={() => setActiveTab('Attendance')} className="glass-panel" style={{ padding: '20px', cursor: 'pointer', border: activeTab === 'Attendance' ? '1px solid hsl(var(--primary))' : '' }}>
+                        <FaClipboardList size={24} style={{ marginBottom: '10px', color: '#32c8ff' }} />
+                        <h3>{attendance.length > 0 ? ((attendance.filter(a => a.status === 'Present').length / attendance.length) * 100).toFixed(1) : 0}%</h3>
+                        <p style={{ fontSize: '0.8rem', color: 'hsl(var(--text-dim))' }}>Attendance</p>
+                    </div>
+                )}
+                {user.schoolSettings?.features?.enableHomework !== false && (
+                    <div onClick={() => setActiveTab('Homework')} className="glass-panel" style={{ padding: '20px', cursor: 'pointer', border: activeTab === 'Homework' ? '1px solid hsl(var(--primary))' : '' }}>
+                        <FaBookOpen size={24} style={{ marginBottom: '10px', color: '#ffc832' }} />
+                        <h3>{homework.length}</h3>
+                        <p style={{ fontSize: '0.8rem', color: 'hsl(var(--text-dim))' }}>Assignments</p>
+                    </div>
+                )}
+                {user.schoolSettings?.features?.enableResults !== false && (
+                    <div onClick={() => setActiveTab('Results')} className="glass-panel" style={{ padding: '20px', cursor: 'pointer', border: activeTab === 'Results' ? '1px solid hsl(var(--primary))' : '' }}>
+                        <FaChartLine size={24} style={{ marginBottom: '10px', color: '#64ff96' }} />
+                        <h3>Results</h3>
+                        <p style={{ fontSize: '0.8rem', color: 'hsl(var(--text-dim))' }}>Academic Performance</p>
+                    </div>
+                )}
+                {user.schoolSettings?.features?.enableAnnouncements !== false && (
+                    <div onClick={() => setActiveTab('Announcements')} className="glass-panel" style={{ padding: '20px', cursor: 'pointer', border: activeTab === 'Announcements' ? '1px solid hsl(var(--primary))' : '' }}>
+                        <FaBullhorn size={24} style={{ marginBottom: '10px', color: '#ff6464' }} />
+                        <h3>{announcements.length}</h3>
+                        <p style={{ fontSize: '0.8rem', color: 'hsl(var(--text-dim))' }}>School Updates</p>
+                    </div>
+                )}
             </div>
 
             {/* Content Area */}
@@ -160,14 +168,23 @@ const ParentDashboard = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {results.map(res => (
-                                        <tr key={res._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                            <td style={{ padding: '10px' }}>{res.examName}</td>
-                                            <td style={{ padding: '10px' }}>{res.subject}</td>
-                                            <td style={{ padding: '10px' }}>{res.marksObtained} / {res.totalMarks}</td>
-                                            <td style={{ padding: '10px' }}>{res.grade}</td>
-                                        </tr>
-                                    ))}
+                                    {results.map(res => {
+                                        const percentage = ((res.marksObtained / res.totalMarks) * 100).toFixed(1);
+                                        const gpa = ((res.marksObtained / res.totalMarks) * 4).toFixed(1);
+                                        const isGPA = user.schoolSettings?.gradingSystem === 'GPA';
+
+                                        return (
+                                            <tr key={res._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                                <td style={{ padding: '10px' }}>{res.examName}</td>
+                                                <td style={{ padding: '10px' }}>{res.subject}</td>
+                                                <td style={{ padding: '10px' }}>
+                                                    {isGPA ? `${gpa} / 4.0` : `${percentage}%`}
+                                                    <span style={{ fontSize: '0.7rem', opacity: 0.5, display: 'block' }}>({res.marksObtained}/{res.totalMarks})</span>
+                                                </td>
+                                                <td style={{ padding: '10px' }}>{res.grade}</td>
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         </div>

@@ -26,6 +26,28 @@ const schoolSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
+    settings: {
+        themeColor: {
+            type: String,
+            default: '#32c8ff', // Default primary color
+        },
+        logoUrl: {
+            type: String,
+            default: '',
+        },
+        gradingSystem: {
+            type: String,
+            enum: ['Percentage', 'GPA'],
+            default: 'Percentage',
+        },
+        features: {
+            enableTimetable: { type: Boolean, default: true },
+            enableAttendance: { type: Boolean, default: true },
+            enableHomework: { type: Boolean, default: true },
+            enableResults: { type: Boolean, default: true },
+            enableAnnouncements: { type: Boolean, default: true },
+        }
+    }
 }, { timestamps: true });
 
 module.exports = mongoose.model('School', schoolSchema);

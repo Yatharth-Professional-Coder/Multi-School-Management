@@ -37,6 +37,7 @@ const loginUser = async (req, res) => {
                 email: user.email,
                 role: user.role,
                 schoolId: user.schoolId?._id,
+                schoolSettings: user.schoolId?.settings,
                 childId: user.childId,
                 studentClass: user.studentClass,
                 token: generateToken(user._id),
