@@ -194,8 +194,9 @@ const SubAdminDashboard = () => {
                     </div>
                 )}
             </div>
-        </div >
+        </div>
     );
+
 };
 
 export default SubAdminDashboard;

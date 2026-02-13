@@ -209,8 +209,9 @@ const ParentDashboard = () => {
 
                 </div>
             </div>
-        </div >
+        </div>
     );
+
 };
 
 export default ParentDashboard;

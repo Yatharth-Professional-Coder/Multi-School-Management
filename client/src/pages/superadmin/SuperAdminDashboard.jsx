@@ -551,11 +551,10 @@ const SuperAdminDashboard = () => {
                     )
                     }
 
-                    {/* Stats */}
+                    {/* Stats & Users Section */}
                     <div className="grid-mobile-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '30px' }}>
-                        <div className="grid-mobile-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '30px' }}>
-
-
+                        {/* Stats Column */}
+                        <div className="grid-mobile-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                             <div className="glass-panel" style={{ padding: '20px', textAlign: 'center' }}>
                                 <FaChalkboardTeacher size={30} color="hsl(var(--secondary))" style={{ marginBottom: '10px' }} />
                                 <h3>{teachers.length}</h3>
@@ -568,13 +567,12 @@ const SuperAdminDashboard = () => {
                             </div>
                         </div>
 
-                        {/* Users List */}
+                        {/* Users List Column */}
                         <div className="glass-panel" style={{ padding: '30px' }}>
                             <h2>School Users</h2>
                             {loadingUsers ? <p>Loading users...</p> : (
                                 <div style={{ overflowX: 'auto' }}>
                                     <table className="data-table" style={{ width: '100%', marginTop: '20px', borderCollapse: 'collapse' }}>
-
                                         <thead>
                                             <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
                                                 <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Name</th>
@@ -614,17 +612,19 @@ const SuperAdminDashboard = () => {
                                         </tbody>
                                     </table>
                                 </div>
-
                             )}
                         </div>
                     </div>
+                </div>
             )}
 
-                    <button onClick={logout} style={{ marginTop: '40px', color: 'hsl(var(--accent))', textDecoration: 'underline' }}>
-                        Logout
-                    </button>
-                </div>
-            );
+
+
+            <button onClick={logout} style={{ marginTop: '40px', color: 'hsl(var(--accent))', textDecoration: 'underline' }}>
+                Logout
+            </button>
+        </div>
+    );
 };
 
-            export default SuperAdminDashboard;
+export default SuperAdminDashboard;
