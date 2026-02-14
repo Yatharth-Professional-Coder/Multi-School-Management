@@ -1,7 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { createSchool, getSchools, updateSchool, deleteSchool, approveSchool, rejectSchool, updateSchoolSettings } = require('../controllers/schoolController');
+const { createSchool, getSchools, updateSchool, deleteSchool, approveSchool, rejectSchool, updateSchoolSettings, getMySchool } = require('../controllers/schoolController');
 const { protect, superAdmin } = require('../middleware/authMiddleware');
+
+router.get('/my-school', protect, getMySchool);
 
 router.route('/')
     .post(protect, superAdmin, createSchool)

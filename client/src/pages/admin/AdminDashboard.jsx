@@ -7,6 +7,7 @@ const AdminDashboard = () => {
     const { user, logout } = useContext(AuthContext);
     const [subAdmins, setSubAdmins] = useState([]);
     const [teachers, setTeachers] = useState([]);
+    const [schoolSettings, setSchoolSettings] = useState(user.schoolSettings || {});
     const [classes, setClasses] = useState([]);
     const [attendanceRecords, setAttendanceRecords] = useState([]);
     const [activeTab, setActiveTab] = useState('Classes'); // Default to Classes
@@ -157,10 +158,22 @@ const AdminDashboard = () => {
         }
     }, [timetableFormData.day, timetableEntries, selectedTimetableClass, activeTab]);
 
+    const fetchSchoolSettings = async () => {
+        try {
+            const { data } = await api.get('/api/schools/my-school', config);
+            setSchoolSettings(data.settings || {});
+        } catch (error) {
+            console.error("Error fetching school settings", error);
+        }
+    };
+
     useEffect(() => {
         fetchClasses();
         fetchSubAdmins();
         fetchTeachers(); // Need teachers for class assignment
+        fetchAttendance();
+        fetchAnnouncements();
+        fetchSchoolSettings();
         fetchRectifications(); // Fetch once for tab badge
     }, []);
 
@@ -432,9 +445,9 @@ const AdminDashboard = () => {
             <div style={{ marginBottom: '30px', display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '10px', whiteSpace: 'nowrap' }}>
 
                 {['Classes', 'SubAdmins', 'Teacher Attendance', 'Announcements', 'Timetable'].filter(tab => {
-                    if (tab === 'Announcements') return user.schoolSettings?.features?.enableAnnouncements !== false;
-                    if (tab === 'Timetable') return user.schoolSettings?.features?.enableTimetable !== false;
-                    if (tab === 'Teacher Attendance') return user.schoolSettings?.features?.enableAttendance !== false;
+                    if (tab === 'Announcements') return schoolSettings?.features?.enableAnnouncements !== false;
+                    if (tab === 'Timetable') return schoolSettings?.features?.enableTimetable !== false;
+                    if (tab === 'Teacher Attendance') return schoolSettings?.features?.enableAttendance !== false;
                     return true;
                 }).concat('Rectification Requests').map(tab => (
                     <button
@@ -786,7 +799,7 @@ const AdminDashboard = () => {
                                                 >
                                                     A
                                                 </button>
-                                                {user.schoolSettings?.features?.enableHalfDay && (
+                                                {schoolSettings?.features?.enableHalfDay && (
                                                     <button
                                                         type="button"
                                                         onClick={() => handleAttendanceChange(teacher._id, 'Half Day')}

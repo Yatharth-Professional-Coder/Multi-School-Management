@@ -226,4 +226,17 @@ const updateSchoolSettings = async (req, res) => {
     }
 };
 
-module.exports = { createSchool, getSchools, updateSchool, deleteSchool, approveSchool, rejectSchool, updateSchoolSettings };
+const getMySchool = async (req, res) => {
+    try {
+        const school = await School.findById(req.user.schoolId);
+        if (school) {
+            res.json(school);
+        } else {
+            res.status(404).json({ message: 'School not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+module.exports = { createSchool, getSchools, updateSchool, deleteSchool, approveSchool, rejectSchool, updateSchoolSettings, getMySchool };

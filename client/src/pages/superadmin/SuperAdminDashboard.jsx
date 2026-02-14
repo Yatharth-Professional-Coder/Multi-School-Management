@@ -108,8 +108,10 @@ const SuperAdminDashboard = () => {
     const handleSchoolClick = (school) => {
         setSelectedSchool(school);
         setNewPlan(school.subscriptionPlan);
-        setSettingsData(school.settings || {
+
+        const defaultSettings = {
             themeColor: '#32c8ff',
+            logoUrl: '',
             gradingSystem: 'Percentage',
             features: {
                 enableTimetable: true,
@@ -119,7 +121,19 @@ const SuperAdminDashboard = () => {
                 enableAnnouncements: true,
                 enableHalfDay: false,
             }
-        });
+        };
+
+        const schoolSettings = school.settings || {};
+        const mergedSettings = {
+            ...defaultSettings,
+            ...schoolSettings,
+            features: {
+                ...defaultSettings.features,
+                ...(schoolSettings.features || {})
+            }
+        };
+
+        setSettingsData(mergedSettings);
         fetchSchoolUsers(school._id);
     };
 
