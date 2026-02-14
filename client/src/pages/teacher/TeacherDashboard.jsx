@@ -26,6 +26,11 @@ const TeacherDashboard = () => {
     // Results State
     const [resultData, setResultData] = useState({ studentId: '', examName: '', subject: '', marksObtained: '', totalMarks: '', grade: '' });
 
+    // Announcements State
+    const [announcements, setAnnouncements] = useState([]);
+    const [announcementData, setAnnouncementData] = useState({ title: '', content: '', targetAudience: 'All' });
+    const [showAnnouncementForm, setShowAnnouncementForm] = useState(false);
+
     const config = {
         headers: { Authorization: `Bearer ${user.token}` },
     };
@@ -42,6 +47,8 @@ const TeacherDashboard = () => {
             fetchStudents(teacherClass._id);
         } else if (activeTab === 'Homework') {
             fetchHomework();
+        } else if (activeTab === 'Announcements') {
+            fetchAnnouncements();
         }
     }, [activeTab, teacherClass]);
 
@@ -94,6 +101,13 @@ const TeacherDashboard = () => {
             const { data } = await api.get('/api/homework', config);
             setHomeworkList(data);
         } catch (error) { console.error("Error fetching homework", error); }
+    };
+
+    const fetchAnnouncements = async () => {
+        try {
+            const { data } = await api.get('/api/announcements', config);
+            setAnnouncements(data);
+        } catch (error) { console.error("Error fetching announcements", error); }
     };
 
     const fetchTimetable = async () => {
@@ -211,6 +225,17 @@ const TeacherDashboard = () => {
         } catch (error) { alert('Failed to upload result'); }
     };
 
+    const handleAnnouncementSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            await api.post('/api/announcements', announcementData, config);
+            alert('Announcement posted!');
+            setAnnouncementData({ title: '', content: '', targetAudience: 'All' });
+            setShowAnnouncementForm(false);
+            fetchAnnouncements();
+        } catch (error) { alert('Failed to post announcement'); }
+    };
+
     const handleStudentSubmit = async (e) => {
         e.preventDefault();
         if (!teacherClass) {
@@ -266,10 +291,11 @@ const TeacherDashboard = () => {
 
             <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'nowrap', overflowX: 'auto', paddingBottom: '10px' }}>
 
-                {['Attendance', 'My Students', 'Homework', 'Results', 'Full Timetable'].filter(tab => {
+                {['Attendance', 'My Students', 'Homework', 'Results', 'Announcements', 'Full Timetable'].filter(tab => {
                     if (tab === 'My Students') return !!teacherClass;
                     if (tab === 'Homework') return user.schoolSettings?.features?.enableHomework !== false;
                     if (tab === 'Results') return user.schoolSettings?.features?.enableResults !== false;
+                    if (tab === 'Announcements') return user.schoolSettings?.features?.enableAnnouncements !== false;
                     if (tab === 'Full Timetable') return user.schoolSettings?.features?.enableTimetable !== false;
                     if (tab === 'Attendance') return user.schoolSettings?.features?.enableAttendance !== false;
                     return true;
@@ -612,6 +638,57 @@ const TeacherDashboard = () => {
                         </form>
                     </div>
                 )}
+                {activeTab === 'Announcements' && (
+                    <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                            <h2 style={{ color: 'hsl(var(--white))' }}>Announcements</h2>
+                            <button className="btn btn-primary" onClick={() => setShowAnnouncementForm(!showAnnouncementForm)}>
+                                {showAnnouncementForm ? 'Cancel' : 'Post Announcement'}
+                            </button>
+                        </div>
+
+                        {showAnnouncementForm && (
+                            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '20px', borderRadius: '8px', marginBottom: '20px' }}>
+                                <h3 style={{ marginBottom: '15px' }}>New Announcement</h3>
+                                <form onSubmit={handleAnnouncementSubmit}>
+                                    <input placeholder="Title" className="input-field" value={announcementData.title} onChange={(e) => setAnnouncementData({ ...announcementData, title: e.target.value })} required style={{ marginBottom: '10px' }} />
+                                    <textarea placeholder="Content" className="input-field" value={announcementData.content} onChange={(e) => setAnnouncementData({ ...announcementData, content: e.target.value })} required style={{ marginBottom: '10px', minHeight: '100px' }} />
+                                    <select className="input-field" value={announcementData.targetAudience} onChange={(e) => setAnnouncementData({ ...announcementData, targetAudience: e.target.value })} style={{ marginBottom: '10px' }}>
+                                        <option value="All">All</option>
+                                        <option value="Teachers">Teachers</option>
+                                        <option value="Students">Students</option>
+                                        <option value="Parents">Parents</option>
+                                    </select>
+                                    <button type="submit" className="btn btn-primary">Post Announcement</button>
+                                </form>
+                            </div>
+                        )}
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px' }}>
+                            {announcements.map(ann => (
+                                <div key={ann._id} className="glass-panel" style={{ padding: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                        <h3>{ann.title}</h3>
+                                        <span style={{ fontSize: '0.8rem', color: 'hsl(var(--accent))', background: 'rgba(var(--accent-rgb), 0.1)', padding: '4px 10px', borderRadius: '20px' }}>
+                                            To: {ann.targetAudience}
+                                        </span>
+                                    </div>
+                                    <p style={{ marginTop: '10px', color: 'hsl(var(--text-dim))', lineHeight: '1.6' }}>{ann.content}</p>
+                                    <div style={{ marginTop: '15px', display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'hsl(var(--text-dim))' }}>
+                                        <span>Posted by: {ann.postedBy?.name || 'Unknown'}</span>
+                                        <span>{new Date(ann.createdAt).toLocaleDateString()}</span>
+                                    </div>
+                                </div>
+                            ))}
+                            {announcements.length === 0 && (
+                                <div style={{ textAlign: 'center', padding: '40px', color: 'hsl(var(--text-dim))' }}>
+                                    No announcements found.
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+
 
                 {activeTab === 'Full Timetable' && (
                     <div>
