@@ -282,7 +282,7 @@ const TeacherDashboard = () => {
 
             <div className="flex-mobile-col" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', gap: '15px' }}>
                 <div>
-                    <h1>Teacher Dashboard</h1>
+                    <h1>Teacher Dashboard v1.1</h1>
                     <p style={{ color: 'hsl(var(--text-dim))' }}>Welcome, {user.name}</p>
                 </div>
                 <button onClick={logout} className="btn btn-danger" style={{ alignSelf: 'flex-start' }}>Logout</button>
@@ -291,7 +291,7 @@ const TeacherDashboard = () => {
 
             <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'nowrap', overflowX: 'auto', paddingBottom: '10px' }}>
 
-                {['Attendance', 'My Students', 'Homework', 'Results', 'Announcements', 'Full Timetable'].filter(tab => {
+                {['Attendance', 'Announcements', 'My Students', 'Homework', 'Results', 'Full Timetable'].filter(tab => {
                     if (tab === 'My Students') return !!teacherClass;
                     if (tab === 'Homework') return user.schoolSettings?.features?.enableHomework !== false;
                     if (tab === 'Results') return user.schoolSettings?.features?.enableResults !== false;
