@@ -5,14 +5,27 @@ const User = require('../models/User');
 // @route   POST /api/attendance
 // @access  Private/Admin, Teacher
 const markAttendance = async (req, res) => {
-    const { userIds, date, status, period } = req.body; // userIds is array, status is "Present" or "Absent", period is Number
+    const { userIds, date, status, period } = req.body;
+
+    if (!req.user || !req.user.schoolId) {
+        return res.status(401).json({ message: 'User school association not found' });
+    }
+
+    if (!userIds || !Array.isArray(userIds) || userIds.length === 0) {
+        return res.status(400).json({ message: 'No students provided for attendance' });
+    }
+
     const schoolId = req.user.schoolId;
     const markedBy = req.user._id;
 
     try {
+        console.log("Marking Attendance for:", { schoolId, date, status, period, count: userIds.length });
+        const normalizedDate = new Date(date);
+        normalizedDate.setUTCHours(0, 0, 0, 0);
+
         const attendanceRecords = userIds.map(userId => ({
             userId,
-            date: new Date(date),
+            date: normalizedDate,
             status,
             period: period || 1,
             schoolId,
@@ -31,6 +44,7 @@ const markAttendance = async (req, res) => {
 
         res.status(200).json({ message: 'Attendance marked successfully' });
     } catch (error) {
+        console.error("Attendance Marking Error:", error);
         res.status(500).json({ message: error.message });
     }
 };
