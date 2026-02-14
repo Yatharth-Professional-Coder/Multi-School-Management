@@ -176,11 +176,9 @@ const getClassAttendance = async (req, res) => {
 
         let query = { userId: { $in: studentIds } };
         if (date) {
-            const startDate = new Date(date);
-            startDate.setUTCHours(0, 0, 0, 0);
-            const endDate = new Date(date);
-            endDate.setUTCHours(23, 59, 59, 999);
-            query.date = { $gte: startDate, $lte: endDate };
+            const normalizedDate = new Date(date);
+            normalizedDate.setUTCHours(0, 0, 0, 0);
+            query.date = normalizedDate;
         }
         if (period) {
             query.period = Number(period);
@@ -207,11 +205,9 @@ const getSchoolAttendance = async (req, res) => {
         let query = { schoolId };
 
         if (date) {
-            const startDate = new Date(date);
-            startDate.setUTCHours(0, 0, 0, 0);
-            const endDate = new Date(date);
-            endDate.setUTCHours(23, 59, 59, 999);
-            query.date = { $gte: startDate, $lte: endDate };
+            const normalizedDate = new Date(date);
+            normalizedDate.setUTCHours(0, 0, 0, 0);
+            query.date = normalizedDate;
         }
 
         if (role) {
