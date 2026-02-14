@@ -38,6 +38,6 @@ const attendanceSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Ensure one attendance record per user per day per period
-attendanceSchema.index({ date: 1, userId: 1, period: 1 }, { unique: true });
+attendanceSchema.index({ date: 1, userId: 1, period: 1 }, { unique: true, name: 'date_user_period_unique' });
 
 module.exports = mongoose.model('Attendance', attendanceSchema);

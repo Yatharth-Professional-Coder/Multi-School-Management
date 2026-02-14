@@ -14,7 +14,22 @@ app.use(helmet());
 
 // Database Connection
 mongoose.connect(process.env.MONGODB_URI)
-    .then(() => console.log('MongoDB Connected'))
+    .then(async () => {
+        console.log('MongoDB Connected');
+        // Drop legacy attendance index that doesn't include period
+        try {
+            const collections = await mongoose.connection.db.listCollections({ name: 'attendances' }).toArray();
+            if (collections.length > 0) {
+                await mongoose.connection.db.collection('attendances').dropIndex('date_1_userId_1');
+                console.log('Successfully dropped legacy attendance index: date_1_userId_1');
+            }
+        } catch (err) {
+            // Index might not exist, which is fine
+            if (err.codeName !== 'IndexNotFound') {
+                console.log('Note on index cleanup:', err.message);
+            }
+        }
+    })
     .catch(err => console.log(err));
 
 const authRoutes = require('./routes/authRoutes');
