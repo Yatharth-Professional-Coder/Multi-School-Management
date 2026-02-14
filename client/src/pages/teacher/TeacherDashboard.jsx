@@ -295,7 +295,7 @@ const TeacherDashboard = () => {
                     if (tab === 'My Students') return !!teacherClass;
                     if (tab === 'Homework') return user.schoolSettings?.features?.enableHomework !== false;
                     if (tab === 'Results') return user.schoolSettings?.features?.enableResults !== false;
-                    if (tab === 'Announcements') return user.schoolSettings?.features?.enableAnnouncements !== false;
+                    if (tab === 'Announcements') return true;
                     if (tab === 'Full Timetable') return user.schoolSettings?.features?.enableTimetable !== false;
                     if (tab === 'Attendance') return user.schoolSettings?.features?.enableAttendance !== false;
                     return true;
