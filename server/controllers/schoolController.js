@@ -218,7 +218,7 @@ const updateSchoolSettings = async (req, res) => {
                 gradingSystem: (school.subscriptionPlan === 'Premium' ? (gradingSystem || school.settings.gradingSystem) : 'Percentage'),
                 features: restrictedFeatures
             };
-
+            school.markModified('settings');
             const updatedSchool = await school.save();
             res.json(updatedSchool);
         } else {

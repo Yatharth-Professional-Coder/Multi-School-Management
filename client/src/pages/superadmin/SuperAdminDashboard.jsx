@@ -478,6 +478,8 @@ const SuperAdminDashboard = () => {
                                                     isAllowed = false;
                                                     upgradeTo = 'Premium';
                                                 }
+                                            } else if (key === 'enableHalfDay') {
+                                                isAllowed = true; // Always allow for now once it's in the system
                                             }
 
                                             return (
