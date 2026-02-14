@@ -145,6 +145,7 @@ const approveRectification = async (req, res) => {
             record.status = record.rectificationRequest.newStatus;
         }
 
+        record.markModified('rectificationRequest');
         await record.save();
         res.json({ message: `Rectification request ${status}` });
 
