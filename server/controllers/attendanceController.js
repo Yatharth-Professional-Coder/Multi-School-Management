@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Attendance = require('../models/Attendance');
 const User = require('../models/User');
 
@@ -24,12 +25,12 @@ const markAttendance = async (req, res) => {
         normalizedDate.setUTCHours(0, 0, 0, 0);
 
         const attendanceRecords = userIds.map(userId => ({
-            userId,
+            userId: new mongoose.Types.ObjectId(userId),
             date: normalizedDate,
             status,
-            period: period || 1,
-            schoolId,
-            markedBy
+            period: parseInt(period) || 1,
+            schoolId: new mongoose.Types.ObjectId(schoolId),
+            markedBy: new mongoose.Types.ObjectId(markedBy)
         }));
 
         const operations = attendanceRecords.map(record => ({
@@ -86,9 +87,12 @@ const requestRectification = async (req, res) => {
     }
 
     try {
+        const normalizedDate = new Date(date);
+        normalizedDate.setUTCHours(0, 0, 0, 0);
+
         const query = {
             userId,
-            date: new Date(date)
+            date: normalizedDate
         };
 
         if (period) {
