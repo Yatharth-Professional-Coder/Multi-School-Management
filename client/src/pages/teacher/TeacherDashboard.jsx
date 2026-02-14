@@ -81,7 +81,11 @@ const TeacherDashboard = () => {
                 studentsData.forEach(student => { initialAttendance[student._id] = 'Present'; });
                 setAttendance(initialAttendance);
             }
-        } catch (error) { console.error("Error fetching students/attendance", error); }
+        } catch (error) {
+            console.error("Error fetching students/attendance", error);
+            const msg = error.response?.data?.message || 'Error fetching students/attendance';
+            alert(msg);
+        }
     };
 
 
@@ -155,7 +159,10 @@ const TeacherDashboard = () => {
             if (periodEntry && periodEntry.classId) {
                 fetchStudents(periodEntry.classId._id);
             }
-        } catch (error) { alert('Failed to mark attendance'); }
+        } catch (error) {
+            const msg = error.response?.data?.message || 'Failed to mark attendance';
+            alert(msg);
+        }
     };
 
     const handleRectifyRequest = async (studentId, newStatus) => {

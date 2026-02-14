@@ -20,18 +20,24 @@ const markAttendance = async (req, res) => {
     const markedBy = req.user._id;
 
     try {
-        console.log("Marking Attendance for:", { schoolId, date, status, period, count: userIds.length });
+        console.log("Marking Attendance Payload:", JSON.stringify({ schoolId, date, status, period, count: userIds.length }));
         const normalizedDate = new Date(date);
         normalizedDate.setUTCHours(0, 0, 0, 0);
 
-        const attendanceRecords = userIds.map(userId => ({
-            userId: new mongoose.Types.ObjectId(userId),
-            date: normalizedDate,
-            status,
-            period: parseInt(period) || 1,
-            schoolId: new mongoose.Types.ObjectId(schoolId),
-            markedBy: new mongoose.Types.ObjectId(markedBy)
-        }));
+        let attendanceRecords;
+        try {
+            attendanceRecords = userIds.map(userId => ({
+                userId: new mongoose.Types.ObjectId(userId.trim()),
+                date: normalizedDate,
+                status,
+                period: parseInt(period) || 1,
+                schoolId: new mongoose.Types.ObjectId(schoolId.toString().trim()),
+                markedBy: new mongoose.Types.ObjectId(markedBy.toString().trim())
+            }));
+        } catch (idErr) {
+            console.error("ID Casting Error:", idErr);
+            return res.status(400).json({ message: 'Invalid ID format in request: ' + idErr.message });
+        }
 
         const operations = attendanceRecords.map(record => ({
             updateOne: {
