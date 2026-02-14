@@ -17,7 +17,7 @@ const attendanceSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['Present', 'Absent', 'Late'],
+        enum: ['Present', 'Absent', 'Late', 'Half Day'],
         required: true,
     },
     period: {
@@ -33,7 +33,7 @@ const attendanceSchema = new mongoose.Schema({
         requested: { type: Boolean, default: false },
         reason: { type: String },
         status: { type: String, enum: ['Pending', 'Approved', 'Rejected'], default: 'Pending' },
-        newStatus: { type: String, enum: ['Present', 'Absent', 'Late'] },
+        newStatus: { type: String, enum: ['Present', 'Absent', 'Late', 'Half Day'] },
     },
 }, { timestamps: true });
 

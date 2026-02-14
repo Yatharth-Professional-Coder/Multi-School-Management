@@ -46,6 +46,7 @@ const schoolSchema = new mongoose.Schema({
             enableHomework: { type: Boolean, default: true },
             enableResults: { type: Boolean, default: true },
             enableAnnouncements: { type: Boolean, default: true },
+            enableHalfDay: { type: Boolean, default: false },
         }
     }
 }, { timestamps: true });

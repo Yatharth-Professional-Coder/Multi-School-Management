@@ -37,6 +37,7 @@ const SuperAdminDashboard = () => {
             enableHomework: true,
             enableResults: true,
             enableAnnouncements: true,
+            enableHalfDay: false,
         }
     });
 
@@ -116,6 +117,7 @@ const SuperAdminDashboard = () => {
                 enableHomework: true,
                 enableResults: true,
                 enableAnnouncements: true,
+                enableHalfDay: false,
             }
         });
         fetchSchoolUsers(school._id);

@@ -309,6 +309,7 @@ const AdminDashboard = () => {
     const submitAttendance = async () => {
         const presentIds = Object.keys(attendanceData).filter(id => attendanceData[id] === 'Present');
         const absentIds = Object.keys(attendanceData).filter(id => attendanceData[id] === 'Absent');
+        const halfDayIds = Object.keys(attendanceData).filter(id => attendanceData[id] === 'Half Day');
 
         try {
             if (presentIds.length > 0) {
@@ -316,6 +317,9 @@ const AdminDashboard = () => {
             }
             if (absentIds.length > 0) {
                 await api.post('/api/attendance', { userIds: absentIds, date: attendanceDate, status: 'Absent' }, config);
+            }
+            if (halfDayIds.length > 0) {
+                await api.post('/api/attendance', { userIds: halfDayIds, date: attendanceDate, status: 'Half Day' }, config);
             }
             alert('Attendance marked successfully');
             setIsMarkingAttendance(false);
@@ -369,9 +373,14 @@ const AdminDashboard = () => {
     const getTeacherStats = (teacherId) => {
         const records = attendanceRecords.filter(r => r.userId?._id === teacherId);
         const total = records.length;
-        const present = records.filter(r => r.status === 'Present').length;
-        const percentage = total === 0 ? 0 : Math.round((present / total) * 100);
-        return { total, present, percentage };
+        const fullDays = records.filter(r => r.status === 'Present').length;
+        const halfDays = records.filter(r => r.status === 'Half Day').length;
+        const lateDays = records.filter(r => r.status === 'Late').length;
+
+        const effectivePresent = fullDays + (halfDays * 0.5) + (lateDays * 1); // treating late as present for now
+        const percentage = total === 0 ? 0 : Math.round((effectivePresent / total) * 100);
+
+        return { total, fullDays, halfDays, effectivePresent, percentage };
     };
 
     return (
@@ -777,6 +786,22 @@ const AdminDashboard = () => {
                                                 >
                                                     A
                                                 </button>
+                                                {user.schoolSettings?.features?.enableHalfDay && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleAttendanceChange(teacher._id, 'Half Day')}
+                                                        style={{
+                                                            padding: '5px 10px',
+                                                            borderRadius: '4px',
+                                                            border: 'none',
+                                                            cursor: 'pointer',
+                                                            background: attendanceData[teacher._id] === 'Half Day' ? '#ff9800' : 'rgba(255,255,255,0.1)',
+                                                            color: attendanceData[teacher._id] === 'Half Day' ? '#fff' : '#fff'
+                                                        }}
+                                                    >
+                                                        H
+                                                    </button>
+                                                )}
                                             </div>
                                         </div>
                                     ))}
@@ -795,7 +820,9 @@ const AdminDashboard = () => {
                                     <thead>
                                         <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
                                             <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Teacher</th>
-                                            <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Attendance (Present/Total)</th>
+                                            <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Full Days</th>
+                                            <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Half Days</th>
+                                            <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Effective Presence / Total</th>
                                             <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Percentage</th>
                                             <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Actions</th>
                                         </tr>
@@ -806,7 +833,9 @@ const AdminDashboard = () => {
                                             return (
                                                 <tr key={teacher._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                                                     <td style={{ padding: '15px' }}>{teacher.name}</td>
-                                                    <td style={{ padding: '15px' }}>{stats.present} / {stats.total}</td>
+                                                    <td style={{ padding: '15px' }}>{stats.fullDays}</td>
+                                                    <td style={{ padding: '15px' }}>{stats.halfDays}</td>
+                                                    <td style={{ padding: '15px' }}>{stats.effectivePresent} / {stats.total}</td>
                                                     <td style={{ padding: '15px' }}>
                                                         <span style={{
                                                             padding: '4px 10px', borderRadius: '15px', fontSize: '0.8rem',
@@ -868,8 +897,8 @@ const AdminDashboard = () => {
                                                     <td style={{ padding: '15px' }}>
                                                         <span style={{
                                                             padding: '4px 10px', borderRadius: '15px', fontSize: '0.8rem',
-                                                            background: record.status === 'Present' ? 'rgba(50, 200, 255, 0.2)' : 'rgba(255, 100, 100, 0.2)',
-                                                            color: record.status === 'Present' ? '#32c8ff' : '#ff6464',
+                                                            background: record.status === 'Present' ? 'rgba(50, 200, 255, 0.2)' : record.status === 'Half Day' ? 'rgba(255, 152, 0, 0.2)' : 'rgba(255, 100, 100, 0.2)',
+                                                            color: record.status === 'Present' ? '#32c8ff' : record.status === 'Half Day' ? '#ff9800' : '#ff6464',
                                                             fontWeight: 'bold'
                                                         }}>
                                                             {record.status}
