@@ -61,7 +61,7 @@ const getAttendance = async (req, res) => {
 // @route   PUT /api/attendance/rectify
 // @access  Private/Student, Teacher
 const requestRectification = async (req, res) => {
-    const { date, reason, studentId, period } = req.body;
+    const { date, reason, studentId, period, newStatus } = req.body;
 
     // If teacher is requesting, they must provide studentId
     // If student is requesting, they use their own ID
@@ -90,7 +90,8 @@ const requestRectification = async (req, res) => {
         record.rectificationRequest = {
             requested: true,
             reason: reason || 'Teacher requested rectification',
-            status: 'Pending'
+            status: 'Pending',
+            newStatus
         };
 
         await record.save();
@@ -116,9 +117,8 @@ const approveRectification = async (req, res) => {
         }
 
         record.rectificationRequest.status = status;
-        if (status === 'Approved') {
-            // Flip the status if approved (Present <-> Absent)
-            record.status = record.status === 'Absent' ? 'Present' : 'Absent';
+        if (status === 'Approved' && record.rectificationRequest.newStatus) {
+            record.status = record.rectificationRequest.newStatus;
         }
 
         await record.save();

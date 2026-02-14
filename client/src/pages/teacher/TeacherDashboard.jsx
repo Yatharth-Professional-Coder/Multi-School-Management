@@ -158,8 +158,8 @@ const TeacherDashboard = () => {
         } catch (error) { alert('Failed to mark attendance'); }
     };
 
-    const handleRectifyRequest = async (studentId) => {
-        const reason = prompt("Reason for rectification:");
+    const handleRectifyRequest = async (studentId, newStatus) => {
+        const reason = prompt(`Reason for changing attendance to ${newStatus}:`);
         if (!reason) return;
 
         try {
@@ -167,7 +167,8 @@ const TeacherDashboard = () => {
                 date: selectedDate,
                 reason,
                 studentId,
-                period: selectedPeriod
+                period: selectedPeriod,
+                newStatus
             }, config);
             alert('Rectification request sent to Principal');
 
@@ -353,28 +354,32 @@ const TeacherDashboard = () => {
                                                 <tr key={record._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                                                     <td style={{ padding: '10px' }}>{record.userId.name}</td>
                                                     <td style={{ padding: '10px', textAlign: 'center' }}>
-                                                        <span style={{
-                                                            color: record.status === 'Present' ? '#64ff96' : record.status === 'Absent' ? '#ff6464' : '#ffc832',
-                                                            fontWeight: 'bold',
-                                                            padding: '2px 8px',
-                                                            background: 'rgba(255,255,255,0.05)',
-                                                            borderRadius: '4px'
-                                                        }}>
-                                                            {record.status}
-                                                        </span>
+                                                        <div style={{ display: 'inline-flex', background: 'rgba(0,0,0,0.3)', borderRadius: '30px', padding: '4px' }}>
+                                                            <button
+                                                                onClick={() => record.status !== 'Present' && handleRectifyRequest(record.userId._id, 'Present')}
+                                                                style={{ padding: '6px 12px', fontSize: '0.8rem', borderRadius: '20px', background: record.status === 'Present' ? 'hsl(140, 70%, 40%)' : 'transparent', color: '#fff', fontWeight: 'bold', border: 'none', cursor: record.status === 'Present' ? 'default' : 'pointer' }}
+                                                            >
+                                                                P
+                                                            </button>
+                                                            <button
+                                                                onClick={() => record.status !== 'Absent' && handleRectifyRequest(record.userId._id, 'Absent')}
+                                                                style={{ padding: '6px 12px', fontSize: '0.8rem', borderRadius: '20px', background: record.status === 'Absent' ? 'hsl(0, 70%, 50%)' : 'transparent', color: '#fff', fontWeight: 'bold', border: 'none', cursor: record.status === 'Absent' ? 'default' : 'pointer' }}
+                                                            >
+                                                                A
+                                                            </button>
+                                                            <button
+                                                                onClick={() => record.status !== 'Late' && handleRectifyRequest(record.userId._id, 'Late')}
+                                                                style={{ padding: '6px 12px', fontSize: '0.8rem', borderRadius: '20px', background: record.status === 'Late' ? 'hsl(40, 90%, 50%)' : 'transparent', color: '#fff', fontWeight: 'bold', border: 'none', cursor: record.status === 'Late' ? 'default' : 'pointer' }}
+                                                            >
+                                                                L
+                                                            </button>
+                                                        </div>
                                                     </td>
                                                     <td style={{ padding: '10px', textAlign: 'right' }}>
-                                                        {record.rectificationRequest?.requested ? (
+                                                        {record.rectificationRequest?.requested && (
                                                             <span style={{ fontSize: '0.8rem', color: 'hsl(var(--accent))' }}>
-                                                                Rectify {record.rectificationRequest.status}
+                                                                Pending {record.rectificationRequest.status}
                                                             </span>
-                                                        ) : (
-                                                            <button
-                                                                onClick={() => handleRectifyRequest(record.userId._id)}
-                                                                style={{ fontSize: '0.8rem', color: 'hsl(var(--primary))', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
-                                                            >
-                                                                Send Rectify Request
-                                                            </button>
                                                         )}
                                                     </td>
                                                 </tr>

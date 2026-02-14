@@ -913,6 +913,7 @@ const AdminDashboard = () => {
                                 <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
                                     <th style={{ textAlign: 'left', padding: '15px' }}>Student</th>
                                     <th style={{ textAlign: 'left', padding: '15px' }}>Date / Period</th>
+                                    <th style={{ textAlign: 'left', padding: '15px' }}>Change</th>
                                     <th style={{ textAlign: 'left', padding: '15px' }}>Reason</th>
                                     <th style={{ textAlign: 'right', padding: '15px' }}>Actions</th>
                                 </tr>
@@ -922,6 +923,9 @@ const AdminDashboard = () => {
                                     <tr key={rect._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                                         <td style={{ padding: '15px' }}>{rect.userId?.name} <br /> <small style={{ color: 'hsl(var(--text-dim))' }}>{rect.userId?.email}</small></td>
                                         <td style={{ padding: '15px' }}>{new Date(rect.date).toLocaleDateString()} (P{rect.period})</td>
+                                        <td style={{ padding: '15px' }}>
+                                            <span style={{ color: '#ff6464' }}>{rect.status}</span> → <span style={{ color: '#64ff96' }}>{rect.rectificationRequest?.newStatus || 'N/A'}</span>
+                                        </td>
                                         <td style={{ padding: '15px' }}>{rect.rectificationRequest?.reason}</td>
                                         <td style={{ padding: '15px', textAlign: 'right' }}>
                                             <button className="btn btn-primary" onClick={() => handleRectifyAction(rect._id, 'Approved')} style={{ fontSize: '0.8rem', padding: '5px 10px', marginRight: '5px' }}>Approve</button>
