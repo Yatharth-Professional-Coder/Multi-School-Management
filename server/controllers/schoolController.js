@@ -17,6 +17,7 @@ const getPlanFeatures = (plan) => {
                 enableHomework: true,
                 enableResults: true,
                 enableAnnouncements: true,
+                enableHalfDay: true,
             };
         case 'Standard':
             return {
@@ -25,6 +26,7 @@ const getPlanFeatures = (plan) => {
                 enableHomework: true,
                 enableResults: false,
                 enableAnnouncements: true,
+                enableHalfDay: true,
             };
         case 'Basic':
         default:
@@ -34,6 +36,7 @@ const getPlanFeatures = (plan) => {
                 enableHomework: false,
                 enableResults: false,
                 enableAnnouncements: true,
+                enableHalfDay: true,
             };
     }
 };
