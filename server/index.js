@@ -18,14 +18,16 @@ mongoose.connect(process.env.MONGODB_URI)
         console.log('MongoDB Connected');
         // Drop legacy attendance index that doesn't include period
         try {
-            const collections = await mongoose.connection.db.listCollections({ name: 'attendances' }).toArray();
-            if (collections.length > 0) {
-                await mongoose.connection.db.collection('attendances').dropIndex('date_1_userId_1');
-                console.log('Successfully dropped legacy attendance index: date_1_userId_1');
-            }
+            // Try to drop the index directly on the collection
+            await mongoose.connection.db.collection('attendances').dropIndex('date_1_userId_1');
+            console.log('Successfully dropped legacy attendance index: date_1_userId_1');
         } catch (err) {
-            // Index might not exist, which is fine
-            if (err.codeName !== 'IndexNotFound') {
+            // Code 27 or IndexNotFound means it's already gone
+            if (err.code === 27 || err.codeName === 'IndexNotFound') {
+                console.log('Legacy index date_1_userId_1 already removed.');
+            } else if (err.code === 26 || err.codeName === 'NamespaceNotFound') {
+                console.log('Collection not found during index cleanup (will be created on first use).');
+            } else {
                 console.log('Note on index cleanup:', err.message);
             }
         }
