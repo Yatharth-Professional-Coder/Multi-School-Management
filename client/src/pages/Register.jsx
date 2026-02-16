@@ -66,13 +66,13 @@ const Register = () => {
                         display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                         marginBottom: '10px'
                     }}>
-                        <img src="/logo.png" alt="EduEdge" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                        <img src="/logo.png" alt="MR. EduEdge" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                     </div>
                     <h1 style={{ fontSize: '3rem', fontWeight: '800', marginBottom: '12px', letterSpacing: '-1.5px' }}>
                         <span className="gradient-text">Register Your School</span>
                     </h1>
                     <p style={{ color: 'hsl(var(--text-dim))', fontSize: '1.2rem', fontWeight: '500' }}>
-                        Join the <span style={{ color: 'hsl(var(--white))' }}>EduEdge</span> ecosystem today
+                        Join the <span style={{ color: 'hsl(var(--white))' }}>MR. EduEdge</span> ecosystem today
                     </p>
                 </div>
 
