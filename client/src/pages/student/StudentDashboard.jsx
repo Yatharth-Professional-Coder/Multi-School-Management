@@ -1,11 +1,19 @@
 import { useState, useEffect, useContext } from 'react';
+import { useLocation } from 'react-router-dom';
 import api from '../../utils/api';
 import AuthContext from '../../context/AuthContext';
 import { FaUserGraduate, FaClipboardList, FaBullhorn, FaBookOpen, FaChartLine } from 'react-icons/fa';
 
 const StudentDashboard = () => {
     const { user, logout } = useContext(AuthContext);
+    const location = useLocation();
     const [activeTab, setActiveTab] = useState('Overview');
+
+    useEffect(() => {
+        if (location.pathname === '/my-results') {
+            setActiveTab('Results');
+        }
+    }, [location.pathname]);
     const [attendance, setAttendance] = useState([]);
     const [homework, setHomework] = useState([]);
     const [results, setResults] = useState([]);
@@ -117,14 +125,16 @@ const StudentDashboard = () => {
 
             {/* Content Area */}
             <div className="glass-panel" style={{ padding: '30px', minHeight: '400px' }}>
-                <h2>{activeTab === 'Overview' ? 'Select a tab above' : activeTab}</h2>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', gap: '20px' }} className="flex-mobile-col">
+                    <h2 style={{ margin: 0 }}>{activeTab === 'Overview' ? 'Select a tab above' : activeTab}</h2>
+                </div>
                 <div style={{ marginTop: '20px' }}>
 
                     {activeTab === 'Overview' && <p>Click on any card above to view detailed information.</p>}
 
                     {activeTab === 'Attendance' && (
-                        <div style={{ overflowX: 'auto' }}>
-                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <div style={{ overflowX: 'auto', margin: '0 -15px', padding: '0 15px' }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '500px' }}>
                                 <thead>
                                     <tr>
                                         <th style={{ textAlign: 'left', padding: '10px' }}>Date</th>
@@ -167,8 +177,8 @@ const StudentDashboard = () => {
                     )}
 
                     {activeTab === 'Results' && (
-                        <div style={{ overflowX: 'auto' }}>
-                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <div style={{ overflowX: 'auto', margin: '0 -15px', padding: '0 15px' }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px' }}>
                                 <thead>
                                     <tr>
                                         <th style={{ textAlign: 'left', padding: '10px', borderBottom: '1px solid grey' }}>Exam</th>

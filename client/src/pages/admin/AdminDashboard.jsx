@@ -1,16 +1,26 @@
 import { useState, useEffect, useContext } from 'react';
+import { useLocation } from 'react-router-dom';
 import api from '../../utils/api';
 import AuthContext from '../../context/AuthContext';
 import { FaUserTie, FaUserGraduate, FaUserPlus, FaChalkboardTeacher, FaLayerGroup, FaClipboardList, FaBullhorn, FaTrash, FaArrowLeft, FaEye } from 'react-icons/fa';
 
 const AdminDashboard = () => {
     const { user, logout } = useContext(AuthContext);
+    const location = useLocation();
     const [subAdmins, setSubAdmins] = useState([]);
     const [teachers, setTeachers] = useState([]);
     const [schoolSettings, setSchoolSettings] = useState(user.schoolSettings || {});
     const [classes, setClasses] = useState([]);
     const [attendanceRecords, setAttendanceRecords] = useState([]);
     const [activeTab, setActiveTab] = useState('Classes'); // Default to Classes
+
+    useEffect(() => {
+        if (location.pathname === '/teachers') {
+            setActiveTab('Teacher Attendance');
+        } else if (location.pathname === '/students') {
+            setActiveTab('Classes');
+        }
+    }, [location.pathname]);
     const [showForm, setShowForm] = useState(false);
     const [showRegisterForm, setShowRegisterForm] = useState(false);
     const [editingUser, setEditingUser] = useState(null);
@@ -821,7 +831,7 @@ const AdminDashboard = () => {
                         {!isMarkingAttendance && !selectedTeacherAttendance && (
                             <div style={{ overflowX: 'auto' }}>
                                 <h3 style={{ marginBottom: '15px', color: 'hsl(var(--text-dim))' }}>Teachers Attendance Summary</h3>
-                                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '800px' }}>
                                     <thead>
                                         <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
                                             <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Teacher</th>
@@ -885,7 +895,7 @@ const AdminDashboard = () => {
                         {selectedTeacherAttendance && (
                             <div style={{ overflowX: 'auto' }}>
                                 <h3 style={{ marginBottom: '15px', color: 'hsl(var(--text-dim))' }}>Attendance History: {selectedTeacherAttendance.name}</h3>
-                                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px' }}>
                                     <thead>
                                         <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
                                             <th style={{ textAlign: 'left', padding: '15px', color: 'hsl(var(--secondary))' }}>Date</th>
@@ -940,9 +950,39 @@ const AdminDashboard = () => {
                     </div>
                 )}
 
+                {activeTab === 'Teachers' && (
+                    <div>
+                        <h2 style={{ marginBottom: '20px' }}>Teacher Registry</h2>
+                        <div style={{ overflowX: 'auto' }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px' }}>
+                                <thead>
+                                    <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                                        <th style={{ textAlign: 'left', padding: '15px' }}>Name</th>
+                                        <th style={{ textAlign: 'left', padding: '15px' }}>Email</th>
+                                        <th style={{ textAlign: 'left', padding: '15px' }}>Role</th>
+                                        <th style={{ textAlign: 'right', padding: '15px' }}>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {teachers.map(teacher => (
+                                        <tr key={teacher._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                            <td style={{ padding: '15px' }}>{teacher.name}</td>
+                                            <td style={{ padding: '15px' }}>{teacher.email}</td>
+                                            <td style={{ padding: '15px' }}><span className="role-badge" style={{ margin: 0 }}>{teacher.role}</span></td>
+                                            <td style={{ padding: '15px', textAlign: 'right' }}>
+                                                <button onClick={() => deleteUser(teacher._id)} className="btn" style={{ padding: '5px 12px', fontSize: '0.8rem', borderColor: '#ff4d4d', color: '#ff4d4d' }}>Remove</button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
+
                 {activeTab === 'Rectification Requests' && (
                     <div style={{ overflowX: 'auto' }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '800px' }}>
                             <thead>
                                 <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
                                     <th style={{ textAlign: 'left', padding: '15px' }}>Student</th>

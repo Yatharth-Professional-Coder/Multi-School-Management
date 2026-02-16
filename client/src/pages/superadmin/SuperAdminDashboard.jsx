@@ -352,7 +352,7 @@ const SuperAdminDashboard = () => {
                 <div className="fade-in">
                     {/* School Info Header */}
                     <div className="glass-panel" style={{ padding: '30px', marginBottom: '30px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '30px' }} className="flex-mobile-col">
                             <div>
                                 <h1 style={{ marginBottom: '10px' }}>{selectedSchool.name}</h1>
                                 <p style={{ color: 'hsl(var(--text-dim))', marginBottom: '20px' }}>
@@ -388,14 +388,14 @@ const SuperAdminDashboard = () => {
                                 </div>
                             </div>
 
-                            <div style={{ textAlign: 'right', background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '10px' }}>
-                                <h3 style={{ marginBottom: '10px', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '10px' }}>
+                            <div style={{ textAlign: 'left', background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '10px' }} className="w-full-mobile">
+                                <h3 style={{ marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                                     <FaUserTie /> Principal
                                 </h3>
                                 <p><strong>{selectedSchool.adminId?.name}</strong></p>
                                 <p style={{ fontSize: '0.9rem', opacity: 0.7, marginBottom: '10px' }}>{selectedSchool.adminId?.email}</p>
 
-                                <button className="btn btn-secondary" style={{ fontSize: '0.8rem', padding: '5px 10px' }} onClick={() => setEditingUser(selectedSchool.adminId)}>
+                                <button className="btn btn-secondary w-full-mobile" style={{ fontSize: '0.8rem', padding: '5px 10px' }} onClick={() => setEditingUser(selectedSchool.adminId)}>
                                     <FaEdit style={{ marginRight: '5px' }} /> Edit Credentials
                                 </button>
                             </div>

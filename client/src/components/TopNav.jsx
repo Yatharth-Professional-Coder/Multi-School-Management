@@ -1,11 +1,16 @@
-import { FaSearch, FaBell, FaCalendarAlt } from 'react-icons/fa';
+import { FaSearch, FaBell, FaCalendarAlt, FaBars } from 'react-icons/fa';
 
-const TopNav = () => {
+const TopNav = ({ onMenuClick }) => {
     return (
         <header className="topnav">
-            <div className="topnav-search">
-                <FaSearch className="search-icon" />
-                <input type="text" placeholder="Search for anything..." />
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div className="menu-toggle" onClick={onMenuClick}>
+                    <FaBars />
+                </div>
+                <div className="topnav-search">
+                    <FaSearch className="search-icon" />
+                    <input type="text" placeholder="Search for anything..." />
+                </div>
             </div>
 
             <div className="topnav-actions">

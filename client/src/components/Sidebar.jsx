@@ -10,10 +10,11 @@ import {
     FaSignOutAlt,
     FaChartBar,
     FaClipboardList,
-    FaBullhorn
+    FaBullhorn,
+    FaTimes
 } from 'react-icons/fa';
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen, setIsOpen }) => {
     const { user, logout } = useContext(AuthContext);
 
     const menuItems = {
@@ -44,10 +45,15 @@ const Sidebar = () => {
     const roleMenuItems = menuItems[user?.role] || [];
 
     return (
-        <aside className="sidebar">
+        <aside className={`sidebar ${isOpen ? 'mobile-open' : ''}`}>
             <div className="sidebar-header">
-                <div className="logo-placeholder">M</div>
-                <span className="brand-name">MR. EduEdge</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
+                    <div className="logo-placeholder">M</div>
+                    <span className="brand-name">MR. EduEdge</span>
+                </div>
+                <div className="menu-toggle" onClick={() => setIsOpen(false)} style={{ margin: 0 }}>
+                    <FaTimes />
+                </div>
             </div>
 
             <div className="sidebar-profile">
@@ -68,6 +74,7 @@ const Sidebar = () => {
                         key={index}
                         to={item.path}
                         className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}
+                        onClick={() => setIsOpen(false)}
                     >
                         <span className="nav-icon">{item.icon}</span>
                         <span className="nav-text">{item.label}</span>

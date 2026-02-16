@@ -1,14 +1,24 @@
 import { useState, useEffect, useContext } from 'react';
+import { useLocation } from 'react-router-dom';
 import api from '../../utils/api';
 import AuthContext from '../../context/AuthContext';
 import { FaUserCheck, FaUserTimes, FaCalendarAlt, FaBook, FaClipboardList, FaBullhorn, FaUserPlus } from 'react-icons/fa';
 
 const TeacherDashboard = () => {
     const { user, logout } = useContext(AuthContext);
+    const location = useLocation();
     const [students, setStudents] = useState([]);
     const [attendance, setAttendance] = useState({});
     const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
     const [activeTab, setActiveTab] = useState('Attendance'); // Attendance, My Students, Homework, Results
+
+    useEffect(() => {
+        if (location.pathname === '/my-students') {
+            setActiveTab('My Students');
+        } else if (location.pathname === '/attendance') {
+            setActiveTab('Attendance');
+        }
+    }, [location.pathname]);
     const [showAddForm, setShowAddForm] = useState(false);
     const [editingStudent, setEditingStudent] = useState(null);
     const [newStudentData, setNewStudentData] = useState({ name: '', email: '', password: '', role: 'Student' });
@@ -631,9 +641,9 @@ const TeacherDashboard = () => {
                 )}
                 {activeTab === 'Announcements' && (
                     <div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }} className="flex-mobile-col">
                             <h2 style={{ color: 'hsl(var(--white))' }}>Announcements</h2>
-                            <button className="btn btn-primary" onClick={() => setShowAnnouncementForm(!showAnnouncementForm)}>
+                            <button className="btn btn-primary w-full-mobile" onClick={() => setShowAnnouncementForm(!showAnnouncementForm)}>
                                 {showAnnouncementForm ? 'Cancel' : 'Post Announcement'}
                             </button>
                         </div>
@@ -685,7 +695,7 @@ const TeacherDashboard = () => {
                     <div>
                         <h2 style={{ marginBottom: '20px' }}>Weekly Schedule</h2>
                         <div style={{ overflowX: 'auto' }}>
-                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '700px' }}>
                                 <thead>
                                     <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
                                         <th style={{ textAlign: 'left', padding: '15px' }}>Day</th>
