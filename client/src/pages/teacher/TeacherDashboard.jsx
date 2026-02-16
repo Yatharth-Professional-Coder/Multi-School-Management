@@ -63,8 +63,6 @@ const TeacherDashboard = () => {
         fetchInitialData();
     }, []);
 
-    if (loading) return <LoadingSpinner fullScreen />;
-
     // Tab-specific fetching
     useEffect(() => {
         if (activeTab === 'My Students' && teacherClass) {
@@ -75,6 +73,26 @@ const TeacherDashboard = () => {
             fetchAnnouncements();
         }
     }, [activeTab, teacherClass]);
+
+    // Effect to fetch students whenever period or day changes
+    useEffect(() => {
+        if (activeTab === 'Attendance' && timetable.length > 0) {
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const dayOfWeek = days[new Date(selectedDate).getDay()];
+            const periodEntry = timetable.find(p => p.day === dayOfWeek && p.period === selectedPeriod);
+
+            if (periodEntry && !periodEntry.isBreak && periodEntry.classId) {
+                // Only re-fetch if we don't have students yet or the class changed
+                // This prevents resetting the local 'attendance' state while marking
+                fetchStudents(periodEntry.classId._id);
+            } else {
+                setStudents([]); // Clear list if it's a break or no class scheduled
+            }
+        }
+    }, [selectedPeriod, selectedDate, timetable.length, activeTab]); // Using length to avoid unnecessary triggers
+
+    if (loading) return <LoadingSpinner fullScreen />;
+
 
     const fetchTeacherClass = async () => {
         try {
@@ -157,22 +175,6 @@ const TeacherDashboard = () => {
         }
     };
 
-    // Effect to fetch students whenever period or day changes
-    useEffect(() => {
-        if (activeTab === 'Attendance' && timetable.length > 0) {
-            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-            const dayOfWeek = days[new Date(selectedDate).getDay()];
-            const periodEntry = timetable.find(p => p.day === dayOfWeek && p.period === selectedPeriod);
-
-            if (periodEntry && !periodEntry.isBreak && periodEntry.classId) {
-                // Only re-fetch if we don't have students yet or the class changed
-                // This prevents resetting the local 'attendance' state while marking
-                fetchStudents(periodEntry.classId._id);
-            } else {
-                setStudents([]); // Clear list if it's a break or no class scheduled
-            }
-        }
-    }, [selectedPeriod, selectedDate, timetable.length, activeTab]); // Using length to avoid unnecessary triggers
 
     const handleAttendanceChange = (studentId, status) => {
         setAttendance(prev => ({ ...prev, [studentId]: status }));
