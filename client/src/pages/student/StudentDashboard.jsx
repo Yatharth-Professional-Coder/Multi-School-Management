@@ -20,32 +20,29 @@ const StudentDashboard = () => {
     const [announcements, setAnnouncements] = useState([]);
     const [timetable, setTimetable] = useState([]);
 
-    const config = {
-        headers: { Authorization: `Bearer ${user.token}` },
-    };
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 // Fetch Attendance
-                const attRes = await api.get(`/api/attendance/${user._id}`, config);
+                const attRes = await api.get(`/api/attendance/${user._id}`);
                 setAttendance(attRes.data);
 
                 // Fetch Homework
-                const hwRes = await api.get('/api/homework', config);
+                const hwRes = await api.get('/api/homework');
                 setHomework(hwRes.data);
 
                 // Fetch Results
-                const resRes = await api.get(`/api/results`, config);
+                const resRes = await api.get(`/api/results`);
                 setResults(resRes.data);
 
                 // Fetch Announcements
-                const annRes = await api.get('/api/announcements', config);
+                const annRes = await api.get('/api/announcements');
                 setAnnouncements(annRes.data);
 
                 // Fetch Timetable if student has a class
                 if (user.studentClass) {
-                    const ttRes = await api.get(`/api/timetable/class/${user.studentClass}`, config);
+                    const ttRes = await api.get(`/api/timetable/class/${user.studentClass}`);
                     setTimetable(ttRes.data);
                 }
 

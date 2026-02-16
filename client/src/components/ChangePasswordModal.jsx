@@ -31,16 +31,9 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
         setMessage({ type: '', text: '' });
 
         try {
-            const config = {
-                headers: {
-                    Authorization: `Bearer ${user.token}`,
-                },
-            };
-
             const { data } = await api.post(
                 '/api/auth/change-password',
-                { oldPassword, newPassword },
-                config
+                { oldPassword, newPassword }
             );
 
             setMessage({ type: 'success', text: data.message });
