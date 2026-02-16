@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import api from '../../utils/api';
 import AuthContext from '../../context/AuthContext';
 import { FaUserGraduate, FaClipboardList, FaBullhorn, FaBookOpen, FaChartLine } from 'react-icons/fa';
+import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 const StudentDashboard = () => {
     const { user, logout } = useContext(AuthContext);
@@ -19,6 +20,7 @@ const StudentDashboard = () => {
     const [results, setResults] = useState([]);
     const [announcements, setAnnouncements] = useState([]);
     const [timetable, setTimetable] = useState([]);
+    const [loading, setLoading] = useState(true);
 
 
     useEffect(() => {
@@ -48,11 +50,15 @@ const StudentDashboard = () => {
 
             } catch (error) {
                 console.error("Error fetching student data", error);
+            } finally {
+                setLoading(false);
             }
         };
 
         fetchData();
     }, []);
+
+    if (loading) return <LoadingSpinner fullScreen />;
 
     const requestRectification = async (date, period) => {
         const reason = prompt("Enter reason for rectification:");

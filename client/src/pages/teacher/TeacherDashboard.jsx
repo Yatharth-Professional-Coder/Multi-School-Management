@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import api from '../../utils/api';
 import AuthContext from '../../context/AuthContext';
 import { FaUserCheck, FaUserTimes, FaCalendarAlt, FaBook, FaClipboardList, FaBullhorn, FaUserPlus } from 'react-icons/fa';
+import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 const TeacherDashboard = () => {
     const { user, logout } = useContext(AuthContext);
@@ -27,6 +28,7 @@ const TeacherDashboard = () => {
     const [selectedPeriod, setSelectedPeriod] = useState(1);
     const [isAlreadyMarked, setIsAlreadyMarked] = useState(false);
     const [existingRecords, setExistingRecords] = useState([]);
+    const [loading, setLoading] = useState(true);
 
 
     // Homework State
@@ -47,9 +49,20 @@ const TeacherDashboard = () => {
 
     // Initial data fetch on mount
     useEffect(() => {
-        fetchTeacherClass();
-        fetchTimetable();
+        const fetchInitialData = async () => {
+            try {
+                await Promise.all([
+                    fetchTeacherClass(),
+                    fetchTimetable()
+                ]);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchInitialData();
     }, []);
+
+    if (loading) return <LoadingSpinner fullScreen />;
 
     // Tab-specific fetching
     useEffect(() => {

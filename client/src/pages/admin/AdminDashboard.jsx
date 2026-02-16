@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import api from '../../utils/api';
 import AuthContext from '../../context/AuthContext';
 import { FaUserTie, FaUserGraduate, FaUserPlus, FaChalkboardTeacher, FaLayerGroup, FaClipboardList, FaBullhorn, FaTrash, FaArrowLeft, FaEye } from 'react-icons/fa';
+import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 const AdminDashboard = () => {
     const { user, logout } = useContext(AuthContext);
@@ -26,6 +27,7 @@ const AdminDashboard = () => {
     const [editingUser, setEditingUser] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [rectifications, setRectifications] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     // Form States
     const [newItemType, setNewItemType] = useState('Class'); // 'Class', 'SubAdmin'
@@ -176,16 +178,26 @@ const AdminDashboard = () => {
             console.error("Error fetching school settings", error);
         }
     };
-
     useEffect(() => {
-        fetchClasses();
-        fetchSubAdmins();
-        fetchTeachers(); // Need teachers for class assignment
-        fetchAttendance();
-        fetchAnnouncements();
-        fetchSchoolSettings();
-        fetchRectifications(); // Fetch once for tab badge
+        const fetchInitialData = async () => {
+            try {
+                await Promise.all([
+                    fetchClasses(),
+                    fetchSubAdmins(),
+                    fetchTeachers(),
+                    fetchAttendance(),
+                    fetchAnnouncements(),
+                    fetchSchoolSettings(),
+                    fetchRectifications()
+                ]);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchInitialData();
     }, []);
+
+    if (loading) return <LoadingSpinner fullScreen />;
 
     useEffect(() => {
         if (activeTab === 'Teacher Attendance') {

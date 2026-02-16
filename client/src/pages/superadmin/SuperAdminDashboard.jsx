@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import api from '../../utils/api';
 import AuthContext from '../../context/AuthContext';
 import { FaPlus, FaSchool, FaEdit, FaKey, FaArrowLeft, FaUserGraduate, FaChalkboardTeacher, FaUserTie, FaTrash } from 'react-icons/fa';
+import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 const SuperAdminDashboard = () => {
     const { user, logout } = useContext(AuthContext);
@@ -585,7 +586,7 @@ const SuperAdminDashboard = () => {
                         {/* Users List Column */}
                         <div className="glass-panel" style={{ padding: '30px' }}>
                             <h2>School Users</h2>
-                            {loadingUsers ? <p>Loading users...</p> : (
+                            {loadingUsers ? <LoadingSpinner /> : (
                                 <div style={{ overflowX: 'auto' }}>
                                     <table className="data-table" style={{ width: '100%', marginTop: '20px', borderCollapse: 'collapse' }}>
                                         <thead>

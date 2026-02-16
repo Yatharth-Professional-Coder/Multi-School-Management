@@ -2,6 +2,8 @@ import { useState, useContext } from 'react';
 import api from '../utils/api';
 import AuthContext from '../context/AuthContext';
 import { FaLock, FaTimes, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
+import LoadingSpinner from './common/LoadingSpinner';
+import './common/LoadingSpinner.css';
 
 const ChangePasswordModal = ({ isOpen, onClose }) => {
     const [oldPassword, setOldPassword] = useState('');
@@ -183,7 +185,7 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
                         style={{ width: '100%', height: '50px', marginTop: '10px' }}
                         disabled={loading}
                     >
-                        {loading ? 'Updating...' : 'Update Password'}
+                        {loading ? <div style={{ transform: 'scale(0.6)' }}><LoadingSpinner /></div> : 'Update Password'}
                     </button>
                 </form>
             </div>
