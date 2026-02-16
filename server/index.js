@@ -59,11 +59,6 @@ app.get('/', (req, res) => {
     res.send('School Management System API is running');
 });
 
-
-if (require.main === module) {
-    app.listen(PORT, () => {
-        console.log(`Server running on port ${PORT}`);
-    });
-}
-
-module.exports = app;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});

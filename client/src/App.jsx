@@ -6,12 +6,11 @@ import Dashboard from './pages/Dashboard';
 import { useContext } from 'react';
 import AuthContext from './context/AuthContext';
 import Layout from './components/Layout';
-import LoadingSpinner from './components/common/LoadingSpinner';
 
 const PrivateRoute = ({ children }) => {
   const { isAuthenticated, loading } = useContext(AuthContext);
 
-  if (loading) return <LoadingSpinner fullScreen />;
+  if (loading) return <div>Loading...</div>;
 
   return isAuthenticated ? children : <Navigate to="/login" />;
 };
@@ -19,7 +18,7 @@ const PrivateRoute = ({ children }) => {
 const PublicRoute = ({ children }) => {
   const { isAuthenticated, loading } = useContext(AuthContext);
 
-  if (loading) return <LoadingSpinner fullScreen />;
+  if (loading) return <div>Loading...</div>;
 
   return isAuthenticated ? <Navigate to="/dashboard" /> : children;
 }

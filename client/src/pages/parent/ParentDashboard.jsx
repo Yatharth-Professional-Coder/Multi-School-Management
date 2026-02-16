@@ -3,7 +3,6 @@ import { useLocation } from 'react-router-dom';
 import api from '../../utils/api';
 import AuthContext from '../../context/AuthContext';
 import { FaUserGraduate, FaClipboardList, FaBullhorn, FaBookOpen, FaChartLine } from 'react-icons/fa';
-import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 const ParentDashboard = () => {
     const { user, logout } = useContext(AuthContext);
@@ -20,7 +19,6 @@ const ParentDashboard = () => {
     const [homework, setHomework] = useState([]);
     const [results, setResults] = useState([]);
     const [announcements, setAnnouncements] = useState([]);
-    const [loading, setLoading] = useState(true);
 
     const config = {
         headers: { Authorization: `Bearer ${user.token}` },
@@ -55,15 +53,11 @@ const ParentDashboard = () => {
 
             } catch (error) {
                 console.error("Error fetching child data", error);
-            } finally {
-                setLoading(false);
             }
         };
 
         fetchData();
     }, [user.childId]);
-
-    if (loading && user.childId) return <LoadingSpinner fullScreen />;
 
     if (!user.childId) {
         return (
