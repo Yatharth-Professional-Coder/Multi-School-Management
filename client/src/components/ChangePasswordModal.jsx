@@ -1,5 +1,5 @@
 import { useState, useContext } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import AuthContext from '../context/AuthContext';
 import { FaLock, FaTimes, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
 
@@ -31,17 +31,9 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
         setMessage({ type: '', text: '' });
 
         try {
-            const config = {
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${user.token}`,
-                },
-            };
-
-            const { data } = await axios.put(
+            const { data } = await api.post(
                 '/api/auth/change-password',
-                { oldPassword, newPassword },
-                config
+                { oldPassword, newPassword }
             );
 
             setMessage({ type: 'success', text: data.message });
