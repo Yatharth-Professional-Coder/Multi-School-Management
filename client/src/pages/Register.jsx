@@ -40,27 +40,42 @@ const Register = () => {
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            padding: '40px 20px'
+            padding: '40px 20px',
+            position: 'relative',
+            overflow: 'hidden'
         }}>
+            {/* Ambient Background Glows */}
+            <div style={{
+                position: 'absolute', width: '50vw', height: '50vw',
+                top: '-10vw', left: '-10vw',
+                background: 'radial-gradient(circle, hsla(var(--primary), 0.12) 0%, transparent 70%)',
+                zIndex: 0
+            }}></div>
+
             <div className="glass-panel fade-in" style={{
-                padding: '40px',
+                padding: '48px',
                 width: '100%',
-                maxWidth: '600px'
+                maxWidth: '750px',
+                zIndex: 1,
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
             }}>
 
-                <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+                <div style={{ textAlign: 'center', marginBottom: '48px' }}>
                     <div style={{
-                        width: '64px', height: '64px',
+                        width: '72px', height: '72px',
                         background: 'linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)))',
-                        borderRadius: '16px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                        marginBottom: '16px', boxShadow: '0 8px 16px rgba(0, 0, 0, 0.2)'
+                        borderRadius: '18px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                        marginBottom: '20px', boxShadow: '0 12px 24px hsla(var(--primary), 0.3)',
+                        transform: 'rotate(-5deg)'
                     }}>
-                        <FaSchool size={32} color="#fff" />
+                        <FaSchool size={36} color="#fff" />
                     </div>
-                    <h1 style={{ fontSize: '2.5rem', fontWeight: '800', marginBottom: '8px', letterSpacing: '-1px' }}>
+                    <h1 style={{ fontSize: '3rem', fontWeight: '800', marginBottom: '12px', letterSpacing: '-1.5px' }}>
                         <span className="gradient-text">Register Your School</span>
                     </h1>
-                    <p style={{ color: 'hsl(var(--text-dim))', fontSize: '1.1rem' }}>Join the MR. EduEdge ecosystem today</p>
+                    <p style={{ color: 'hsl(var(--text-dim))', fontSize: '1.2rem', fontWeight: '500' }}>
+                        Join the <span style={{ color: 'hsl(var(--white))' }}>MR. EduEdge</span> ecosystem today
+                    </p>
                 </div>
 
                 {error && (
@@ -79,17 +94,17 @@ const Register = () => {
                 )}
 
                 <form onSubmit={handleSubmit}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
-                        <div className="input-group">
-                            <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'hsl(var(--text-dim))' }}>School Name</label>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '24px' }}>
+                        <div className="input-group" style={{ marginBottom: '0' }}>
+                            <label className="input-label">School Name</label>
                             <div style={{ position: 'relative' }}>
-                                <FaSchool style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'hsl(var(--primary))', opacity: 0.6 }} />
+                                <FaSchool style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'hsl(var(--primary))', opacity: 0.8 }} />
                                 <input
                                     type="text"
                                     name="name"
                                     placeholder="Bright Future School"
                                     className="input-field"
-                                    style={{ paddingLeft: '48px' }}
+                                    style={{ paddingLeft: '48px', height: '56px' }}
                                     value={formData.name}
                                     onChange={handleChange}
                                     required
@@ -97,16 +112,16 @@ const Register = () => {
                             </div>
                         </div>
 
-                        <div className="input-group">
-                            <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'hsl(var(--text-dim))' }}>Contact Number</label>
+                        <div className="input-group" style={{ marginBottom: '0' }}>
+                            <label className="input-label">Contact Number</label>
                             <div style={{ position: 'relative' }}>
-                                <FaPhone style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'hsl(var(--primary))', opacity: 0.6 }} />
+                                <FaPhone style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'hsl(var(--primary))', opacity: 0.8 }} />
                                 <input
                                     type="text"
                                     name="contact"
                                     placeholder="+91 XXXXX XXXXX"
                                     className="input-field"
-                                    style={{ paddingLeft: '48px' }}
+                                    style={{ paddingLeft: '48px', height: '56px' }}
                                     value={formData.contact}
                                     onChange={handleChange}
                                     required
@@ -115,15 +130,15 @@ const Register = () => {
                         </div>
                     </div>
 
-                    <div className="input-group" style={{ marginBottom: '20px' }}>
-                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'hsl(var(--text-dim))' }}>School Address</label>
+                    <div className="input-group" style={{ marginBottom: '24px' }}>
+                        <label className="input-label">School Address</label>
                         <div style={{ position: 'relative' }}>
-                            <FaMapMarkerAlt style={{ position: 'absolute', left: '16px', top: '15px', color: 'hsl(var(--primary))', opacity: 0.6 }} />
+                            <FaMapMarkerAlt style={{ position: 'absolute', left: '16px', top: '16px', color: 'hsl(var(--primary))', opacity: 0.8 }} />
                             <textarea
                                 name="address"
                                 placeholder="Enter complete school address"
                                 className="input-field"
-                                style={{ paddingLeft: '48px', minHeight: '80px', paddingTop: '12px' }}
+                                style={{ paddingLeft: '48px', minHeight: '100px', paddingTop: '14px' }}
                                 value={formData.address}
                                 onChange={handleChange}
                                 required
@@ -131,39 +146,48 @@ const Register = () => {
                         </div>
                     </div>
 
-                    <div className="input-group" style={{ marginBottom: '30px' }}>
-                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'hsl(var(--text-dim))' }}>Choose Subscription Plan</label>
+                    <div className="input-group" style={{ marginBottom: '32px' }}>
+                        <label className="input-label">Choose Subscription Plan</label>
                         <div style={{ position: 'relative' }}>
-                            <FaLayerGroup style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'hsl(var(--primary))', opacity: 0.6 }} />
+                            <FaLayerGroup style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'hsl(var(--primary))', opacity: 0.8 }} />
                             <select
                                 name="subscriptionPlan"
                                 className="input-field"
-                                style={{ paddingLeft: '48px', appearance: 'auto' }}
+                                style={{ paddingLeft: '48px', height: '56px', appearance: 'auto' }}
                                 value={formData.subscriptionPlan}
                                 onChange={handleChange}
                                 required
                             >
                                 <option value="Basic">Basic Plan (Up to 500 Students)</option>
                                 <option value="Standard">Standard Plan (Up to 2000 Students)</option>
-                                <option value="Premium">Premium Plan (Unlimited)</option>
+                                <option value="Premium">Premium Plan (Unlimited Access)</option>
                             </select>
                         </div>
                     </div>
 
-                    <div style={{ marginBottom: '20px', padding: '20px', background: 'rgba(255, 255, 255, 0.03)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--glass-border)' }}>
-                        <p style={{ marginBottom: '16px', color: 'hsl(var(--secondary))', fontWeight: 'bold', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Principal Credentials</p>
+                    <div style={{
+                        marginBottom: '32px', padding: '32px',
+                        background: 'rgba(255, 255, 255, 0.02)',
+                        borderRadius: 'var(--radius)',
+                        border: '1px solid var(--glass-border)'
+                    }}>
+                        <p style={{
+                            marginBottom: '24px', color: 'hsl(var(--secondary))',
+                            fontWeight: '800', fontSize: '0.85rem',
+                            textTransform: 'uppercase', letterSpacing: '1.5px'
+                        }}>Principal Credentials</p>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                            <div className="input-group">
-                                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'hsl(var(--text-dim))' }}>Full Name</label>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+                            <div className="input-group" style={{ marginBottom: '0' }}>
+                                <label className="input-label">Full Name</label>
                                 <div style={{ position: 'relative' }}>
-                                    <FaUserTie style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'hsl(var(--primary))', opacity: 0.6 }} />
+                                    <FaUserTie style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'hsl(var(--primary))', opacity: 0.8 }} />
                                     <input
                                         type="text"
                                         name="adminName"
                                         placeholder="Admin Name"
                                         className="input-field"
-                                        style={{ paddingLeft: '48px' }}
+                                        style={{ paddingLeft: '48px', height: '52px' }}
                                         value={formData.adminName}
                                         onChange={handleChange}
                                         required
@@ -171,16 +195,16 @@ const Register = () => {
                                 </div>
                             </div>
 
-                            <div className="input-group">
-                                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'hsl(var(--text-dim))' }}>Email Address</label>
+                            <div className="input-group" style={{ marginBottom: '0' }}>
+                                <label className="input-label">Email Address</label>
                                 <div style={{ position: 'relative' }}>
-                                    <FaEnvelope style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'hsl(var(--primary))', opacity: 0.6 }} />
+                                    <FaEnvelope style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'hsl(var(--primary))', opacity: 0.8 }} />
                                     <input
                                         type="email"
                                         name="adminEmail"
                                         placeholder="admin@school.com"
                                         className="input-field"
-                                        style={{ paddingLeft: '48px' }}
+                                        style={{ paddingLeft: '48px', height: '52px' }}
                                         value={formData.adminEmail}
                                         onChange={handleChange}
                                         required
@@ -189,16 +213,16 @@ const Register = () => {
                             </div>
                         </div>
 
-                        <div className="input-group" style={{ marginTop: '20px' }}>
-                            <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'hsl(var(--text-dim))' }}>Create Password</label>
+                        <div className="input-group" style={{ marginTop: '24px', marginBottom: '0' }}>
+                            <label className="input-label">Create Secure Password</label>
                             <div style={{ position: 'relative' }}>
-                                <FaLock style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'hsl(var(--primary))', opacity: 0.6 }} />
+                                <FaLock style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'hsl(var(--primary))', opacity: 0.8 }} />
                                 <input
                                     type="password"
                                     name="adminPassword"
                                     placeholder="••••••••"
                                     className="input-field"
-                                    style={{ paddingLeft: '48px' }}
+                                    style={{ paddingLeft: '48px', height: '52px' }}
                                     value={formData.adminPassword}
                                     onChange={handleChange}
                                     required
@@ -212,18 +236,23 @@ const Register = () => {
                         className="btn btn-primary"
                         style={{
                             width: '100%',
-                            height: '52px',
-                            fontSize: '1.1rem',
-                            fontWeight: 'bold',
-                            marginTop: '10px'
+                            height: '56px',
+                            fontSize: '1.2rem',
+                            fontWeight: '800',
+                            marginTop: '8px',
+                            borderRadius: 'var(--radius-sm)'
                         }}
                     >
-                        Complete Registration
+                        Complete School Registration
                     </button>
                 </form>
 
-                <p style={{ marginTop: '30px', textAlign: 'center', color: 'hsl(var(--text-dim))', fontSize: '1rem' }}>
-                    Already have an account? <Link to="/login" style={{ color: 'hsl(var(--primary))', textDecoration: 'none', fontWeight: 'bold' }}>Sign In</Link>
+                <p style={{
+                    marginTop: '40px', textAlign: 'center',
+                    color: 'hsl(var(--text-dim))', fontSize: '1.1rem',
+                    paddingTop: '32px', borderTop: '1px solid var(--glass-border)'
+                }}>
+                    Already have an account? <Link to="/login" style={{ color: 'hsl(var(--primary))', textDecoration: 'none', fontWeight: '800', marginLeft: '5px' }}>Sign In</Link>
                 </p>
             </div>
         </div>

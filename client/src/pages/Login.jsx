@@ -27,48 +27,67 @@ const Login = () => {
             justifyContent: 'center',
             minHeight: '100vh',
             background: 'var(--bg-gradient)',
-            padding: '20px'
+            padding: '20px',
+            position: 'relative',
+            overflow: 'hidden'
         }}>
-            <div className="glass-panel fade-in" style={{ width: '100%', maxWidth: '450px', padding: '40px' }}>
-                <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+            {/* Ambient Background Glows */}
+            <div style={{
+                position: 'absolute', width: '40vw', height: '40vw',
+                top: '-20vw', right: '-10vw',
+                background: 'radial-gradient(circle, hsla(var(--primary), 0.15) 0%, transparent 70%)',
+                zIndex: 0
+            }}></div>
+            <div style={{
+                position: 'absolute', width: '50vw', height: '50vw',
+                bottom: '-20vw', left: '-10vw',
+                background: 'radial-gradient(circle, hsla(var(--accent), 0.1) 0%, transparent 70%)',
+                zIndex: 0
+            }}></div>
+
+            <div className="glass-panel fade-in" style={{
+                width: '100%',
+                maxWidth: '450px',
+                padding: '48px',
+                zIndex: 1,
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+            }}>
+                <div style={{ textAlign: 'center', marginBottom: '40px' }}>
                     <div style={{
-                        width: '64px', height: '64px',
+                        width: '72px', height: '72px',
                         background: 'linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)))',
-                        borderRadius: '16px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                        marginBottom: '16px', boxShadow: '0 8px 16px rgba(0, 0, 0, 0.2)'
+                        borderRadius: '18px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                        marginBottom: '20px', boxShadow: '0 12px 24px hsla(var(--primary), 0.3)',
+                        transform: 'rotate(-5deg)'
                     }}>
-                        <FaSchool size={32} color="#fff" />
+                        <FaSchool size={36} color="#fff" />
                     </div>
-                    <h1 style={{ fontSize: '2.5rem', fontWeight: '800', marginBottom: '8px', letterSpacing: '-1px' }}>
+                    <h1 style={{ fontSize: '2.8rem', fontWeight: '800', marginBottom: '12px', letterSpacing: '-1.5px' }}>
                         <span className="gradient-text">Welcome Back</span>
                     </h1>
-                    <p style={{ color: 'hsl(var(--text-dim))', fontSize: '1.1rem' }}>Sign in to MR. EduEdge Portal</p>
+                    <p style={{ color: 'hsl(var(--text-dim))', fontSize: '1.1rem', fontWeight: '500' }}>
+                        Sign in to <span style={{ color: 'hsl(var(--white))' }}>MR. EduEdge</span> Portal
+                    </p>
                 </div>
 
                 {error && (
-                    <div className="alert-error" style={{
-                        background: 'rgba(255, 77, 77, 0.1)',
-                        border: '1px solid rgba(255, 77, 77, 0.2)',
-                        color: '#ff4d4d',
-                        padding: '12px',
-                        borderRadius: 'var(--radius-sm)',
-                        marginBottom: '20px',
-                        textAlign: 'center',
-                        fontSize: '0.9rem'
-                    }}>
+                    <div className="alert-error">
                         {error}
                     </div>
                 )}
 
                 <form onSubmit={handleSubmit}>
-                    <div className="input-group" style={{ marginBottom: '20px' }}>
-                        <label className="input-label" style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'hsl(var(--text-dim))' }}>Email / Username</label>
+                    <div className="input-group">
+                        <label className="input-label">Email / Username</label>
                         <div style={{ position: 'relative' }}>
-                            <FaEnvelope style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'hsl(var(--primary))', opacity: 0.6 }} />
+                            <FaEnvelope style={{
+                                position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)',
+                                color: 'hsl(var(--primary))', opacity: 0.8, fontSize: '1.1rem'
+                            }} />
                             <input
                                 type="text"
                                 className="input-field"
-                                style={{ paddingLeft: '48px', height: '52px' }}
+                                style={{ paddingLeft: '48px', height: '56px' }}
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 placeholder="Enter your email"
@@ -77,32 +96,48 @@ const Login = () => {
                         </div>
                     </div>
 
-                    <div className="input-group" style={{ marginBottom: '12px' }}>
-                        <label className="input-label" style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'hsl(var(--text-dim))' }}>Password</label>
+                    <div className="input-group" style={{ marginBottom: '16px' }}>
+                        <label className="input-label">Password</label>
                         <div style={{ position: 'relative' }}>
-                            <FaLock style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'hsl(var(--primary))', opacity: 0.6 }} />
+                            <FaLock style={{
+                                position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)',
+                                color: 'hsl(var(--primary))', opacity: 0.8, fontSize: '1.1rem'
+                            }} />
                             <input
                                 type="password"
                                 className="input-field"
-                                style={{ paddingLeft: '48px', height: '52px' }}
+                                style={{ paddingLeft: '48px', height: '56px' }}
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 placeholder="••••••••"
                                 required
                             />
                         </div>
-                        <div style={{ textAlign: 'right', marginTop: '10px' }}>
-                            <a href="#" style={{ fontSize: '0.9rem', color: 'hsl(var(--secondary))', textDecoration: 'none' }}>Forgot password?</a>
+                        <div style={{ textAlign: 'right', marginTop: '12px' }}>
+                            <a href="#" style={{ fontSize: '0.9rem', color: 'hsl(var(--secondary))', fontWeight: '600', transition: 'opacity 0.2s' }}>
+                                Forgot password?
+                            </a>
                         </div>
                     </div>
 
-                    <button type="submit" className="btn btn-primary" style={{ width: '100%', height: '52px', marginTop: '20px', fontSize: '1.1rem', fontWeight: 'bold' }}>
+                    <button type="submit" className="btn btn-primary" style={{
+                        width: '100%', height: '56px', marginTop: '24px',
+                        fontSize: '1.2rem', fontWeight: 'bold',
+                        borderRadius: 'var(--radius-sm)'
+                    }}>
                         Sign In to Dashboard
                     </button>
                 </form>
 
-                <div style={{ textAlign: 'center', marginTop: '32px', color: 'hsl(var(--text-dim))', fontSize: '1rem' }}>
-                    Don't have an account? <a href="/register" style={{ color: 'hsl(var(--primary))', fontWeight: 'bold', textDecoration: 'none' }}>Register School</a>
+                <div style={{
+                    textAlign: 'center', marginTop: '40px',
+                    color: 'hsl(var(--text-dim))', fontSize: '1rem',
+                    paddingTop: '32px', borderTop: '1px solid var(--glass-border)'
+                }}>
+                    Don't have an account? <a href="/register" style={{
+                        color: 'hsl(var(--primary))', fontWeight: '700', textDecoration: 'none',
+                        marginLeft: '5px'
+                    }}>Register School</a>
                 </div>
             </div>
         </div>
