@@ -455,7 +455,6 @@ const AdminDashboard = () => {
                         key={tab}
                         className={`btn ${activeTab === tab ? 'btn-primary' : ''}`}
                         onClick={() => { setActiveTab(tab); setSelectedClass(null); setSelectedTimetableClass(null); }}
-                        style={{ whiteSpace: 'nowrap' }}
                     >
                         {tab === 'SubAdmins' ? 'Sub Admins' : tab}
                         {tab === 'Rectification Requests' && rectifications.length > 0 && (

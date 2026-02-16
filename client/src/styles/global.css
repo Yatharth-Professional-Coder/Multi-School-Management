@@ -512,19 +512,9 @@ button {
 
   .tabs-container-mobile {
     display: flex !important;
-    overflow-x: auto !important;
-    white-space: nowrap !important;
-    padding-bottom: 15px !important;
-    margin: 0 -15px 20px !important;
-    padding-left: 15px !important;
-    padding-right: 15px !important;
-    scrollbar-width: none;
-    /* Firefox */
-  }
-
-  .tabs-container-mobile::-webkit-scrollbar {
-    display: none;
-    /* Chrome/Safari */
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    margin-bottom: 20px !important;
   }
 
   .btn-mobile-full {

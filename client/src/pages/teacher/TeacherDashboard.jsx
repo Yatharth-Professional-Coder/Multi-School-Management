@@ -300,7 +300,7 @@ const TeacherDashboard = () => {
                     if (tab === 'Attendance') return user.schoolSettings?.features?.enableAttendance !== false;
                     return true;
                 }).map(tab => (
-                    <button key={tab} className={`btn ${activeTab === tab ? 'btn-primary' : ''}`} onClick={() => setActiveTab(tab)} style={{ whiteSpace: 'nowrap' }}>{tab}</button>
+                    <button key={tab} className={`btn ${activeTab === tab ? 'btn-primary' : ''}`} onClick={() => setActiveTab(tab)}>{tab}</button>
                 ))}
             </div>
 
