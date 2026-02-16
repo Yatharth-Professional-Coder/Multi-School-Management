@@ -48,7 +48,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         <aside className={`sidebar ${isOpen ? 'mobile-open' : ''}`}>
             <div className="sidebar-header">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
-                    <img src="/logo.png" alt="EduEdge" style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
+                    <img src="/logo.png" alt="EduEdge" style={{ width: '40px', height: '40px', objectFit: 'contain' }} />
                     <span className="brand-name">EduEdge</span>
                 </div>
                 <div className="menu-toggle" onClick={() => setIsOpen(false)} style={{ margin: 0 }}>

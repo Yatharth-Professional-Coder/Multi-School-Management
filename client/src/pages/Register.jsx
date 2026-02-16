@@ -62,12 +62,11 @@ const Register = () => {
 
                 <div style={{ textAlign: 'center', marginBottom: '48px' }}>
                     <div style={{
-                        width: '80px', height: '80px',
-                        background: 'rgba(255,255,255,0.05)',
-                        borderRadius: '20px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                        marginBottom: '20px', border: '1px solid var(--glass-border)'
+                        width: '100px', height: '100px',
+                        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                        marginBottom: '10px'
                     }}>
-                        <img src="/logo.png" alt="EduEdge" style={{ width: '60px', height: '60px', objectFit: 'contain' }} />
+                        <img src="/logo.png" alt="EduEdge" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                     </div>
                     <h1 style={{ fontSize: '3rem', fontWeight: '800', marginBottom: '12px', letterSpacing: '-1.5px' }}>
                         <span className="gradient-text">Register Your School</span>
