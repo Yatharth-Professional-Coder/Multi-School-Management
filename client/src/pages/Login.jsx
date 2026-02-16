@@ -7,6 +7,7 @@ import { FaSchool, FaEnvelope, FaLock } from 'react-icons/fa';
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [infoMessage, setInfoMessage] = useState('');
 
     const { login, error } = useContext(AuthContext);
     const navigate = useNavigate();
@@ -73,6 +74,22 @@ const Login = () => {
                     </div>
                 )}
 
+                {infoMessage && (
+                    <div className="alert-info" style={{
+                        background: 'rgba(54, 162, 235, 0.1)',
+                        border: '1px solid rgba(54, 162, 235, 0.2)',
+                        color: 'rgb(54, 162, 235)',
+                        padding: '12px',
+                        borderRadius: 'var(--radius-sm)',
+                        marginBottom: '20px',
+                        textAlign: 'center',
+                        fontSize: '0.9rem',
+                        fontWeight: '500'
+                    }}>
+                        {infoMessage}
+                    </div>
+                )}
+
                 <form onSubmit={handleSubmit}>
                     <div className="input-group">
                         <label className="input-label">Email / Username</label>
@@ -111,9 +128,13 @@ const Login = () => {
                             />
                         </div>
                         <div style={{ textAlign: 'right', marginTop: '12px' }}>
-                            <a href="#" style={{ fontSize: '0.9rem', color: 'hsl(var(--secondary))', fontWeight: '600', transition: 'opacity 0.2s' }}>
+                            <button
+                                type="button"
+                                onClick={() => setInfoMessage('Ask your teacher to reset it for you')}
+                                style={{ fontSize: '0.9rem', color: 'hsl(var(--secondary))', fontWeight: '600', transition: 'opacity 0.2s' }}
+                            >
                                 Forgot password?
-                            </a>
+                            </button>
                         </div>
                     </div>
 
