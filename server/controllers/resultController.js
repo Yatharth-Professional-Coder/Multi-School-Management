@@ -30,6 +30,33 @@ const addResult = async (req, res) => {
     }
 };
 
+// @desc    Add or Update Result
+// @route   POST /api/results
+// @access  Private/Admin, Teacher
+const addBulkResults = async (req, res) => {
+    const { results } = req.body; // Array of results
+    const schoolId = req.user.schoolId;
+
+    try {
+        const operations = results.map(result => ({
+            updateOne: {
+                filter: {
+                    studentId: result.studentId,
+                    examName: result.examName,
+                    subject: result.subject
+                },
+                update: { ...result, schoolId },
+                upsert: true
+            }
+        }));
+
+        const bulkWriteResult = await Result.bulkWrite(operations);
+        res.status(201).json(bulkWriteResult);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 // @desc    Get Results for a student (or all if teacher/admin looking for specific student)
 // @route   GET /api/results
 // @access  Private/Admin, Teacher, Student, Parent

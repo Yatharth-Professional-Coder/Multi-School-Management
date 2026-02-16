@@ -37,6 +37,7 @@ const TeacherDashboard = () => {
 
     // Results State
     const [resultData, setResultData] = useState({ studentId: '', examName: '', subject: '', marksObtained: '', totalMarks: '', grade: '' });
+    const [tempResults, setTempResults] = useState([]);
 
     // Announcements State
     const [announcements, setAnnouncements] = useState([]);
@@ -239,13 +240,35 @@ const TeacherDashboard = () => {
         } catch (error) { alert('Failed to assign homework'); }
     };
 
-    const submitResult = async (e) => {
-        e.preventDefault();
+    const addSubjectResult = () => {
+        if (!resultData.subject || !resultData.marksObtained || !resultData.totalMarks) {
+            alert('Please fill subject, marks obtained and total marks');
+            return;
+        }
+        const newResult = { ...resultData };
+        setTempResults([...tempResults, newResult]);
+        setResultData({ ...resultData, subject: '', marksObtained: '', totalMarks: '', grade: '' });
+    };
+
+    const removeTempResult = (index) => {
+        const updated = [...tempResults];
+        updated.splice(index, 1);
+        setTempResults(updated);
+    };
+
+    const submitBulkResults = async () => {
+        if (tempResults.length === 0) {
+            alert('No results to upload');
+            return;
+        }
         try {
-            await api.post('/api/results', resultData, config);
-            alert('Result uploaded!');
-            setResultData({ ...resultData, marksObtained: '' }); // Clear marks to allow rapid entry for same subject/exam
-        } catch (error) { alert('Failed to upload result'); }
+            await api.post('/api/results/bulk', { results: tempResults }, config);
+            alert('All results uploaded successfully!');
+            setTempResults([]);
+            setResultData({ studentId: '', examName: '', subject: '', marksObtained: '', totalMarks: '', grade: '' });
+        } catch (error) {
+            alert('Failed to upload results');
+        }
     };
 
     const handleAnnouncementSubmit = async (e) => {
@@ -634,23 +657,104 @@ const TeacherDashboard = () => {
 
                 {activeTab === 'Results' && (
                     <div>
-                        <h3>Upload Results</h3>
-                        <form onSubmit={submitResult} className="grid-mobile-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginTop: '20px' }}>
-
-                            <select className="input-field" value={resultData.studentId} onChange={e => setResultData({ ...resultData, studentId: e.target.value })} required>
-                                <option value="">Select Student</option>
-                                {students.map(s => <option key={s._id} value={s._id}>{s.name}</option>)}
-                            </select>
-                            <input placeholder="Exam Name" className="input-field" value={resultData.examName} onChange={e => setResultData({ ...resultData, examName: e.target.value })} required />
-                            <input placeholder="Subject" className="input-field" value={resultData.subject} onChange={e => setResultData({ ...resultData, subject: e.target.value })} required />
-                            <input type="number" placeholder="Marks Obtained" className="input-field" value={resultData.marksObtained} onChange={e => setResultData({ ...resultData, marksObtained: e.target.value })} required />
-                            <input type="number" placeholder="Total Marks" className="input-field" value={resultData.totalMarks} onChange={e => setResultData({ ...resultData, totalMarks: e.target.value })} required />
-                            <input placeholder="Grade (Optional)" className="input-field" value={resultData.grade} onChange={e => setResultData({ ...resultData, grade: e.target.value })} />
-
-                            <div style={{ gridColumn: 'span 2' }}>
-                                <button type="submit" className="btn btn-primary">Upload Result</button>
+                        <h2 style={{ marginBottom: '20px' }}>Upload School Results</h2>
+                        <div className="glass-panel" style={{ padding: '25px', background: 'rgba(255,255,255,0.03)' }}>
+                            <div className="grid-mobile-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                                <div className="w-full-mobile">
+                                    <label className="input-label">Select Student</label>
+                                    <select
+                                        className="input-field"
+                                        value={resultData.studentId}
+                                        onChange={e => {
+                                            setResultData({ ...resultData, studentId: e.target.value });
+                                            setTempResults([]); // Reset temp results if student changes
+                                        }}
+                                        required
+                                    >
+                                        <option value="">Select Student</option>
+                                        {students.map(s => <option key={s._id} value={s._id}>{s.name}</option>)}
+                                    </select>
+                                </div>
+                                <div className="w-full-mobile">
+                                    <label className="input-label">Exam Type</label>
+                                    <input
+                                        placeholder="e.g. Unit Test 1, Annual Exam"
+                                        className="input-field"
+                                        value={resultData.examName}
+                                        onChange={e => setResultData({ ...resultData, examName: e.target.value })}
+                                        required
+                                    />
+                                </div>
                             </div>
-                        </form>
+
+                            <div style={{ marginTop: '30px', padding: '20px', background: 'rgba(0,0,0,0.2)', borderRadius: '12px' }}>
+                                <h4 style={{ marginBottom: '15px', color: 'hsl(var(--accent))' }}>Add Subjects</h4>
+                                <div className="grid-mobile-1" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr auto', gap: '15px', alignItems: 'end' }}>
+                                    <div className="w-full-mobile">
+                                        <label className="input-label">Subject</label>
+                                        <input placeholder="Subject" className="input-field" value={resultData.subject} onChange={e => setResultData({ ...resultData, subject: e.target.value })} />
+                                    </div>
+                                    <div className="w-full-mobile">
+                                        <label className="input-label">Obtained</label>
+                                        <input type="number" placeholder="Marks" className="input-field" value={resultData.marksObtained} onChange={e => setResultData({ ...resultData, marksObtained: e.target.value })} />
+                                    </div>
+                                    <div className="w-full-mobile">
+                                        <label className="input-label">Total</label>
+                                        <input type="number" placeholder="Total" className="input-field" value={resultData.totalMarks} onChange={e => setResultData({ ...resultData, totalMarks: e.target.value })} />
+                                    </div>
+                                    <div className="w-full-mobile">
+                                        <label className="input-label">Grade</label>
+                                        <input placeholder="Grade" className="input-field" value={resultData.grade} onChange={e => setResultData({ ...resultData, grade: e.target.value })} />
+                                    </div>
+                                    <button onClick={addSubjectResult} className="btn btn-secondary w-full-mobile" style={{ height: '45px' }}>Add</button>
+                                </div>
+                            </div>
+
+                            {tempResults.length > 0 && (
+                                <div style={{ marginTop: '30px' }}>
+                                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                        <thead>
+                                            <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                                                <th style={{ textAlign: 'left', padding: '10px' }}>Subject</th>
+                                                <th style={{ textAlign: 'center', padding: '10px' }}>Marks</th>
+                                                <th style={{ textAlign: 'center', padding: '10px' }}>Grade</th>
+                                                <th style={{ textAlign: 'right', padding: '10px' }}>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {tempResults.map((tr, idx) => (
+                                                <tr key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                                    <td style={{ padding: '10px' }}>{tr.subject}</td>
+                                                    <td style={{ padding: '10px', textAlign: 'center' }}>{tr.marksObtained} / {tr.totalMarks}</td>
+                                                    <td style={{ padding: '10px', textAlign: 'center' }}>{tr.grade || '-'}</td>
+                                                    <td style={{ padding: '10px', textAlign: 'right' }}>
+                                                        <button onClick={() => removeTempResult(idx)} style={{ color: '#ff6b6b', background: 'none', border: 'none', cursor: 'pointer' }}>Remove</button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+
+                                    <div style={{ marginTop: '20px', padding: '15px', background: 'rgba(var(--accent-rgb), 0.1)', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <div>
+                                            <span style={{ fontSize: '0.9rem', color: 'hsl(var(--text-dim))' }}>Calculated Total: </span>
+                                            <span style={{ fontWeight: 'bold' }}>
+                                                {tempResults.reduce((acc, curr) => acc + Number(curr.marksObtained), 0)} / {tempResults.reduce((acc, curr) => acc + Number(curr.totalMarks), 0)}
+                                            </span>
+                                        </div>
+                                        <div style={{ textAlign: 'right' }}>
+                                            <span style={{ fontSize: '1.1rem', color: 'hsl(var(--accent))', fontWeight: 'bold' }}>
+                                                Percentage: {((tempResults.reduce((acc, curr) => acc + Number(curr.marksObtained), 0) / tempResults.reduce((acc, curr) => acc + Number(curr.totalMarks), 0)) * 100).toFixed(2)}%
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div style={{ marginTop: '30px', textAlign: 'right' }}>
+                                        <button className="btn btn-primary" onClick={submitBulkResults}>Submit All Results</button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 )}
                 {activeTab === 'Announcements' && (
