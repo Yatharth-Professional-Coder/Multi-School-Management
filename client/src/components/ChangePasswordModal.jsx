@@ -75,14 +75,17 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
             alignItems: 'center',
             justifyContent: 'center',
             zIndex: 1000,
-            padding: '20px'
+            padding: '15px'
         }} onClick={onClose}>
             <div className="glass-panel fade-in" style={{
                 width: '100%',
                 maxWidth: '450px',
-                padding: '30px',
+                padding: 'min(30px, 6vw)',
+                margin: 'auto',
                 position: 'relative',
-                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+                overflowY: 'auto',
+                maxHeight: '90vh'
             }} onClick={e => e.stopPropagation()}>
                 <button
                     onClick={onClose}

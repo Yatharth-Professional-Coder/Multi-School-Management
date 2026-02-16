@@ -84,41 +84,110 @@ const StudentDashboard = () => {
 
 
             {/* Stats Overview */}
-            <div className="tabs-container-mobile">
-
+            <div className="stats-grid">
                 {user.schoolSettings?.features?.enableAttendance !== false && (
-                    <div onClick={() => setActiveTab('Attendance')} className="glass-panel" style={{ padding: '20px', cursor: 'pointer', border: activeTab === 'Attendance' ? '1px solid hsl(var(--primary))' : '' }}>
-                        <FaClipboardList size={24} style={{ marginBottom: '10px', color: '#32c8ff' }} />
-                        <h3>{attendance.length > 0 ? ((attendance.filter(a => a.status === 'Present').length / attendance.length) * 100).toFixed(1) : 0}%</h3>
-                        <p style={{ fontSize: '0.8rem', color: 'hsl(var(--text-dim))' }}>Attendance</p>
+                    <div
+                        onClick={() => setActiveTab('Attendance')}
+                        className="glass-panel"
+                        style={{
+                            padding: '20px',
+                            cursor: 'pointer',
+                            border: activeTab === 'Attendance' ? '1px solid hsl(var(--primary))' : '1px solid var(--glass-border)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            textAlign: 'center',
+                            transition: 'all 0.3s ease',
+                            background: activeTab === 'Attendance' ? 'rgba(var(--primary), 0.1)' : ''
+                        }}
+                    >
+                        <FaClipboardList size={28} style={{ marginBottom: '12px', color: '#32c8ff' }} />
+                        <h3 style={{ fontSize: '1.5rem', marginBottom: '4px' }}>{attendance.length > 0 ? ((attendance.filter(a => a.status === 'Present').length / attendance.length) * 100).toFixed(1) : 0}%</h3>
+                        <p style={{ fontSize: '0.85rem', color: 'hsl(var(--text-dim))', fontWeight: '500' }}>Attendance</p>
                     </div>
                 )}
                 {user.schoolSettings?.features?.enableHomework !== false && (
-                    <div onClick={() => setActiveTab('Homework')} className="glass-panel" style={{ padding: '20px', cursor: 'pointer', border: activeTab === 'Homework' ? '1px solid hsl(var(--primary))' : '' }}>
-                        <FaBookOpen size={24} style={{ marginBottom: '10px', color: '#ffc832' }} />
-                        <h3>{homework.length}</h3>
-                        <p style={{ fontSize: '0.8rem', color: 'hsl(var(--text-dim))' }}>Assignments</p>
+                    <div
+                        onClick={() => setActiveTab('Homework')}
+                        className="glass-panel"
+                        style={{
+                            padding: '20px',
+                            cursor: 'pointer',
+                            border: activeTab === 'Homework' ? '1px solid hsl(var(--primary))' : '1px solid var(--glass-border)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            textAlign: 'center',
+                            transition: 'all 0.3s ease',
+                            background: activeTab === 'Homework' ? 'rgba(var(--primary), 0.1)' : ''
+                        }}
+                    >
+                        <FaBookOpen size={28} style={{ marginBottom: '12px', color: '#ffc832' }} />
+                        <h3 style={{ fontSize: '1.5rem', marginBottom: '4px' }}>{homework.length}</h3>
+                        <p style={{ fontSize: '0.85rem', color: 'hsl(var(--text-dim))', fontWeight: '500' }}>Assignments</p>
                     </div>
                 )}
                 {user.schoolSettings?.features?.enableResults !== false && (
-                    <div onClick={() => setActiveTab('Results')} className="glass-panel" style={{ padding: '20px', cursor: 'pointer', border: activeTab === 'Results' ? '1px solid hsl(var(--primary))' : '' }}>
-                        <FaChartLine size={24} style={{ marginBottom: '10px', color: '#64ff96' }} />
-                        <h3>Results</h3>
-                        <p style={{ fontSize: '0.8rem', color: 'hsl(var(--text-dim))' }}>View Performance</p>
+                    <div
+                        onClick={() => setActiveTab('Results')}
+                        className="glass-panel"
+                        style={{
+                            padding: '20px',
+                            cursor: 'pointer',
+                            border: activeTab === 'Results' ? '1px solid hsl(var(--primary))' : '1px solid var(--glass-border)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            textAlign: 'center',
+                            transition: 'all 0.3s ease',
+                            background: activeTab === 'Results' ? 'rgba(var(--primary), 0.1)' : ''
+                        }}
+                    >
+                        <FaChartLine size={28} style={{ marginBottom: '12px', color: '#64ff96' }} />
+                        <h3 style={{ fontSize: '1.5rem', marginBottom: '4px' }}>Results</h3>
+                        <p style={{ fontSize: '0.85rem', color: 'hsl(var(--text-dim))', fontWeight: '500' }}>View Performance</p>
                     </div>
                 )}
                 {user.schoolSettings?.features?.enableAnnouncements !== false && (
-                    <div onClick={() => setActiveTab('Announcements')} className="glass-panel" style={{ padding: '20px', cursor: 'pointer', border: activeTab === 'Announcements' ? '1px solid hsl(var(--primary))' : '' }}>
-                        <FaBullhorn size={24} style={{ marginBottom: '10px', color: '#ff6464' }} />
-                        <h3>{announcements.length}</h3>
-                        <p style={{ fontSize: '0.8rem', color: 'hsl(var(--text-dim))' }}>Announcements</p>
+                    <div
+                        onClick={() => setActiveTab('Announcements')}
+                        className="glass-panel"
+                        style={{
+                            padding: '20px',
+                            cursor: 'pointer',
+                            border: activeTab === 'Announcements' ? '1px solid hsl(var(--primary))' : '1px solid var(--glass-border)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            textAlign: 'center',
+                            transition: 'all 0.3s ease',
+                            background: activeTab === 'Announcements' ? 'rgba(var(--primary), 0.1)' : ''
+                        }}
+                    >
+                        <FaBullhorn size={28} style={{ marginBottom: '12px', color: '#ff6464' }} />
+                        <h3 style={{ fontSize: '1.5rem', marginBottom: '4px' }}>{announcements.length}</h3>
+                        <p style={{ fontSize: '0.85rem', color: 'hsl(var(--text-dim))', fontWeight: '500' }}>Announcements</p>
                     </div>
                 )}
                 {user.schoolSettings?.features?.enableTimetable !== false && (
-                    <div onClick={() => setActiveTab('Timetable')} className="glass-panel" style={{ padding: '20px', cursor: 'pointer', border: activeTab === 'Timetable' ? '1px solid hsl(var(--primary))' : '' }}>
-                        <FaClipboardList size={24} style={{ marginBottom: '10px', color: '#a855f7' }} />
-                        <h3>Timetable</h3>
-                        <p style={{ fontSize: '0.8rem', color: 'hsl(var(--text-dim))' }}>Weekly Schedule</p>
+                    <div
+                        onClick={() => setActiveTab('Timetable')}
+                        className="glass-panel"
+                        style={{
+                            padding: '20px',
+                            cursor: 'pointer',
+                            border: activeTab === 'Timetable' ? '1px solid hsl(var(--primary))' : '1px solid var(--glass-border)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            textAlign: 'center',
+                            transition: 'all 0.3s ease',
+                            background: activeTab === 'Timetable' ? 'rgba(var(--primary), 0.1)' : ''
+                        }}
+                    >
+                        <FaClipboardList size={28} style={{ marginBottom: '12px', color: '#a855f7' }} />
+                        <h3 style={{ fontSize: '1.5rem', marginBottom: '4px' }}>Timetable</h3>
+                        <p style={{ fontSize: '0.85rem', color: 'hsl(var(--text-dim))', fontWeight: '500' }}>Weekly Schedule</p>
                     </div>
                 )}
             </div>

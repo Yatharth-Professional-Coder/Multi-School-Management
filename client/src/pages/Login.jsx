@@ -130,7 +130,7 @@ const Login = () => {
                         <div style={{ textAlign: 'right', marginTop: '12px' }}>
                             <button
                                 type="button"
-                                onClick={() => setInfoMessage('Ask your teacher to reset it for you')}
+                                onClick={() => setInfoMessage('Ask your teacher or administrative staff to reset it for you')}
                                 style={{ fontSize: '0.9rem', color: 'hsl(var(--secondary))', fontWeight: '600', transition: 'opacity 0.2s' }}
                             >
                                 Forgot password?
