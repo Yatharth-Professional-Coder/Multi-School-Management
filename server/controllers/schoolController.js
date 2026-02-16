@@ -242,4 +242,91 @@ const getMySchool = async (req, res) => {
     }
 };
 
-module.exports = { createSchool, getSchools, updateSchool, deleteSchool, approveSchool, rejectSchool, updateSchoolSettings, getMySchool };
+const getAggregatedSchoolData = async (req, res) => {
+    const schoolId = req.params.id;
+    try {
+        const school = await School.findById(schoolId);
+        if (!school) {
+            return res.status(404).json({ message: 'School not found' });
+        }
+
+        // Fetch all users for this school
+        const users = await User.find({ schoolId }).select('-password');
+
+        const teachers = users.filter(u => u.role === 'Teacher');
+        const students = users.filter(u => u.role === 'Student');
+
+        // Aggregate Teacher Data
+        const teacherData = await Promise.all(teachers.map(async (teacher) => {
+            const [classes, homework, announcements] = await Promise.all([
+                Class.find({ teacherId: teacher._id }).select('className'),
+                Homework.countDocuments({ teacherId: teacher._id }),
+                Announcement.countDocuments({ postedBy: teacher._id })
+            ]);
+
+            // Attendance of teacher (if applicable - usually teachers mark attendance, but let's check Attendance model)
+            // In this system, Attendance.userId is likely the studentId. 
+            // Let's check Teacher attendance if it's being tracked. 
+            // For now, let's just get Attendance marked by this teacher.
+            const attendanceMarked = await Attendance.countDocuments({ markedBy: teacher._id });
+
+            return {
+                _id: teacher._id,
+                name: teacher.name,
+                email: teacher.email,
+                classes: classes.map(c => c.className),
+                homeworkCount: homework,
+                announcementsCount: announcements,
+                attendanceMarkedCount: attendanceMarked
+            };
+        }));
+
+        // Aggregate Student Data
+        const studentData = await Promise.all(students.map(async (student) => {
+            const [attendance, results] = await Promise.all([
+                Attendance.find({ userId: student._id }),
+                Result.find({ studentId: student._id })
+            ]);
+
+            const totalAttendance = attendance.length;
+            const presentCount = attendance.filter(a => a.status === 'Present').length;
+            const attendancePercentage = totalAttendance > 0 ? ((presentCount / totalAttendance) * 100).toFixed(1) : 0;
+
+            return {
+                _id: student._id,
+                name: student.name,
+                email: student.email, // Username
+                attendancePercentage,
+                totalAttendance,
+                presentCount,
+                results: results.map(r => ({
+                    subject: r.subject,
+                    examName: r.examName,
+                    marksObtained: r.marksObtained,
+                    totalMarks: r.totalMarks,
+                    grade: r.grade
+                }))
+            };
+        }));
+
+        res.json({
+            teachers: teacherData,
+            students: studentData
+        });
+
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+module.exports = {
+    createSchool,
+    getSchools,
+    updateSchool,
+    deleteSchool,
+    approveSchool,
+    rejectSchool,
+    updateSchoolSettings,
+    getMySchool,
+    getAggregatedSchoolData
+};

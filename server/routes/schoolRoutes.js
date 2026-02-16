@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { createSchool, getSchools, updateSchool, deleteSchool, approveSchool, rejectSchool, updateSchoolSettings, getMySchool } = require('../controllers/schoolController');
+const { createSchool, getSchools, updateSchool, deleteSchool, approveSchool, rejectSchool, updateSchoolSettings, getMySchool, getAggregatedSchoolData } = require('../controllers/schoolController');
 const { protect, superAdmin } = require('../middleware/authMiddleware');
 
 router.get('/my-school', protect, getMySchool);
@@ -16,6 +16,7 @@ router.route('/:id')
 router.put('/:id/approve', protect, superAdmin, approveSchool);
 router.delete('/:id/reject', protect, superAdmin, rejectSchool);
 router.put('/:id/settings', protect, superAdmin, updateSchoolSettings);
+router.get('/:id/aggregated-data', protect, superAdmin, getAggregatedSchoolData);
 
 router.post('/register', createSchool); // Public registration for new schools
 

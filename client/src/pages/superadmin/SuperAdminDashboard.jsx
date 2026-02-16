@@ -12,8 +12,10 @@ const SuperAdminDashboard = () => {
     // Detailed View State
     const [selectedSchool, setSelectedSchool] = useState(null);
     const [schoolUsers, setSchoolUsers] = useState([]);
+    const [aggregatedData, setAggregatedData] = useState({ teachers: [], students: [] });
     const [editingUser, setEditingUser] = useState(null);
     const [loadingUsers, setLoadingUsers] = useState(false);
+    const [activeDetailedTab, setActiveDetailedTab] = useState('Overview');
 
     // Edit Plan State
     const [isEditingPlan, setIsEditingPlan] = useState(false);
@@ -57,14 +59,17 @@ const SuperAdminDashboard = () => {
         }
     };
 
-    const fetchSchoolUsers = async (schoolId) => {
+    const fetchAggregatedData = async (schoolId) => {
         setLoadingUsers(true);
         try {
-            const { data } = await api.get(`/api/users?schoolId=${schoolId}`, config);
-            setSchoolUsers(data);
+            const { data: users } = await api.get(`/api/users?schoolId=${schoolId}`, config);
+            setSchoolUsers(users);
+
+            const { data: aggregated } = await api.get(`/api/schools/${schoolId}/aggregated-data`, config);
+            setAggregatedData(aggregated);
         } catch (error) {
             console.error(error);
-            alert('Error fetching school users');
+            alert('Error fetching aggregated school data');
         } finally {
             setLoadingUsers(false);
         }
@@ -135,7 +140,8 @@ const SuperAdminDashboard = () => {
         };
 
         setSettingsData(mergedSettings);
-        fetchSchoolUsers(school._id);
+        fetchAggregatedData(school._id);
+        setActiveDetailedTab('Overview');
     };
 
     const handleUpdatePlan = async () => {
@@ -568,6 +574,183 @@ const SuperAdminDashboard = () => {
                     }
 
                     {/* Stats & Users Section */}
+                    {/* (Moving this section into tabs for a cleaner look as requested) */}
+                    {/* But for now, keeping it below if needed, or just let the tabs handle it */}
+
+                    {/* Detailed Content Tabs */}
+                    <div className="glass-panel" style={{ padding: '0', overflow: 'hidden', marginBottom: '30px' }}>
+                        <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.02)' }}>
+                            {['Overview', 'Teachers', 'Students'].map(tab => (
+                                <button
+                                    key={tab}
+                                    onClick={() => setActiveDetailedTab(tab)}
+                                    style={{
+                                        padding: '15px 30px',
+                                        background: 'none',
+                                        border: 'none',
+                                        color: activeDetailedTab === tab ? 'hsl(var(--primary))' : 'hsl(var(--text-dim))',
+                                        borderBottom: activeDetailedTab === tab ? '2px solid hsl(var(--primary))' : '2px solid transparent',
+                                        cursor: 'pointer',
+                                        fontWeight: activeDetailedTab === tab ? 'bold' : 'normal',
+                                        transition: 'all 0.3s'
+                                    }}
+                                >
+                                    {tab}
+                                </button>
+                            ))}
+                        </div>
+
+                        <div style={{ padding: '30px' }}>
+                            {activeDetailedTab === 'Overview' && (
+                                <div className="fade-in">
+                                    <h2 style={{ marginBottom: '20px' }}>School Overview</h2>
+                                    <div className="grid-mobile-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
+                                        <div style={{ background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '12px' }}>
+                                            <h3 style={{ marginBottom: '15px', color: 'hsl(var(--secondary))' }}>Quick Stats</h3>
+                                            <ul style={{ listStyle: 'none', padding: 0 }}>
+                                                <li style={{ marginBottom: '10px', display: 'flex', justifyContent: 'space-between' }}>
+                                                    <span>Total Teachers:</span> <strong>{aggregatedData.teachers.length}</strong>
+                                                </li>
+                                                <li style={{ marginBottom: '10px', display: 'flex', justifyContent: 'space-between' }}>
+                                                    <span>Total Students:</span> <strong>{aggregatedData.students.length}</strong>
+                                                </li>
+                                                <li style={{ marginBottom: '10px', display: 'flex', justifyContent: 'space-between' }}>
+                                                    <span>School ID:</span> <span style={{ fontSize: '0.8rem', opacity: 0.7 }}>{selectedSchool._id}</span>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div style={{ background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '12px' }}>
+                                            <h3 style={{ marginBottom: '15px', color: 'hsl(var(--secondary))' }}>Active Features</h3>
+                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                                {Object.entries(selectedSchool.settings?.features || {}).map(([key, value]) => value && (
+                                                    <span key={key} style={{ background: 'rgba(50, 200, 255, 0.1)', color: '#32c8ff', padding: '4px 10px', borderRadius: '15px', fontSize: '0.75rem' }}>
+                                                        {key.replace('enable', '').replace(/([A-Z])/g, ' $1').trim()}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div style={{ marginTop: '30px' }}>
+                                        <h3>Recent Activity</h3>
+                                        <p style={{ opacity: 0.6, fontStyle: 'italic' }}>Detailed activity logs coming soon...</p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeDetailedTab === 'Teachers' && (
+                                <div className="fade-in">
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                                        <h2>Teacher Directory</h2>
+                                        <span style={{ fontSize: '0.9rem', opacity: 0.7 }}>Total: {aggregatedData.teachers.length}</span>
+                                    </div>
+                                    <div style={{ overflowX: 'auto' }}>
+                                        <table className="data-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                            <thead>
+                                                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                                                    <th style={{ textAlign: 'left', padding: '15px' }}>Name</th>
+                                                    <th style={{ textAlign: 'left', padding: '15px' }}>Email</th>
+                                                    <th style={{ textAlign: 'left', padding: '15px' }}>Classes</th>
+                                                    <th style={{ textAlign: 'center', padding: '15px' }}>Homework</th>
+                                                    <th style={{ textAlign: 'center', padding: '15px' }}>Att. Marked</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {aggregatedData.teachers.map(teacher => (
+                                                    <tr key={teacher._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                                        <td style={{ padding: '15px' }}>{teacher.name}</td>
+                                                        <td style={{ padding: '15px', fontSize: '0.9rem', opacity: 0.8 }}>{teacher.email}</td>
+                                                        <td style={{ padding: '15px' }}>
+                                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
+                                                                {teacher.classes.length > 0 ? teacher.classes.map(c => (
+                                                                    <span key={c} style={{ background: 'rgba(255,255,255,0.1)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem' }}>{c}</span>
+                                                                )) : <span style={{ opacity: 0.5, fontSize: '0.8rem' }}>None</span>}
+                                                            </div>
+                                                        </td>
+                                                        <td style={{ padding: '15px', textAlign: 'center' }}>
+                                                            <span style={{ color: teacher.homeworkCount > 0 ? 'hsl(var(--secondary))' : '' }}>{teacher.homeworkCount}</span>
+                                                        </td>
+                                                        <td style={{ padding: '15px', textAlign: 'center' }}>{teacher.attendanceMarkedCount}</td>
+                                                    </tr>
+                                                ))}
+                                                {aggregatedData.teachers.length === 0 && (
+                                                    <tr><td colSpan="5" style={{ textAlign: 'center', padding: '30px', opacity: 0.5 }}>No teachers found for this school</td></tr>
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeDetailedTab === 'Students' && (
+                                <div className="fade-in">
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                                        <h2>Student Directory</h2>
+                                        <span style={{ fontSize: '0.9rem', opacity: 0.7 }}>Total: {aggregatedData.students.length}</span>
+                                    </div>
+                                    <div style={{ overflowX: 'auto' }}>
+                                        <table className="data-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                            <thead>
+                                                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                                                    <th style={{ textAlign: 'left', padding: '15px' }}>Name</th>
+                                                    <th style={{ textAlign: 'left', padding: '15px' }}>Username (Email)</th>
+                                                    <th style={{ textAlign: 'center', padding: '15px' }}>Attendance</th>
+                                                    <th style={{ textAlign: 'left', padding: '15px' }}>Recent Results</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {aggregatedData.students.map(student => (
+                                                    <tr key={student._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                                        <td style={{ padding: '15px' }}>{student.name}</td>
+                                                        <td style={{ padding: '15px', fontSize: '0.9rem', opacity: 0.8 }}>{student.email}</td>
+                                                        <td style={{ padding: '15px', textAlign: 'center' }}>
+                                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                                                <span style={{
+                                                                    fontWeight: 'bold',
+                                                                    color: parseFloat(student.attendancePercentage) < 75 ? '#ff4d4d' : '#64ff96'
+                                                                }}>
+                                                                    {student.attendancePercentage}%
+                                                                </span>
+                                                                <span style={{ fontSize: '0.7rem', opacity: 0.5 }}>({student.presentCount}/{student.totalAttendance})</span>
+                                                            </div>
+                                                        </td>
+                                                        <td style={{ padding: '15px' }}>
+                                                            {student.results.length > 0 ? (
+                                                                <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '5px' }}>
+                                                                    {student.results.slice(0, 3).map((res, i) => (
+                                                                        <div key={i} style={{
+                                                                            background: 'rgba(255,255,255,0.05)',
+                                                                            padding: '5px 10px',
+                                                                            borderRadius: '6px',
+                                                                            fontSize: '0.75rem',
+                                                                            minWidth: '80px',
+                                                                            border: '1px solid rgba(255,255,255,0.1)'
+                                                                        }}>
+                                                                            <div style={{ fontWeight: 'bold' }}>{res.subject}</div>
+                                                                            <div style={{ color: 'hsl(var(--primary))' }}>{res.grade || `${((res.marksObtained / res.totalMarks) * 100).toFixed(0)}%`}</div>
+                                                                        </div>
+                                                                    ))}
+                                                                    {student.results.length > 3 && (
+                                                                        <span style={{ opacity: 0.5, fontSize: '0.8rem', alignSelf: 'center' }}>+{student.results.length - 3} more</span>
+                                                                    )}
+                                                                </div>
+                                                            ) : (
+                                                                <span style={{ opacity: 0.5, fontSize: '0.8rem' }}>No records</span>
+                                                            )}
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                                {aggregatedData.students.length === 0 && (
+                                                    <tr><td colSpan="4" style={{ textAlign: 'center', padding: '30px', opacity: 0.5 }}>No students found for this school</td></tr>
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
                     <div className="grid-mobile-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '30px' }}>
                         {/* Stats Column */}
                         <div className="grid-mobile-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
@@ -633,9 +816,6 @@ const SuperAdminDashboard = () => {
                     </div>
                 </div>
             )}
-
-
-
         </div>
     );
 };
