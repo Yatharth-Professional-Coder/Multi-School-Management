@@ -11,11 +11,15 @@ import {
     FaChartBar,
     FaClipboardList,
     FaBullhorn,
-    FaTimes
+    FaTimes,
+    FaKey
 } from 'react-icons/fa';
+import ChangePasswordModal from './ChangePasswordModal';
+import { useState } from 'react';
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
     const { user, logout } = useContext(AuthContext);
+    const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
 
     const menuItems = {
         SuperAdmin: [
@@ -83,11 +87,24 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
             </nav>
 
             <div className="sidebar-footer">
+                <button
+                    onClick={() => setIsChangePasswordOpen(true)}
+                    className="nav-item"
+                    style={{ width: '100%', border: 'none', background: 'none', marginBottom: '10px' }}
+                >
+                    <span className="nav-icon"><FaKey /></span>
+                    <span className="nav-text">Change Password</span>
+                </button>
                 <button onClick={logout} className="logout-btn">
                     <FaSignOutAlt />
                     <span>Logout</span>
                 </button>
             </div>
+
+            <ChangePasswordModal
+                isOpen={isChangePasswordOpen}
+                onClose={() => setIsChangePasswordOpen(false)}
+            />
         </aside>
     );
 };

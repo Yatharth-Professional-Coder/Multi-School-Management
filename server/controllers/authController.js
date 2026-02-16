@@ -97,4 +97,25 @@ const forgotPassword = async (req, res) => {
     res.status(200).json({ message: `Password reset link sent to ${email}` });
 }
 
-module.exports = { loginUser, registerUser, forgotPassword };
+// @desc    Change Password
+// @route   PUT /api/auth/change-password
+// @access  Private
+const changePassword = async (req, res) => {
+    const { oldPassword, newPassword } = req.body;
+
+    try {
+        const user = await User.findById(req.user._id);
+
+        if (user && (await user.matchPassword(oldPassword))) {
+            user.password = newPassword;
+            await user.save();
+            res.json({ message: 'Password updated successfully' });
+        } else {
+            res.status(401).json({ message: 'Invalid current password' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+module.exports = { loginUser, registerUser, forgotPassword, changePassword };
