@@ -52,10 +52,9 @@ const Register = () => {
                 zIndex: 0
             }}></div>
 
-            <div className="glass-panel fade-in" style={{
-                padding: '48px',
+            <div className="glass-panel fade-in login-card" style={{
                 width: '100%',
-                maxWidth: '750px',
+                maxWidth: '900px',
                 zIndex: 1,
                 boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
             }}>
