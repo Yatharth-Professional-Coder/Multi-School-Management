@@ -123,4 +123,4 @@ const getResults = async (req, res) => {
     }
 };
 
-module.exports = { addResult, getResults };
+module.exports = { addResult, getResults, addBulkResults };
