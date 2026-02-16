@@ -80,7 +80,7 @@ const ParentDashboard = () => {
 
             {/* Stats Overview */}
 
-            <div className="grid-mobile-1" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '30px' }}>
+            <div className="tabs-container-mobile">
 
                 {user.schoolSettings?.features?.enableAttendance !== false && (
                     <div onClick={() => setActiveTab('Attendance')} className="glass-panel" style={{ padding: '20px', cursor: 'pointer', border: activeTab === 'Attendance' ? '1px solid hsl(var(--primary))' : '' }}>
