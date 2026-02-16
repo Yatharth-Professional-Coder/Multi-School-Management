@@ -490,6 +490,8 @@ button {
   /* Utility Classes for Responsiveness */
   .flex-mobile-col {
     flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 15px !important;
   }
 
   .grid-mobile-1 {
@@ -504,16 +506,42 @@ button {
     display: none !important;
   }
 
+  .tabs-container-mobile {
+    display: flex !important;
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+    padding-bottom: 15px !important;
+    margin: 0 -15px 20px !important;
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+    scrollbar-width: none;
+    /* Firefox */
+  }
+
+  .tabs-container-mobile::-webkit-scrollbar {
+    display: none;
+    /* Chrome/Safari */
+  }
+
+  .btn-mobile-full {
+    width: 100% !important;
+  }
+
+  /* Adjustments for better spacing on small screens */
   .main-content {
-    padding: 15px;
+    padding: 15px !important;
   }
 
   .container {
-    padding: 0 10px;
+    padding: 0 10px !important;
   }
 
   .glass-panel {
-    padding: 15px !important;
+    padding: 20px 15px !important;
+  }
+
+  .section-header-mobile {
+    margin-bottom: 25px !important;
   }
 }
 

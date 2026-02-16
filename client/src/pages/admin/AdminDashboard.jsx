@@ -444,8 +444,7 @@ const AdminDashboard = () => {
 
             {/* Actions */}
             {/* Actions */}
-            <div style={{ marginBottom: '30px', display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '10px', whiteSpace: 'nowrap' }}>
-
+            <div className="tabs-container-mobile">
                 {['Classes', 'SubAdmins', 'Teacher Attendance', 'Announcements', 'Timetable'].filter(tab => {
                     if (tab === 'Announcements') return schoolSettings?.features?.enableAnnouncements !== false;
                     if (tab === 'Timetable') return schoolSettings?.features?.enableTimetable !== false;
@@ -456,6 +455,7 @@ const AdminDashboard = () => {
                         key={tab}
                         className={`btn ${activeTab === tab ? 'btn-primary' : ''}`}
                         onClick={() => { setActiveTab(tab); setSelectedClass(null); setSelectedTimetableClass(null); }}
+                        style={{ whiteSpace: 'nowrap' }}
                     >
                         {tab === 'SubAdmins' ? 'Sub Admins' : tab}
                         {tab === 'Rectification Requests' && rectifications.length > 0 && (
@@ -470,8 +470,8 @@ const AdminDashboard = () => {
             {/* Content Area */}
             <div className="glass-panel" style={{ padding: '20px' }}>
 
-                <div className="flex-mobile-col" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', alignItems: 'flex-start', gap: '15px' }}>
-                    <h2 style={{ color: 'hsl(var(--white))' }}>
+                <div className="flex-mobile-col" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '25px' }}>
+                    <h2 style={{ color: 'hsl(var(--white))', margin: 0 }}>
                         {selectedClass ? `Attendance: ${selectedClass.className}` : activeTab === 'SubAdmins' ? 'Sub Admin Management' : activeTab === 'Teacher Attendance' ? 'Teacher Attendance' : `${activeTab} Management`}
                     </h2>
                     {activeTab !== 'Teacher Attendance' && activeTab !== 'Timetable' && !selectedClass && (

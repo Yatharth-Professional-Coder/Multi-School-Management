@@ -290,8 +290,7 @@ const TeacherDashboard = () => {
     return (
         <div className="container fade-in" style={{ paddingTop: '20px' }}>
 
-            <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'nowrap', overflowX: 'auto', paddingBottom: '10px' }}>
-
+            <div className="tabs-container-mobile">
                 {['Attendance', 'Announcements', 'My Students', 'Homework', 'Results', 'Full Timetable'].filter(tab => {
                     if (tab === 'My Students') return !!teacherClass;
                     if (tab === 'Homework') return user.schoolSettings?.features?.enableHomework !== false;
@@ -301,7 +300,7 @@ const TeacherDashboard = () => {
                     if (tab === 'Attendance') return user.schoolSettings?.features?.enableAttendance !== false;
                     return true;
                 }).map(tab => (
-                    <button key={tab} className={`btn ${activeTab === tab ? 'btn-primary' : ''}`} onClick={() => setActiveTab(tab)}>{tab}</button>
+                    <button key={tab} className={`btn ${activeTab === tab ? 'btn-primary' : ''}`} onClick={() => setActiveTab(tab)} style={{ whiteSpace: 'nowrap' }}>{tab}</button>
                 ))}
             </div>
 
@@ -309,17 +308,19 @@ const TeacherDashboard = () => {
 
                 {activeTab === 'Attendance' && (
                     <>
-                        <div className="flex-mobile-col" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px', gap: '15px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                                <h2>Mark Attendance</h2>
+                        <div className="flex-mobile-col" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '25px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                <h2 style={{ margin: 0 }}>Mark Attendance</h2>
                             </div>
-                            <div className="flex-mobile-col w-full-mobile" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                                <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className="input-field w-full-mobile" style={{ width: 'auto' }} />
-                                <div className="w-full-mobile" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <span style={{ color: 'hsl(var(--text-dim))', whiteSpace: 'nowrap' }}>Period:</span>
+                            <div className="flex-mobile-col w-full-mobile" style={{ display: 'flex', gap: '15px' }}>
+                                <div className="w-full-mobile">
+                                    <label className="input-label" style={{ display: 'block', marginBottom: '5px', fontSize: '0.8rem' }}>Date</label>
+                                    <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className="input-field w-full-mobile" />
+                                </div>
+                                <div className="w-full-mobile">
+                                    <label className="input-label" style={{ display: 'block', marginBottom: '5px', fontSize: '0.8rem' }}>Period</label>
                                     <select
                                         className="input-field w-full-mobile"
-                                        style={{ width: 'auto' }}
                                         value={selectedPeriod}
                                         onChange={(e) => setSelectedPeriod(parseInt(e.target.value))}
                                     >
