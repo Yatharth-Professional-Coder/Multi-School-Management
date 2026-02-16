@@ -399,14 +399,6 @@ const AdminDashboard = () => {
     return (
         <div className="container fade-in" style={{ paddingTop: '20px' }}>
 
-            <div className="flex-mobile-col" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', gap: '15px' }}>
-                <div>
-                    <h1>Admin Dashboard</h1>
-                    <p style={{ color: 'hsl(var(--text-dim))' }}>Hello, {user.name}</p>
-                </div>
-                <button onClick={logout} className="btn btn-danger" style={{ alignSelf: 'flex-start' }}>Logout</button>
-            </div>
-
 
             {/* Quick Stats */}
             <div className="grid-mobile-1" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '40px' }}>

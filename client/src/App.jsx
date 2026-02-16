@@ -5,6 +5,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import { useContext } from 'react';
 import AuthContext from './context/AuthContext';
+import Layout from './components/Layout';
 
 const PrivateRoute = ({ children }) => {
   const { isAuthenticated, loading } = useContext(AuthContext);
@@ -31,7 +32,9 @@ const AppRoutes = () => {
         path="/dashboard"
         element={
           <PrivateRoute>
-            <Dashboard />
+            <Layout>
+              <Dashboard />
+            </Layout>
           </PrivateRoute>
         }
       />

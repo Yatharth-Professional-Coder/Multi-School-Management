@@ -54,11 +54,9 @@ const ParentDashboard = () => {
     if (!user.childId) {
         return (
             <div className="container fade-in" style={{ paddingTop: '40px', textAlign: 'center' }}>
-                <h1>Parent Portal</h1>
                 <div className="glass-panel" style={{ padding: '40px', marginTop: '20px' }}>
                     <h2>No Student Linked</h2>
                     <p>Please contact the school administration to link your account to your child.</p>
-                    <button onClick={logout} className="btn btn-primary" style={{ marginTop: '20px' }}>Logout</button>
                 </div>
             </div>
         );
@@ -66,13 +64,10 @@ const ParentDashboard = () => {
 
     return (
         <div className="container fade-in" style={{ paddingTop: '40px' }}>
-            <div className="flex-mobile-col" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', gap: '15px' }}>
-                <div>
-                    <h1>Parent Portal</h1>
-                    <p style={{ color: 'hsl(var(--text-dim))' }}>Welcome, {user.name}</p>
-                    {child && <p style={{ color: 'hsl(var(--accent))', fontSize: '0.9rem' }}>Viewing: {child.name}</p>}
-                </div>
-                <button onClick={logout} className="btn btn-danger" style={{ alignSelf: 'flex-start' }}>Logout</button>
+            {/* Dashboard Controls */}
+            <div style={{ marginBottom: '30px' }}>
+                <p style={{ color: 'hsl(var(--text-dim))' }}>Welcome back, <span style={{ color: 'hsl(var(--primary))', fontWeight: 'bold' }}>{user.name}</span></p>
+                {child && <p style={{ color: 'hsl(var(--accent))', fontSize: '0.9rem' }}>Viewing: {child.name}</p>}
             </div>
 
             {/* Stats Overview */}

@@ -87,12 +87,9 @@ const SubAdminDashboard = () => {
     return (
         <div className="container fade-in" style={{ paddingTop: '20px' }}>
 
-            <div className="flex-mobile-col" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', gap: '15px' }}>
-                <div>
-                    <h1>Sub Admin Dashboard</h1>
-                    <p style={{ color: 'hsl(var(--text-dim))' }}>Hello, {user.name}</p>
-                </div>
-                <button onClick={logout} className="btn btn-danger" style={{ alignSelf: 'flex-start' }}>Logout</button>
+            {/* Dashboard Controls */}
+            <div style={{ marginBottom: '30px' }}>
+                <p style={{ color: 'hsl(var(--text-dim))' }}>Welcome back, <span style={{ color: 'hsl(var(--primary))', fontWeight: 'bold' }}>{user.name}</span></p>
             </div>
 
 

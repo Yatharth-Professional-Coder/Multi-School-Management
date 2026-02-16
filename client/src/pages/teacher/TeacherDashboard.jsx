@@ -280,15 +280,6 @@ const TeacherDashboard = () => {
     return (
         <div className="container fade-in" style={{ paddingTop: '20px' }}>
 
-            <div className="flex-mobile-col" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', gap: '15px' }}>
-                <div>
-                    <h1>Teacher Dashboard v1.1</h1>
-                    <p style={{ color: 'hsl(var(--text-dim))' }}>Welcome, {user.name}</p>
-                </div>
-                <button onClick={logout} className="btn btn-danger" style={{ alignSelf: 'flex-start' }}>Logout</button>
-            </div>
-
-
             <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'nowrap', overflowX: 'auto', paddingBottom: '10px' }}>
 
                 {['Attendance', 'Announcements', 'My Students', 'Homework', 'Results', 'Full Timetable'].filter(tab => {

@@ -225,11 +225,8 @@ const SuperAdminDashboard = () => {
     return (
         <div className="container fade-in" style={{ paddingTop: '20px' }}>
 
-            <div className="flex-mobile-col" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', gap: '15px' }}>
-                <div>
-                    <h1>Super Admin Dashboard</h1>
-                    <p style={{ color: 'hsl(var(--text-dim))' }}>Manage All Schools</p>
-                </div>
+            {/* Dashboard Controls */}
+            <div className="flex-mobile-col" style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '30px', gap: '15px' }}>
                 {!selectedSchool && (
                     <button className="btn btn-primary w-full-mobile" onClick={() => setShowForm(!showForm)}>
                         <FaPlus style={{ marginRight: '8px' }} /> Add School
@@ -638,9 +635,6 @@ const SuperAdminDashboard = () => {
 
 
 
-            <button onClick={logout} style={{ marginTop: '40px', color: 'hsl(var(--accent))', textDecoration: 'underline' }}>
-                Logout
-            </button>
         </div>
     );
 };

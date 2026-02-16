@@ -34,248 +34,196 @@ const Register = () => {
     };
 
     return (
-        <div className="login-container" style={{
-            background: 'radial-gradient(circle at bottom left, #2a2a72, #009ffd 0%, #000 70%)',
+        <div className="register-wrapper" style={{
+            background: 'var(--bg-gradient)',
             minHeight: '100vh',
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            color: '#fff'
+            padding: '40px 20px'
         }}>
-            <div className="glass-panel fade-in w-full-mobile" style={{
-                padding: '2rem',
-                borderRadius: '20px',
+            <div className="glass-panel fade-in" style={{
+                padding: '40px',
                 width: '100%',
-                maxWidth: '500px',
-                background: 'rgba(255, 255, 255, 0.1)',
-                backdropFilter: 'blur(10px)',
-                boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
-                border: '1px solid rgba(255, 255, 255, 0.18)'
+                maxWidth: '600px'
             }}>
 
-                <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-                    <FaSchool size={50} color="#00d4ff" />
-                    <h2 style={{ marginTop: '1rem', fontSize: '2rem', fontWeight: 'bold' }}>Register School</h2>
-                    <p style={{ color: '#ccc' }}>Create a new school and admin account</p>
+                <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+                    <div style={{
+                        width: '64px', height: '64px',
+                        background: 'linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)))',
+                        borderRadius: '16px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                        marginBottom: '16px', boxShadow: '0 8px 16px rgba(0, 0, 0, 0.2)'
+                    }}>
+                        <FaSchool size={32} color="#fff" />
+                    </div>
+                    <h1 style={{ fontSize: '2.5rem', fontWeight: '800', marginBottom: '8px', letterSpacing: '-1px' }}>
+                        <span className="gradient-text">Register Your School</span>
+                    </h1>
+                    <p style={{ color: 'hsl(var(--text-dim))', fontSize: '1.1rem' }}>Join the MR. EduEdge ecosystem today</p>
                 </div>
 
                 {error && (
-                    <div style={{
-                        background: 'rgba(255, 77, 77, 0.2)',
+                    <div className="alert-error" style={{
+                        background: 'rgba(255, 77, 77, 0.1)',
+                        border: '1px solid rgba(255, 77, 77, 0.2)',
                         color: '#ff4d4d',
-                        padding: '10px',
-                        borderRadius: '5px',
-                        marginBottom: '20px',
+                        padding: '12px',
+                        borderRadius: 'var(--radius-sm)',
+                        marginBottom: '30px',
                         textAlign: 'center',
-                        border: '1px solid rgba(255, 77, 77, 0.3)'
+                        fontSize: '0.9rem'
                     }}>
                         {error}
                     </div>
                 )}
 
                 <form onSubmit={handleSubmit}>
-                    {/* School Name */}
-                    <div className="input-group" style={{ marginBottom: '1.5rem', position: 'relative' }}>
-                        <FaSchool style={{ position: 'absolute', top: '15px', left: '15px', color: '#00d4ff' }} />
-                        <input
-                            type="text"
-                            name="name"
-                            placeholder="School Name"
-                            value={formData.name}
-                            onChange={handleChange}
-                            required
-                            style={{
-                                width: '100%',
-                                padding: '12px 12px 12px 45px',
-                                background: 'rgba(255, 255, 255, 0.05)',
-                                border: '1px solid rgba(255, 255, 255, 0.1)',
-                                borderRadius: '8px',
-                                color: '#fff',
-                                fontSize: '1rem',
-                                outline: 'none'
-                            }}
-                        />
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+                        <div className="input-group">
+                            <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'hsl(var(--text-dim))' }}>School Name</label>
+                            <div style={{ position: 'relative' }}>
+                                <FaSchool style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'hsl(var(--primary))', opacity: 0.6 }} />
+                                <input
+                                    type="text"
+                                    name="name"
+                                    placeholder="Bright Future School"
+                                    className="input-field"
+                                    style={{ paddingLeft: '48px' }}
+                                    value={formData.name}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <div className="input-group">
+                            <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'hsl(var(--text-dim))' }}>Contact Number</label>
+                            <div style={{ position: 'relative' }}>
+                                <FaPhone style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'hsl(var(--primary))', opacity: 0.6 }} />
+                                <input
+                                    type="text"
+                                    name="contact"
+                                    placeholder="+91 XXXXX XXXXX"
+                                    className="input-field"
+                                    style={{ paddingLeft: '48px' }}
+                                    value={formData.contact}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
+                        </div>
                     </div>
 
-                    {/* Address */}
-                    <div className="input-group" style={{ marginBottom: '1.5rem', position: 'relative' }}>
-                        <FaMapMarkerAlt style={{ position: 'absolute', top: '15px', left: '15px', color: '#00d4ff' }} />
-                        <input
-                            type="text"
-                            name="address"
-                            placeholder="School Address"
-                            value={formData.address}
-                            onChange={handleChange}
-                            required
-                            style={{
-                                width: '100%',
-                                padding: '12px 12px 12px 45px',
-                                background: 'rgba(255, 255, 255, 0.05)',
-                                border: '1px solid rgba(255, 255, 255, 0.1)',
-                                borderRadius: '8px',
-                                color: '#fff',
-                                fontSize: '1rem',
-                                outline: 'none'
-                            }}
-                        />
+                    <div className="input-group" style={{ marginBottom: '20px' }}>
+                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'hsl(var(--text-dim))' }}>School Address</label>
+                        <div style={{ position: 'relative' }}>
+                            <FaMapMarkerAlt style={{ position: 'absolute', left: '16px', top: '15px', color: 'hsl(var(--primary))', opacity: 0.6 }} />
+                            <textarea
+                                name="address"
+                                placeholder="Enter complete school address"
+                                className="input-field"
+                                style={{ paddingLeft: '48px', minHeight: '80px', paddingTop: '12px' }}
+                                value={formData.address}
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
                     </div>
 
-                    {/* Contact */}
-                    <div className="input-group" style={{ marginBottom: '1.5rem', position: 'relative' }}>
-                        <FaPhone style={{ position: 'absolute', top: '15px', left: '15px', color: '#00d4ff' }} />
-                        <input
-                            type="text"
-                            name="contact"
-                            placeholder="Contact Number"
-                            value={formData.contact}
-                            onChange={handleChange}
-                            required
-                            style={{
-                                width: '100%',
-                                padding: '12px 12px 12px 45px',
-                                background: 'rgba(255, 255, 255, 0.05)',
-                                border: '1px solid rgba(255, 255, 255, 0.1)',
-                                borderRadius: '8px',
-                                color: '#fff',
-                                fontSize: '1rem',
-                                outline: 'none'
-                            }}
-                        />
+                    <div className="input-group" style={{ marginBottom: '30px' }}>
+                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'hsl(var(--text-dim))' }}>Choose Subscription Plan</label>
+                        <div style={{ position: 'relative' }}>
+                            <FaLayerGroup style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'hsl(var(--primary))', opacity: 0.6 }} />
+                            <select
+                                name="subscriptionPlan"
+                                className="input-field"
+                                style={{ paddingLeft: '48px', appearance: 'auto' }}
+                                value={formData.subscriptionPlan}
+                                onChange={handleChange}
+                                required
+                            >
+                                <option value="Basic">Basic Plan (Up to 500 Students)</option>
+                                <option value="Standard">Standard Plan (Up to 2000 Students)</option>
+                                <option value="Premium">Premium Plan (Unlimited)</option>
+                            </select>
+                        </div>
                     </div>
 
-                    {/* Subscription Plan */}
-                    <div className="input-group" style={{ marginBottom: '1.5rem', position: 'relative' }}>
-                        <FaLayerGroup style={{ position: 'absolute', top: '15px', left: '15px', color: '#00d4ff' }} />
-                        <select
-                            name="subscriptionPlan"
-                            value={formData.subscriptionPlan}
-                            onChange={handleChange}
-                            required
-                            style={{
-                                width: '100%',
-                                padding: '12px 12px 12px 45px',
-                                background: 'rgba(255, 255, 255, 0.05)',
-                                border: '1px solid rgba(255, 255, 255, 0.1)',
-                                borderRadius: '8px',
-                                color: '#fff',
-                                fontSize: '1rem',
-                                outline: 'none',
-                                appearance: 'none' // Removes default arrow
-                            }}
-                        >
-                            <option value="Basic" style={{ color: '#000' }}>Basic Plan</option>
-                            <option value="Standard" style={{ color: '#000' }}>Standard Plan</option>
-                            <option value="Premium" style={{ color: '#000' }}>Premium Plan</option>
-                        </select>
-                        <p style={{ marginTop: '5px', fontSize: '0.85rem', color: '#00d4ff', fontStyle: 'italic' }}>
-                            For pricing and details, contact: +91 8571099660
-                        </p>
-                    </div>
+                    <div style={{ marginBottom: '20px', padding: '20px', background: 'rgba(255, 255, 255, 0.03)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--glass-border)' }}>
+                        <p style={{ marginBottom: '16px', color: 'hsl(var(--secondary))', fontWeight: 'bold', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Principal Credentials</p>
 
-                    <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.1)', margin: '20px 0', paddingTop: '20px' }}>
-                        <p style={{ marginBottom: '15px', color: '#aaa', fontSize: '0.9rem' }}>Principal / Admin Details</p>
-                    </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                            <div className="input-group">
+                                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'hsl(var(--text-dim))' }}>Full Name</label>
+                                <div style={{ position: 'relative' }}>
+                                    <FaUserTie style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'hsl(var(--primary))', opacity: 0.6 }} />
+                                    <input
+                                        type="text"
+                                        name="adminName"
+                                        placeholder="Admin Name"
+                                        className="input-field"
+                                        style={{ paddingLeft: '48px' }}
+                                        value={formData.adminName}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </div>
+                            </div>
 
-                    {/* Admin Name */}
-                    <div className="input-group" style={{ marginBottom: '1.5rem', position: 'relative' }}>
-                        <FaUserTie style={{ position: 'absolute', top: '15px', left: '15px', color: '#00d4ff' }} />
-                        <input
-                            type="text"
-                            name="adminName"
-                            placeholder="Principal Name"
-                            value={formData.adminName}
-                            onChange={handleChange}
-                            required
-                            style={{
-                                width: '100%',
-                                padding: '12px 12px 12px 45px',
-                                background: 'rgba(255, 255, 255, 0.05)',
-                                border: '1px solid rgba(255, 255, 255, 0.1)',
-                                borderRadius: '8px',
-                                color: '#fff',
-                                fontSize: '1rem',
-                                outline: 'none'
-                            }}
-                        />
-                    </div>
+                            <div className="input-group">
+                                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'hsl(var(--text-dim))' }}>Email Address</label>
+                                <div style={{ position: 'relative' }}>
+                                    <FaEnvelope style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'hsl(var(--primary))', opacity: 0.6 }} />
+                                    <input
+                                        type="email"
+                                        name="adminEmail"
+                                        placeholder="admin@school.com"
+                                        className="input-field"
+                                        style={{ paddingLeft: '48px' }}
+                                        value={formData.adminEmail}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </div>
+                            </div>
+                        </div>
 
-                    {/* Admin Email */}
-                    <div className="input-group" style={{ marginBottom: '1.5rem', position: 'relative' }}>
-                        <FaEnvelope style={{ position: 'absolute', top: '15px', left: '15px', color: '#00d4ff' }} />
-                        <input
-                            type="email"
-                            name="adminEmail"
-                            placeholder="Principal Email"
-                            value={formData.adminEmail}
-                            onChange={handleChange}
-                            required
-                            style={{
-                                width: '100%',
-                                padding: '12px 12px 12px 45px',
-                                background: 'rgba(255, 255, 255, 0.05)',
-                                border: '1px solid rgba(255, 255, 255, 0.1)',
-                                borderRadius: '8px',
-                                color: '#fff',
-                                fontSize: '1rem',
-                                outline: 'none'
-                            }}
-                        />
-                    </div>
-
-                    {/* Admin Password */}
-                    <div className="input-group" style={{ marginBottom: '1.5rem', position: 'relative' }}>
-                        <FaLock style={{ position: 'absolute', top: '15px', left: '15px', color: '#00d4ff' }} />
-                        <input
-                            type="password"
-                            name="adminPassword"
-                            placeholder="Password"
-                            value={formData.adminPassword}
-                            onChange={handleChange}
-                            required
-                            style={{
-                                width: '100%',
-                                padding: '12px 12px 12px 45px',
-                                background: 'rgba(255, 255, 255, 0.05)',
-                                border: '1px solid rgba(255, 255, 255, 0.1)',
-                                borderRadius: '8px',
-                                color: '#fff',
-                                fontSize: '1rem',
-                                outline: 'none'
-                            }}
-                        />
+                        <div className="input-group" style={{ marginTop: '20px' }}>
+                            <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'hsl(var(--text-dim))' }}>Create Password</label>
+                            <div style={{ position: 'relative' }}>
+                                <FaLock style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'hsl(var(--primary))', opacity: 0.6 }} />
+                                <input
+                                    type="password"
+                                    name="adminPassword"
+                                    placeholder="••••••••"
+                                    className="input-field"
+                                    style={{ paddingLeft: '48px' }}
+                                    value={formData.adminPassword}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
+                        </div>
                     </div>
 
                     <button
                         type="submit"
-                        className="login-btn"
+                        className="btn btn-primary"
                         style={{
                             width: '100%',
-                            padding: '12px',
-                            background: 'linear-gradient(to right, #00c6ff, #0072ff)',
-                            border: 'none',
-                            borderRadius: '8px',
-                            color: '#fff',
+                            height: '52px',
                             fontSize: '1.1rem',
                             fontWeight: 'bold',
-                            cursor: 'pointer',
-                            marginTop: '1rem',
-                            transition: 'transform 0.2s ease, box-shadow 0.2s ease'
-                        }}
-                        onMouseOver={(e) => {
-                            e.currentTarget.style.transform = 'translateY(-2px)';
-                            e.currentTarget.style.boxShadow = '0 5px 15px rgba(0, 114, 255, 0.4)';
-                        }}
-                        onMouseOut={(e) => {
-                            e.currentTarget.style.transform = 'translateY(0)';
-                            e.currentTarget.style.boxShadow = 'none';
+                            marginTop: '10px'
                         }}
                     >
-                        Register School
+                        Complete Registration
                     </button>
                 </form>
 
-                <p style={{ marginTop: '2rem', textAlign: 'center', color: '#ccc' }}>
-                    Already have an account? <Link to="/login" style={{ color: '#00d4ff', textDecoration: 'none', fontWeight: 'bold' }}>Sign In</Link>
+                <p style={{ marginTop: '30px', textAlign: 'center', color: 'hsl(var(--text-dim))', fontSize: '1rem' }}>
+                    Already have an account? <Link to="/login" style={{ color: 'hsl(var(--primary))', textDecoration: 'none', fontWeight: 'bold' }}>Sign In</Link>
                 </p>
             </div>
         </div>
