@@ -125,7 +125,7 @@ const StudentDashboard = () => {
 
             {/* Content Area */}
             <div className="glass-panel" style={{ padding: '30px', minHeight: '400px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', gap: '20px' }} className="flex-mobile-col">
+                <div className="flex-mobile-col" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
                     <h2 style={{ margin: 0 }}>{activeTab === 'Overview' ? 'Select a tab above' : activeTab}</h2>
                 </div>
                 <div style={{ marginTop: '20px' }}>
