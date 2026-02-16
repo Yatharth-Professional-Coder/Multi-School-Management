@@ -54,19 +54,18 @@ const Login = () => {
             }}>
                 <div style={{ textAlign: 'center', marginBottom: '40px' }}>
                     <div style={{
-                        width: '72px', height: '72px',
-                        background: 'linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)))',
-                        borderRadius: '18px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                        marginBottom: '20px', boxShadow: '0 12px 24px hsla(var(--primary), 0.3)',
-                        transform: 'rotate(-5deg)'
+                        width: '80px', height: '80px',
+                        background: 'rgba(255,255,255,0.05)',
+                        borderRadius: '20px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                        marginBottom: '20px', border: '1px solid var(--glass-border)'
                     }}>
-                        <FaSchool size={36} color="#fff" />
+                        <img src="/logo.png" alt="EduEdge" style={{ width: '60px', height: '60px', objectFit: 'contain' }} />
                     </div>
                     <h1 style={{ fontSize: '2.8rem', fontWeight: '800', marginBottom: '12px', letterSpacing: '-1.5px' }}>
                         <span className="gradient-text">Welcome Back</span>
                     </h1>
                     <p style={{ color: 'hsl(var(--text-dim))', fontSize: '1.1rem', fontWeight: '500' }}>
-                        Sign in to <span style={{ color: 'hsl(var(--white))' }}>MR. EduEdge</span> Portal
+                        Sign in to <span style={{ color: 'hsl(var(--white))' }}>EduEdge</span> Portal
                     </p>
                 </div>
 

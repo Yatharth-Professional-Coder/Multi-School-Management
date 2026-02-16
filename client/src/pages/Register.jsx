@@ -62,19 +62,18 @@ const Register = () => {
 
                 <div style={{ textAlign: 'center', marginBottom: '48px' }}>
                     <div style={{
-                        width: '72px', height: '72px',
-                        background: 'linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)))',
-                        borderRadius: '18px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                        marginBottom: '20px', boxShadow: '0 12px 24px hsla(var(--primary), 0.3)',
-                        transform: 'rotate(-5deg)'
+                        width: '80px', height: '80px',
+                        background: 'rgba(255,255,255,0.05)',
+                        borderRadius: '20px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                        marginBottom: '20px', border: '1px solid var(--glass-border)'
                     }}>
-                        <FaSchool size={36} color="#fff" />
+                        <img src="/logo.png" alt="EduEdge" style={{ width: '60px', height: '60px', objectFit: 'contain' }} />
                     </div>
                     <h1 style={{ fontSize: '3rem', fontWeight: '800', marginBottom: '12px', letterSpacing: '-1.5px' }}>
                         <span className="gradient-text">Register Your School</span>
                     </h1>
                     <p style={{ color: 'hsl(var(--text-dim))', fontSize: '1.2rem', fontWeight: '500' }}>
-                        Join the <span style={{ color: 'hsl(var(--white))' }}>MR. EduEdge</span> ecosystem today
+                        Join the <span style={{ color: 'hsl(var(--white))' }}>EduEdge</span> ecosystem today
                     </p>
                 </div>
 
