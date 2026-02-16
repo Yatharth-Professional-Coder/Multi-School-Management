@@ -90,13 +90,24 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
                 <button
                     onClick={() => setIsChangePasswordOpen(true)}
                     className="nav-item"
-                    style={{ width: '100%', border: 'none', background: 'none', marginBottom: '10px' }}
+                    style={{
+                        width: '100%',
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        marginBottom: '10px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        padding: '12px 15px',
+                        color: 'hsl(var(--text-dim))',
+                        border: '1px solid var(--glass-border)'
+                    }}
                 >
-                    <span className="nav-icon"><FaKey /></span>
+                    <FaKey className="nav-icon" />
                     <span className="nav-text">Change Password</span>
                 </button>
                 <button onClick={logout} className="logout-btn">
-                    <FaSignOutAlt />
+                    <FaSignOutAlt className="nav-icon" />
                     <span>Logout</span>
                 </button>
             </div>
