@@ -22,48 +22,20 @@ const Login = () => {
     };
 
     return (
-        <div className="login-wrapper" style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            minHeight: '100vh',
-            background: 'var(--bg-gradient)',
-            padding: '20px',
-            position: 'relative',
-            overflow: 'hidden'
-        }}>
+        <div className="login-wrapper">
             {/* Ambient Background Glows */}
-            <div style={{
-                position: 'absolute', width: '40vw', height: '40vw',
-                top: '-20vw', right: '-10vw',
-                background: 'radial-gradient(circle, hsla(var(--primary), 0.15) 0%, transparent 70%)',
-                zIndex: 0
-            }}></div>
-            <div style={{
-                position: 'absolute', width: '50vw', height: '50vw',
-                bottom: '-20vw', left: '-10vw',
-                background: 'radial-gradient(circle, hsla(var(--accent), 0.1) 0%, transparent 70%)',
-                zIndex: 0
-            }}></div>
+            <div className="login-blob-1"></div>
+            <div className="login-blob-2"></div>
 
-            <div className="glass-panel fade-in login-card" style={{
-                width: '100%',
-                maxWidth: '450px',
-                zIndex: 1,
-                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
-            }}>
-                <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-                    <div style={{
-                        width: '100px', height: '100px',
-                        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                        marginBottom: '10px'
-                    }}>
+            <div className="glass-panel fade-in login-card-container">
+                <div className="login-header">
+                    <div className="login-logo-wrapper">
                         <img src="/logo.png" alt="MR. EduEdge" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                     </div>
-                    <h1 style={{ fontSize: '2.8rem', fontWeight: '800', marginBottom: '12px', letterSpacing: '-1.5px' }}>
+                    <h1 className="login-title">
                         <span className="gradient-text">Welcome Back</span>
                     </h1>
-                    <p style={{ color: 'hsl(var(--text-dim))', fontSize: '1.1rem', fontWeight: '500' }}>
+                    <p className="login-subtitle">
                         Sign in to <span style={{ color: 'hsl(var(--white))' }}>MR. EduEdge</span> Portal
                     </p>
                 </div>
@@ -94,14 +66,10 @@ const Login = () => {
                     <div className="input-group">
                         <label className="input-label">Email / Username</label>
                         <div style={{ position: 'relative' }}>
-                            <FaEnvelope style={{
-                                position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)',
-                                color: 'hsl(var(--primary))', opacity: 0.8, fontSize: '1.1rem'
-                            }} />
+                            <FaEnvelope className="login-input-icon" />
                             <input
                                 type="text"
-                                className="input-field"
-                                style={{ paddingLeft: '48px', height: '56px' }}
+                                className="input-field login-input"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 placeholder="Enter your email"
@@ -113,14 +81,10 @@ const Login = () => {
                     <div className="input-group" style={{ marginBottom: '16px' }}>
                         <label className="input-label">Password</label>
                         <div style={{ position: 'relative' }}>
-                            <FaLock style={{
-                                position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)',
-                                color: 'hsl(var(--primary))', opacity: 0.8, fontSize: '1.1rem'
-                            }} />
+                            <FaLock className="login-input-icon" />
                             <input
                                 type="password"
-                                className="input-field"
-                                style={{ paddingLeft: '48px', height: '56px' }}
+                                className="input-field login-input"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 placeholder="••••••••"
@@ -138,20 +102,12 @@ const Login = () => {
                         </div>
                     </div>
 
-                    <button type="submit" className="btn btn-primary" style={{
-                        width: '100%', height: '56px', marginTop: '24px',
-                        fontSize: '1.2rem', fontWeight: 'bold',
-                        borderRadius: 'var(--radius-sm)'
-                    }}>
+                    <button type="submit" className="btn btn-primary login-btn">
                         Sign In to Dashboard
                     </button>
                 </form>
 
-                <div style={{
-                    textAlign: 'center', marginTop: '40px',
-                    color: 'hsl(var(--text-dim))', fontSize: '1rem',
-                    paddingTop: '32px', borderTop: '1px solid var(--glass-border)'
-                }}>
+                <div className="login-footer">
                     Don't have an account? <a href="/register" style={{
                         color: 'hsl(var(--primary))', fontWeight: '700', textDecoration: 'none',
                         marginLeft: '5px'

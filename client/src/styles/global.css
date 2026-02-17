@@ -609,3 +609,152 @@ button {
 .fade-in {
   animation: fadeIn 0.5s ease-out forwards;
 }
+
+/* Login Page Styles */
+.login-wrapper {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 100vh !important;
+  background: var(--bg-gradient) !important;
+  padding: 20px !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.login-blob-1 {
+  position: absolute !important;
+  width: 40vw !important;
+  height: 40vw !important;
+  top: -20vw !important;
+  right: -10vw !important;
+  background: radial-gradient(circle, hsla(var(--primary), 0.15) 0%, transparent 70%) !important;
+  z-index: 0 !important;
+}
+
+.login-blob-2 {
+  position: absolute !important;
+  width: 50vw !important;
+  height: 50vw !important;
+  bottom: -20vw !important;
+  left: -10vw !important;
+  background: radial-gradient(circle, hsla(var(--accent), 0.1) 0%, transparent 70%) !important;
+  z-index: 0 !important;
+}
+
+.login-card-container {
+  width: 100% !important;
+  max-width: 450px !important;
+  z-index: 1 !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+  padding: 48px !important;
+}
+
+.login-header {
+  text-align: center !important;
+  margin-bottom: 40px !important;
+}
+
+.login-logo-wrapper {
+  width: 100px !important;
+  height: 100px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin-bottom: 10px !important;
+}
+
+.login-title {
+  font-size: 2.8rem !important;
+  font-weight: 800 !important;
+  margin-bottom: 12px !important;
+  letter-spacing: -1.5px !important;
+}
+
+.login-subtitle {
+  color: hsl(var(--text-dim)) !important;
+  font-size: 1.1rem !important;
+  font-weight: 500 !important;
+}
+
+.login-input-icon {
+  position: absolute !important;
+  left: 16px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  color: hsl(var(--primary)) !important;
+  opacity: 0.8 !important;
+  font-size: 1.1rem !important;
+}
+
+.login-input {
+  padding-left: 48px !important;
+  height: 56px !important;
+}
+
+.login-btn {
+  width: 100% !important;
+  height: 56px !important;
+  margin-top: 24px !important;
+  font-size: 1.2rem !important;
+  font-weight: bold !important;
+  border-radius: var(--radius-sm) !important;
+}
+
+.login-footer {
+  text-align: center !important;
+  margin-top: 40px !important;
+  color: hsl(var(--text-dim)) !important;
+  font-size: 1rem !important;
+  padding-top: 32px !important;
+  border-top: 1px solid var(--glass-border) !important;
+}
+
+/* Responsive Login Styles */
+@media (max-width: 480px) {
+  .login-card-container {
+    padding: 30px 20px !important;
+    max-width: 100% !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    border: none !important;
+  }
+
+  /* Make glass panel background slightly visible or just transparent on very small screens if desired, 
+     but usually keeping it contained is better. 
+     Let's style it to fit the screen nicely. */
+  .login-card-container.glass-panel {
+    background: hsl(var(--surface)) !important;
+    border: 1px solid var(--glass-border) !important;
+    box-shadow: var(--shadow-lg) !important;
+  }
+
+  .login-title {
+    font-size: 2rem !important;
+  }
+
+  .login-subtitle {
+    font-size: 1rem !important;
+  }
+
+  .login-logo-wrapper {
+    width: 80px !important;
+    height: 80px !important;
+  }
+
+  .login-header {
+    margin-bottom: 30px !important;
+  }
+
+  .login-footer {
+    margin-top: 30px !important;
+    padding-top: 20px !important;
+    font-size: 0.9rem !important;
+  }
+
+  .login-blob-1,
+  .login-blob-2 {
+    display: none !important;
+    /* Hide blobs on mobile to reduce clutter/rendering */
+  }
+}
