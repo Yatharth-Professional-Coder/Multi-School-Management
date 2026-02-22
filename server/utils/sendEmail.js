@@ -14,7 +14,7 @@ const sendEmail = async (options) => {
 
     // Define the email options
     const mailOptions = {
-        from: `MR.EduEdge Portal < ${process.env.SMTP_USER}> `,
+        from: `MR.EduEdge Portal <myat305055@gmail.com>`,
         to: options.to,
         subject: options.subject,
         html: options.html,
