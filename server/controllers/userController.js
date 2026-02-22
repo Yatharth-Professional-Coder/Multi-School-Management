@@ -45,7 +45,8 @@ const addUser = async (req, res) => {
             role,
             schoolId,
             childId: req.body.childId || null,
-            studentClass: req.body.classId || null
+            studentClass: req.body.classId || null,
+            parentEmail: req.body.parentEmail || ''
         });
 
         res.status(201).json({
@@ -123,7 +124,7 @@ const getUserById = async (req, res) => {
 };
 
 const updateUser = async (req, res) => {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role, parentEmail } = req.body;
     try {
         const user = await User.findById(req.params.id);
 
@@ -162,6 +163,9 @@ const updateUser = async (req, res) => {
 
             user.name = name || user.name;
             user.email = email || user.email;
+            if (parentEmail !== undefined) {
+                user.parentEmail = parentEmail;
+            }
             if (password) {
                 user.password = password; // Will be hashed by pre-save hook
             }

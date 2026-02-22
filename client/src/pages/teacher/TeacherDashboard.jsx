@@ -21,7 +21,7 @@ const TeacherDashboard = () => {
     }, [location.pathname]);
     const [showAddForm, setShowAddForm] = useState(false);
     const [editingStudent, setEditingStudent] = useState(null);
-    const [newStudentData, setNewStudentData] = useState({ name: '', email: '', password: '', role: 'Student' });
+    const [newStudentData, setNewStudentData] = useState({ name: '', email: '', parentEmail: '', password: '', role: 'Student' });
     const [teacherClass, setTeacherClass] = useState(null);
     const [timetable, setTimetable] = useState([]);
     const [selectedPeriod, setSelectedPeriod] = useState(1);
@@ -260,7 +260,7 @@ const TeacherDashboard = () => {
             };
             await api.post('/api/users', studentPayload, config);
             setShowAddForm(false);
-            setNewStudentData({ name: '', email: '', password: '', role: 'Student' });
+            setNewStudentData({ name: '', email: '', parentEmail: '', password: '', role: 'Student' });
             fetchStudents();
             alert('Student added successfully');
         } catch (error) {
@@ -273,7 +273,8 @@ const TeacherDashboard = () => {
         try {
             const updatePayload = {
                 name: editingStudent.name,
-                email: editingStudent.email
+                email: editingStudent.email,
+                parentEmail: editingStudent.parentEmail
             };
             if (editingStudent.password) {
                 updatePayload.password = editingStudent.password;
@@ -502,6 +503,12 @@ const TeacherDashboard = () => {
                                             required
                                         />
                                         <input
+                                            placeholder="Parent Email"
+                                            className="input-field"
+                                            value={newStudentData.parentEmail}
+                                            onChange={(e) => setNewStudentData({ ...newStudentData, parentEmail: e.target.value })}
+                                        />
+                                        <input
                                             type="password"
                                             placeholder="Temporary Password"
                                             className="input-field"
@@ -537,6 +544,12 @@ const TeacherDashboard = () => {
                                             required
                                         />
                                         <input
+                                            placeholder="Parent Email"
+                                            className="input-field"
+                                            value={editingStudent.parentEmail || ''}
+                                            onChange={(e) => setEditingStudent({ ...editingStudent, parentEmail: e.target.value })}
+                                        />
+                                        <input
                                             type="password"
                                             placeholder="New Password (Leave blank to keep current)"
                                             className="input-field"
@@ -556,6 +569,7 @@ const TeacherDashboard = () => {
                                     <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
                                         <th style={{ textAlign: 'left', padding: '15px' }}>Student Name</th>
                                         <th style={{ textAlign: 'left', padding: '15px' }}>Username/Email</th>
+                                        <th style={{ textAlign: 'left', padding: '15px' }}>Parent Email</th>
                                         <th style={{ textAlign: 'right', padding: '15px' }}>Actions</th>
                                     </tr>
                                 </thead>
@@ -564,6 +578,7 @@ const TeacherDashboard = () => {
                                         <tr key={student._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                                             <td style={{ padding: '15px' }}>{student.name}</td>
                                             <td style={{ padding: '15px' }}>{student.email}</td>
+                                            <td style={{ padding: '15px' }}>{student.parentEmail || 'N/A'}</td>
                                             <td style={{ padding: '15px', textAlign: 'right' }}>
                                                 <button
                                                     onClick={() => setEditingStudent(student)}
